@@ -16,7 +16,7 @@ from zoneinfo import ZoneInfo
 import requests
 from fastapi import Body, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 # Paths & Runtime Mode (Local Windows Workstation vs Vercel Serverless Cloud Monitor)
@@ -51,12 +51,21 @@ EXCLUDED_DIRS = {"manual-uploads", "__pycache__", "renders", "review", "tmp", "t
 
 # Fallback analytics baseline (from verified Zapier / YouTube API snapshots)
 BASELINE_VIDEO_META: Dict[str, Dict[str, Any]] = {
+    "GM2VoeHNEV4": {
+        "title": "Parents Legally Mailed Their 5-Year-Old Daughter For 53¢! 📦🤯 #Shorts",
+        "publishedAt": "2026-11-10T09:09:54Z",
+        "duration": "0:52",
+        "is_short": True,
+        "views": 52,
+        "likes": 19,
+        "comments": 0,
+    },
     "U2JI4OeNHP4": {
         "title": "He bought the Queen’s bank for $1… 🤯 #Shorts #animation #funny #memes #animationmeme #joker",
         "publishedAt": "2026-11-09T13:52:52Z",
         "duration": "0:39",
         "is_short": True,
-        "views": 1323,
+        "views": 1324,
         "likes": 41,
         "comments": 0,
     },
@@ -1283,6 +1292,23 @@ def serve_home():
         index_file,
         headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"},
     )
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def serve_favicon():
+    svg = (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36">'
+        '<rect width="36" height="36" rx="9" fill="#0E1422"/>'
+        '<rect x="4" y="7" width="28" height="22" rx="6" fill="#E11D48"/>'
+        '<polygon points="15,13 24,18 15,23" fill="#FFFFFF"/>'
+        "</svg>"
+    )
+    return Response(content=svg, media_type="image/svg+xml")
+
+
+@app.get("/api/health")
+def api_health():
+    return JSONResponse({"ok": True, "cloud_mode": CLOUD_MODE, "is_vercel": IS_VERCEL})
 
 
 @app.get("/api/overview")

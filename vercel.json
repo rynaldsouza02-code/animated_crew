@@ -1,14 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "fastapi",
   "functions": {
-    "api/index.py": {
-      "includeFiles": "dashboard/**"
+    "app.py": {
+      "includeFiles": "dashboard/**",
+      "excludeFiles": "faceless-shorts/**"
     }
-  },
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/api/index.py"
-    }
-  ]
+  }
 }

@@ -4,7 +4,7 @@ Automated YouTube Shorts studio & analytics hub built for **Animated_Crew**, pai
 
 ## Repository Layout
 - `dashboard/` — **CrewTube Studio Manager** FastAPI backend (`server.py`), web UI (`static/index.html`), cloud snapshot sync (`sync_cloud_data.py`), and lightweight Vercel snapshot bundle (`cloud_data/`).
-- `api/index.py` & `vercel.json` — Vercel Python serverless entrypoint exposing the FastAPI `app`.
+- `app.py` & `vercel.json` — Vercel FastAPI entrypoint exposing the `app` ASGI instance.
 - `faceless-shorts/` — 6-style local animated YouTube Shorts engine (`deep-dive`, `night-file`, `inside-out`, `stick-story`, `paper-atlas`, `tall-tale`).
 
 ## Run Locally (Full Pipeline + Manual Upload + Auto Queue)
@@ -20,7 +20,7 @@ python dashboard/sync_cloud_data.py
 ```
 
 ## Deploy to Vercel
-This repository includes `vercel.json`, `requirements.txt`, and `api/index.py` for zero-config FastAPI deployment on Vercel:
+This repository includes `vercel.json`, `requirements.txt`, and `app.py` for zero-config FastAPI deployment on Vercel:
 ```bash
 vercel --prod
 ```
