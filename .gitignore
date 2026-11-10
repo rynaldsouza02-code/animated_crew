@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+*.egg-info/
+.venv/
+venv/
+.env
+.env.*
+.vercel/
+.DS_Store
+Thumbs.db
+
+# Prevent giant rendered MP4 / WAV files from entering cloud snapshot data
+dashboard/cloud_data/**/renders/*.mp4
+dashboard/cloud_data/**/*.wav
+dashboard/cloud_data/**/upload_job.json

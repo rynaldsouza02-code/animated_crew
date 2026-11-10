@@ -1,0 +1,30 @@
+{
+  "title": "The $18.7 Million Maple Syrup Heist",
+  "voice": "am_michael",
+  "speed": 1.08,
+  "lead": 0.28,
+  "outro": 1.0,
+  "gap": 0.16,
+  "music": "bounce",
+  "sources": [
+    "BBC News / The Atlantic / Guinness World Records: The Great Canadian Maple Syrup Heist (2011-2012) in Saint-Louis-de-Blandford, Quebec; ~3,000 tons of syrup valued at C$18.7 million stolen from the Federation of Quebec Maple Syrup Producers Strategic Reserve",
+    "CBC News / Supreme Court of Canada: Thieves drained heavy ~600-pound steel barrels over months, refilled them with water, and returned them to stacked shelves; discovered in July 2012 when inspector Michel Gauvreau climbed a stack and noticed a nearly empty, rusting barrel leaking water"
+  ],
+  "lines": [
+    { "text": "Thieves pulled off an eighteen million dollar heist in Canada", "caps": "Thieves | pulled off | an eighteen | million dollar | heist | in Canada", "gap": 0.18 },
+    { "text": "by stealing three thousand tons of pure maple syrup.", "caps": "by stealing | three thousand | tons | of pure | maple syrup.", "gap": 0.2 },
+    { "text": "See, Quebec locks away reserve syrup in giant warehouses," },
+    { "text": "stacked high with thousands of heavy steel barrels.", "gap": 0.18 },
+    { "text": "One night, a sneaky crew slipped past the security," },
+    { "text": "rolled out six hundred pound barrels one by one," },
+    { "text": "and drained every last golden drop.", "gap": 0.18 },
+    { "text": "Instead of leaving suspicious empty cans behind," },
+    { "text": "they filled those exact same barrels up with tap water," },
+    { "text": "and stacked them neatly right back on the shelves.", "gap": 0.2 },
+    { "text": "Nobody noticed a thing for almost an entire year.", "gap": 0.2 },
+    { "text": "Until an inspector climbed the towering stacks," },
+    { "text": "nudged a rusty barrel that felt way too light," },
+    { "text": "and watched clear water pour out onto the floor.", "gap": 0.18 },
+    { "text": "Proving even syrup crooks can wash up empty.", "gap": 0.3 }
+  ]
+}

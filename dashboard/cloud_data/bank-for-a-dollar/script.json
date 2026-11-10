@@ -1,0 +1,29 @@
+{
+  "title": "The Man Who Bought An Entire Bank For $1",
+  "voice": "am_michael",
+  "speed": 1.12,
+  "lead": 0.25,
+  "outro": 1.0,
+  "gap": 0.18,
+  "music": "bounce",
+  "sources": [
+    "BBC History / Financial Times: The 1995 collapse of Barings Bank (founded 1762) after trader Nick Leeson lost £827M ($1.4 billion).",
+    "Bank of England / ING Groep Archive: ING acquired Barings Bank and all of its worldwide assets and liabilities for the nominal sum of £1.",
+    "The Guardian: Queen Elizabeth II kept accounts at Barings Bank; following the collapse and £1 acquisition, the bank was restructured and restored to profitability."
+  ],
+  "lines": [
+    { "text": "This man bought an entire bank for one dollar.", "caps": "This man | bought | an entire bank | for ONE DOLLAR.", "gap": 0.2 },
+    { "text": "In 1995, Barings Bank was so prestigious,", "caps": "In 1995, | Barings Bank | was so prestigious," },
+    { "text": "even Queen Elizabeth kept her personal fortune there.", "caps": "even | Queen Elizabeth | kept her money | there.", "gap": 0.2 },
+    { "text": "Until one twenty-eight-year-old trader", "caps": "Until one | 28-year-old | trader" },
+    { "text": "secretly gambled away 1.4 billion dollars.", "caps": "secretly | gambled away | 1.4 BILLION | dollars.", "gap": 0.2 },
+    { "text": "Overnight, the royal vault was wiped clean.", "caps": "Overnight, | the vault | was wiped | clean.", "gap": 0.2 },
+    { "text": "Desperate regulators had forty-eight hours to find a buyer,", "caps": "Desperate regulators | had 48 hours | to find a buyer," },
+    { "text": "so an investor calmly stepped in,", "caps": "so an investor | calmly | stepped in," },
+    { "text": "slapped down a single one-dollar coin,", "caps": "slapped down | a single | ONE-DOLLAR | coin," },
+    { "text": "and took every vault, painting, and royal account.", "caps": "and took | every vault, | painting, | and royal account.", "gap": 0.2 },
+    { "text": "Within months, he turned it profitable again,", "caps": "Within months, | he turned it | profitable again," },
+    { "text": "proving the cheapest thing on Earth", "caps": "proving | the cheapest thing | on Earth" },
+    { "text": "is someone else's billion-dollar blunder.", "caps": "is someone else's | billion-dollar | blunder.", "gap": 0.3 }
+  ]
+}

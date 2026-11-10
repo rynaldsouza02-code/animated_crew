@@ -1,0 +1,30 @@
+{
+  "title": "The Man Who Sold The Eiffel Tower Twice",
+  "voice": "am_michael",
+  "speed": 1.08,
+  "lead": 0.28,
+  "outro": 1.0,
+  "gap": 0.16,
+  "music": "bounce",
+  "sources": [
+    "Smithsonian Magazine, 'The Man Who Sold the Eiffel Tower. Twice.' (May 1925, Victor Lustig forged Ministry of Posts and Telegraphs stationery and hosted six Paris scrap-metal dealers at the Hotel de Crillon)",
+    "Encyclopaedia Britannica / Wikipedia, 'Victor Lustig' (claimed the city would tear down the Eiffel Tower for 7,000 tons of scrap iron; convinced Andre Poisson to buy it plus pay a cash bribe, fled to Vienna, then returned weeks later to sell it a second time)"
+  ],
+  "lines": [
+    { "text": "In 1925, one con artist sold the entire Eiffel Tower.", "caps": "In 1925, | one | con artist | sold | the entire | Eiffel Tower.", "gap": 0.2 },
+    { "text": "Then came back weeks later and sold it again.", "gap": 0.2 },
+    { "text": "See, Paris newspapers joked the tower cost too much to paint," },
+    { "text": "so Victor Lustig printed fake government letters," },
+    { "text": "inviting six scrap dealers to a secret hotel meeting.", "gap": 0.18 },
+    { "text": "Inside a luxury suite, he whispered the big lie:" },
+    { "text": "the city was secretly tearing down seven thousand tons of iron,", "caps": "the city was | secretly | tearing down | seven thousand | tons | of iron," },
+    { "text": "and picking one buyer for the famous landmark.", "gap": 0.18 },
+    { "text": "One dealer wanted the metal contract so badly" },
+    { "text": "he handed over a suitcase full of cash, plus a bribe.", "gap": 0.2 },
+    { "text": "Lustig jumped on the next train out of France," },
+    { "text": "waiting for police headlines that never came." },
+    { "text": "Because the victim was way too embarrassed to tell anyone.", "gap": 0.2 },
+    { "text": "So Lustig bought a fresh ticket right back to Paris," },
+    { "text": "slapped another price tag on the tower, and cashed in twice.", "gap": 0.3 }
+  ]
+}

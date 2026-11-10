@@ -1,0 +1,85 @@
+{
+ "duration": 38.724,
+ "voice": "am_michael",
+ "speed": 1.12,
+ "lines": [
+  {
+   "i": 0,
+   "text": "This man bought an entire bank for one dollar.",
+   "start": 0.25,
+   "end": 2.679
+  },
+  {
+   "i": 1,
+   "text": "In 1995, Barings Bank was so prestigious,",
+   "start": 2.879,
+   "end": 6.639
+  },
+  {
+   "i": 2,
+   "text": "even Queen Elizabeth kept her personal fortune there.",
+   "start": 7.039,
+   "end": 9.88
+  },
+  {
+   "i": 3,
+   "text": "Until one twenty-eight-year-old trader",
+   "start": 10.08,
+   "end": 12.04
+  },
+  {
+   "i": 4,
+   "text": "secretly gambled away 1.4 billion dollars.",
+   "start": 12.35,
+   "end": 15.968
+  },
+  {
+   "i": 5,
+   "text": "Overnight, the royal vault was wiped clean.",
+   "start": 16.168,
+   "end": 18.528
+  },
+  {
+   "i": 6,
+   "text": "Desperate regulators had forty-eight hours to find a buyer,",
+   "start": 18.728,
+   "end": 22.784
+  },
+  {
+   "i": 7,
+   "text": "so an investor calmly stepped in,",
+   "start": 22.784,
+   "end": 24.998
+  },
+  {
+   "i": 8,
+   "text": "slapped down a single one-dollar coin,",
+   "start": 25.118,
+   "end": 27.048
+  },
+  {
+   "i": 9,
+   "text": "and took every vault, painting, and royal account.",
+   "start": 27.458,
+   "end": 30.267
+  },
+  {
+   "i": 10,
+   "text": "Within months, he turned it profitable again,",
+   "start": 30.467,
+   "end": 32.847
+  },
+  {
+   "i": 11,
+   "text": "proving the cheapest thing on Earth",
+   "start": 33.407,
+   "end": 34.707
+  },
+  {
+   "i": 12,
+   "text": "is someone else's billion-dollar blunder.",
+   "start": 34.767,
+   "end": 37.424
+  }
+ ]
+}
