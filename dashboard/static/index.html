@@ -443,6 +443,72 @@
     .bar-track { height: 8px; border-radius: 99px; background: rgba(255, 255, 255, 0.06); overflow: hidden; }
     .bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--crimson), #fb7185); }
 
+    /* Monetization & Earnings Tab */
+    .mon-status-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 14px; flex-wrap: wrap;
+      background: var(--card-inset); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px;
+    }
+    .mon-status-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-width: 0; }
+    .mon-status-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .currency-switch {
+      display: inline-flex; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 9px; padding: 3px; gap: 3px;
+    }
+    .curr-btn {
+      appearance: none; border: none; background: transparent; color: var(--text-secondary);
+      font-family: inherit; font-size: 0.76rem; font-weight: 700; padding: 5px 10px;
+      border-radius: 6px; cursor: pointer; transition: all 0.14s ease;
+    }
+    .curr-btn.active { background: #1a2338; color: #fff; box-shadow: inset 0 0 0 1px var(--border-strong); }
+
+    .mon-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 20px; margin-bottom: 20px; }
+    .ypp-tier-box {
+      background: var(--card-inset); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px; margin-bottom: 12px;
+    }
+    .ypp-tier-box:last-child { margin-bottom: 0; }
+    .ypp-tier-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      margin-bottom: 10px; flex-wrap: wrap;
+    }
+    .ypp-tier-name { font-size: 0.87rem; font-weight: 700; color: #fff; }
+    .ypp-req { margin-bottom: 10px; }
+    .ypp-req:last-child { margin-bottom: 0; }
+    .ypp-req-top {
+      display: flex; justify-content: space-between; align-items: center; gap: 8px;
+      font-size: 0.77rem; margin-bottom: 5px;
+    }
+    .ypp-prog-track {
+      height: 7px; border-radius: 99px; background: rgba(255, 255, 255, 0.07); overflow: hidden;
+    }
+    .ypp-prog-fill {
+      height: 100%; border-radius: 99px; transition: width 0.25s ease;
+      background: linear-gradient(90deg, var(--cyan), var(--emerald));
+    }
+    .ypp-prog-fill.purple { background: linear-gradient(90deg, var(--purple-light), var(--crimson)); }
+
+    .rpm-presets { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px; }
+    .rpm-chip {
+      appearance: none; background: var(--card-inset); border: 1px solid var(--border);
+      color: var(--text-secondary); border-radius: 999px; padding: 6px 11px;
+      font-size: 0.75rem; font-weight: 600; cursor: pointer; font-family: inherit;
+      transition: all 0.14s ease;
+    }
+    .rpm-chip:hover { border-color: var(--border-strong); color: #fff; }
+    .rpm-chip.active {
+      background: rgba(16, 185, 129, 0.14); border-color: rgba(16, 185, 129, 0.44); color: #6ee7b7;
+    }
+    .sim-readout-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+    .sim-box {
+      background: var(--card-inset); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 12px;
+    }
+    .sim-box-label { font-size: 0.69rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; }
+    .sim-box-val { font-size: 1.15rem; font-weight: 800; color: #fff; font-family: "JetBrains Mono", monospace; }
+    .sim-box-sub { font-size: 0.71rem; color: var(--text-muted); margin-top: 2px; }
+
     /* Automation & Pipeline Tab */
     .auto-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; margin-bottom: 20px; }
     .flow-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; margin-bottom: 20px; }
@@ -509,7 +575,7 @@
 
     @media (max-width: 1080px) {
       .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .upload-studio-grid, .insights-grid, .auto-grid, .script-modal-grid { grid-template-columns: 1fr; }
+      .upload-studio-grid, .insights-grid, .auto-grid, .mon-grid, .script-modal-grid { grid-template-columns: 1fr; }
       .flow-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
     @media (max-width: 720px) {
@@ -519,7 +585,7 @@
       .flow-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 520px) {
-      .kpi-grid, .form-grid-2, .health-grid { grid-template-columns: 1fr; }
+      .kpi-grid, .form-grid-2, .health-grid, .sim-readout-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -653,6 +719,12 @@
       <button class="main-tab" id="tabBtn-analytics" onclick="switchTab('analytics')" role="tab">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         <span>Analytics Insights</span>
+      </button>
+
+      <button class="main-tab" id="tabBtn-monetization" onclick="switchTab('monetization')" role="tab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span>Monetization</span>
+        <span class="tab-pill" id="tabMonBadge">$0.00</span>
       </button>
 
       <button class="main-tab" id="tabBtn-automation" onclick="switchTab('automation')" role="tab">
@@ -910,7 +982,159 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- TAB 4: AUTOMATION & PIPELINE HEALTH                          -->
+    <!-- TAB 4: MONETIZATION & YOUTUBE EARNINGS                       -->
+    <!-- ============================================================ -->
+    <section class="tab-panel" id="panel-monetization">
+      <!-- YPP Partner Status & Currency Bar -->
+      <div class="panel">
+        <div class="mon-status-bar">
+          <div class="mon-status-left">
+            <span class="badge badge-amber" id="monYppBadge">Pre-Monetization (YPP Not Enabled)</span>
+            <div>
+              <div style="font-size:0.9rem;font-weight:700;color:#fff;" id="monStatusTitle">Animated_Crew · YouTube Earnings & Partner Status</div>
+              <div style="font-size:0.76rem;color:var(--text-muted);" id="monStatusSub">Verified via YouTube Data API v3 & Analytics API · Channel Country: IN</div>
+            </div>
+          </div>
+
+          <div class="mon-status-controls">
+            <div class="currency-switch" role="group" aria-label="Currency selector">
+              <button type="button" class="curr-btn active" id="currBtnUSD" onclick="setMonCurrency('USD')">USD ($)</button>
+              <button type="button" class="curr-btn" id="currBtnINR" onclick="setMonCurrency('INR')">INR (₹)</button>
+            </div>
+            <a class="btn btn-sm btn-outline-crimson" id="studioEarnLink" href="https://studio.youtube.com/channel/UCT-NT5b7lbS1mqaITYfeZ4g/monetization" target="_blank" rel="noopener">
+              YouTube Studio Earn
+            </a>
+          </div>
+        </div>
+
+        <div class="kpi-grid" style="margin-top:16px;margin-bottom:0;">
+          <div class="kpi-card kpi-emerald">
+            <div class="kpi-top">
+              <span class="kpi-label">Official YouTube Earnings</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="kpi-val" id="monOfficialVal">$0.00</div>
+            <div class="kpi-sub" id="monOfficialSub">Actual YPP / AdSense payout</div>
+          </div>
+
+          <div class="kpi-card kpi-cyan">
+            <div class="kpi-top">
+              <span class="kpi-label">Est. Earnings (If Monetized)</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            <div class="kpi-val" id="monSimVal">$0.21</div>
+            <div class="kpi-sub" id="monSimSub">Projected at active Shorts RPM</div>
+          </div>
+
+          <div class="kpi-card kpi-purple">
+            <div class="kpi-top">
+              <span class="kpi-label">YPP Subscribers Progress</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            </div>
+            <div class="kpi-val" id="monSubsVal">5 / 500</div>
+            <div class="kpi-sub" id="monSubsSub">Tier 1: 500 · Ad Revenue: 1,000</div>
+          </div>
+
+          <div class="kpi-card kpi-red">
+            <div class="kpi-top">
+              <span class="kpi-label">90-Day Shorts Views</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </div>
+            <div class="kpi-val" id="monViews90Val">4,111</div>
+            <div class="kpi-sub" id="monViews90Sub">Goal: 3M (Tier 1) · 10M (Ad Share)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- YPP Milestones + Shorts RPM Revenue Estimator -->
+      <div class="mon-grid">
+        <!-- Left: YPP Eligibility Milestones -->
+        <div class="panel" style="margin-bottom:0;">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">YouTube Partner Program (YPP) Eligibility</div>
+              <div class="panel-sub">Official thresholds to unlock Fan Funding and Shorts Feed Ad Revenue (45% creator split)</div>
+            </div>
+          </div>
+          <div id="yppTiersContainer"></div>
+          <div style="margin-top:12px;padding:11px 13px;border-radius:10px;background:rgba(255,255,255,0.025);border:1px solid var(--border);font-size:0.75rem;color:var(--text-secondary);line-height:1.5;">
+            <b style="color:#fff;">How YouTube counts eligibility:</b> You qualify by hitting Subscribers <b>plus either</b> rolling 90-day Shorts views <b>or</b> 365-day public watch hours on long-form videos (YouTube excludes Shorts Feed views from long-form watch hours). AdSense payouts trigger once balance reaches <span class="mono" id="adsenseMinLabel">$100.00</span>.
+          </div>
+        </div>
+
+        <!-- Right: Shorts RPM Revenue Simulator & Pace Forecaster -->
+        <div class="panel" style="margin-bottom:0;">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">YouTube Shorts Earnings Estimator</div>
+              <div class="panel-sub">Preview estimated payout by audience RPM & daily views once monetized</div>
+            </div>
+            <button type="button" class="btn btn-xs" id="btnSaveMonSettings" onclick="saveMonSettings()">Save Defaults</button>
+          </div>
+
+          <div style="font-size:0.75rem;color:var(--text-secondary);font-weight:600;margin-bottom:7px;">Audience RPM Benchmark (Per 1,000 Shorts Views)</div>
+          <div class="rpm-presets" id="rpmPresets">
+            <button type="button" class="rpm-chip" data-rpm="0.02" onclick="selectRpmPreset(0.02)">India / Emerging ($0.02)</button>
+            <button type="button" class="rpm-chip active" data-rpm="0.05" onclick="selectRpmPreset(0.05)">Global Blended ($0.05)</button>
+            <button type="button" class="rpm-chip" data-rpm="0.08" onclick="selectRpmPreset(0.08)">US / Finance & History ($0.08)</button>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group" style="margin-bottom:10px;">
+              <div class="form-label"><span>Custom Shorts RPM (USD)</span></div>
+              <input type="number" step="0.01" min="0.01" max="5" class="form-control mono" id="monRpmInput" value="0.05" oninput="onMonSimChanged()" />
+            </div>
+            <div class="form-group" style="margin-bottom:10px;">
+              <div class="form-label"><span>Simulated Daily Views</span></div>
+              <input type="number" step="500" min="0" class="form-control mono" id="monDailyViewsInput" value="50000" oninput="onMonSimChanged()" />
+            </div>
+          </div>
+
+          <div class="rpm-presets" style="margin-bottom:6px;" id="dailyViewChips">
+            <button type="button" class="rpm-chip" onclick="setSimDailyViews('current')">Current Pace</button>
+            <button type="button" class="rpm-chip" onclick="setSimDailyViews(10000)">10K / day</button>
+            <button type="button" class="rpm-chip active" onclick="setSimDailyViews(50000)">50K / day</button>
+            <button type="button" class="rpm-chip" onclick="setSimDailyViews(100000)">100K / day</button>
+            <button type="button" class="rpm-chip" onclick="setSimDailyViews(500000)">500K / day</button>
+          </div>
+
+          <div class="sim-readout-grid" id="simReadoutGrid"></div>
+          <div style="margin-top:11px;font-size:0.75rem;color:var(--text-secondary);" id="simThresholdHint"></div>
+        </div>
+      </div>
+
+      <!-- Per-Video YouTube Earnings Breakdown -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Per-Video Earnings Breakdown (As Per YouTube)</div>
+            <div class="panel-sub">Official channel revenue per Short alongside projected YPP value at your selected RPM</div>
+          </div>
+          <span class="badge badge-muted" id="monFxBadge">1 USD ≈ ₹84.50</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Video</th>
+                <th>Published</th>
+                <th>Views</th>
+                <th>View Share</th>
+                <th>YouTube Earnings (Actual)</th>
+                <th>Est. If Monetized (<span id="monTblRpmLbl">$0.05</span> RPM)</th>
+                <th style="text-align:right;">YouTube Studio</th>
+              </tr>
+            </thead>
+            <tbody id="monVideoTableBody">
+              <tr><td colspan="7" style="color:var(--text-muted);">Loading video earnings breakdown...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB 5: AUTOMATION & PIPELINE HEALTH                          -->
     <!-- ============================================================ -->
     <section class="tab-panel" id="panel-automation">
       <div class="auto-grid">
@@ -1015,6 +1239,21 @@
     let customFileObjectUrl = null;
     let projectsBySlug = {};
     let currentOverviewData = null;
+    let monCurrency = localStorage.getItem("crewtube_mon_currency") || "USD";
+    let monRpmUsd = parseFloat(localStorage.getItem("crewtube_mon_rpm") || "") || 0.05;
+    let monDailyViews = parseInt(localStorage.getItem("crewtube_mon_daily_views") || "", 10);
+    if (Number.isNaN(monDailyViews)) monDailyViews = 50000;
+    let monUsdToInr = 84.5;
+    let monSettingsInitialized = false;
+
+    function fmtMoney(usdVal, decimals = 2) {
+      const usd = Number(usdVal || 0);
+      if (monCurrency === "INR") {
+        const inr = usd * monUsdToInr;
+        return "₹" + inr.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+      }
+      return "$" + usd.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+    }
 
     function escapeHtml(str) {
       return String(str || "")
@@ -1838,6 +2077,231 @@
         </tr>`).join("") : `<tr><td colspan="8" style="color:var(--text-muted);">No published videos on channel.</td></tr>`;
     }
 
+    /* Render Monetization & Earnings Tab */
+    function setMonCurrency(curr) {
+      monCurrency = curr === "INR" ? "INR" : "USD";
+      localStorage.setItem("crewtube_mon_currency", monCurrency);
+      document.getElementById("currBtnUSD")?.classList.toggle("active", monCurrency === "USD");
+      document.getElementById("currBtnINR")?.classList.toggle("active", monCurrency === "INR");
+      if (currentOverviewData?.monetization) renderMonetization(currentOverviewData.monetization);
+    }
+
+    function selectRpmPreset(rpmVal) {
+      monRpmUsd = Number(rpmVal) || 0.05;
+      localStorage.setItem("crewtube_mon_rpm", String(monRpmUsd));
+      const inp = document.getElementById("monRpmInput");
+      if (inp) inp.value = String(monRpmUsd);
+      if (currentOverviewData?.monetization) renderMonetization(currentOverviewData.monetization);
+    }
+
+    function setSimDailyViews(val) {
+      const mon = currentOverviewData?.monetization || {};
+      if (val === "current") {
+        monDailyViews = Number(mon.avg_recent_views || 1370);
+      } else {
+        monDailyViews = Math.max(0, Number(val) || 0);
+      }
+      localStorage.setItem("crewtube_mon_daily_views", String(monDailyViews));
+      const inp = document.getElementById("monDailyViewsInput");
+      if (inp) inp.value = String(monDailyViews);
+      if (currentOverviewData?.monetization) renderMonetization(currentOverviewData.monetization);
+    }
+
+    function onMonSimChanged() {
+      const rpmVal = parseFloat(document.getElementById("monRpmInput")?.value || "0.05");
+      if (!Number.isNaN(rpmVal) && rpmVal >= 0) {
+        monRpmUsd = Math.min(10, rpmVal);
+        localStorage.setItem("crewtube_mon_rpm", String(monRpmUsd));
+      }
+      const dv = parseInt(document.getElementById("monDailyViewsInput")?.value || "0", 10);
+      if (!Number.isNaN(dv) && dv >= 0) {
+        monDailyViews = dv;
+        localStorage.setItem("crewtube_mon_daily_views", String(monDailyViews));
+      }
+      if (currentOverviewData?.monetization) renderMonetization(currentOverviewData.monetization);
+    }
+
+    async function saveMonSettings() {
+      localStorage.setItem("crewtube_mon_currency", monCurrency);
+      localStorage.setItem("crewtube_mon_rpm", String(monRpmUsd));
+      localStorage.setItem("crewtube_mon_daily_views", String(monDailyViews));
+      if (currentOverviewData?.cloud_mode) {
+        showToast("Monetization preferences saved in browser");
+        return;
+      }
+      try {
+        const res = await fetch("/api/monetization/settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            default_currency: monCurrency,
+            shorts_rpm_usd: monRpmUsd,
+            usd_to_inr_rate: monUsdToInr,
+          }),
+        });
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(d.detail || `HTTP ${res.status}`);
+        showToast("Monetization settings saved");
+      } catch (err) {
+        showToast("Save failed: " + err.message);
+      }
+    }
+
+    function renderMonetization(mon) {
+      if (!mon || !mon.tiers) return;
+      if (!monSettingsInitialized) {
+        monSettingsInitialized = true;
+        monUsdToInr = Number(mon.usd_to_inr_rate || 84.5);
+        if (!localStorage.getItem("crewtube_mon_currency") && mon.default_currency) {
+          monCurrency = mon.default_currency;
+        }
+        if (!localStorage.getItem("crewtube_mon_rpm") && mon.shorts_rpm_usd) {
+          monRpmUsd = Number(mon.shorts_rpm_usd);
+        }
+        document.getElementById("monRpmInput").value = String(monRpmUsd);
+        document.getElementById("monDailyViewsInput").value = String(monDailyViews);
+      }
+
+      document.getElementById("currBtnUSD")?.classList.toggle("active", monCurrency === "USD");
+      document.getElementById("currBtnINR")?.classList.toggle("active", monCurrency === "INR");
+
+      const officialUsd = Number(mon.official_revenue_usd || 0);
+      const lifetimeViews = Number(mon.lifetime_views || 0);
+      const views90 = Number(mon.shorts_views_90d || 0);
+      const estLifetimeUsd = (lifetimeViews / 1000.0) * monRpmUsd;
+
+      document.getElementById("tabMonBadge").textContent = fmtMoney(officialUsd, 2);
+
+      const yppBadge = document.getElementById("monYppBadge");
+      yppBadge.className = mon.ypp_enabled ? "badge badge-emerald" : "badge badge-amber";
+      yppBadge.textContent = mon.ypp_status_label || (mon.ypp_enabled ? "YPP Active" : "Pre-Monetization (YPP Not Enabled)");
+      document.getElementById("monStatusSub").textContent =
+        `${mon.api_source || "YouTube API"} · Country: ${mon.channel_country || "IN"} · ${mon.analytics_minutes_watched || 0} settled watch mins`;
+      document.getElementById("studioEarnLink").href = mon.studio_earn_url || "https://studio.youtube.com";
+
+      document.getElementById("monOfficialVal").textContent = fmtMoney(officialUsd, 2);
+      document.getElementById("monOfficialSub").textContent = mon.ypp_enabled
+        ? `${fmtNum(mon.monetized_playbacks || 0)} monetized playbacks · AdSense threshold ${fmtMoney(mon.adsense_threshold_usd || 100, 0)}`
+        : `YPP not enabled yet · Official payout: ${fmtMoney(0, 2)}`;
+
+      document.getElementById("monSimVal").textContent = fmtMoney(estLifetimeUsd, 2);
+      document.getElementById("monSimSub").textContent = `${fmtNum(lifetimeViews)} views × $${monRpmUsd.toFixed(2)}/1K (45% Shorts pool)`;
+
+      const t1 = mon.tiers.tier1;
+      const t2 = mon.tiers.tier2;
+      document.getElementById("monSubsVal").textContent = `${fmtNum(t1.subs_current)} / ${fmtNum(t1.subs_goal)}`;
+      document.getElementById("monSubsSub").textContent = `${t1.subs_pct}% of Tier 1 (500) · ${t2.subs_pct}% of Full Ad Share (1,000)`;
+
+      document.getElementById("monViews90Val").textContent = fmtNum(views90);
+      document.getElementById("monViews90Sub").textContent =
+        `Avg ${fmtNum(mon.avg_recent_views || 0)}/Short · 3M Tier 1 / 10M Ad Share`;
+
+      document.getElementById("adsenseMinLabel").textContent = fmtMoney(mon.adsense_threshold_usd || 100, 2);
+      document.getElementById("monFxBadge").textContent = `1 USD ≈ ₹${monUsdToInr.toFixed(2)}`;
+      document.getElementById("monTblRpmLbl").textContent = `$${monRpmUsd.toFixed(2)}`;
+
+      const renderReq = (label, curText, goalText, pct, cls = "") => `
+        <div class="ypp-req">
+          <div class="ypp-req-top">
+            <span style="color:var(--text-secondary);font-weight:600;">${label}</span>
+            <span class="mono" style="color:#fff;font-size:0.74rem;">${curText} / ${goalText} <span style="color:var(--text-muted);">(${pct}%)</span></span>
+          </div>
+          <div class="ypp-prog-track">
+            <div class="ypp-prog-fill ${cls}" style="width:${Math.max(Number(pct) > 0 ? 2 : 0, Math.min(100, Number(pct)))}%"></div>
+          </div>
+        </div>`;
+
+      document.getElementById("yppTiersContainer").innerHTML = `
+        <div class="ypp-tier-box">
+          <div class="ypp-tier-head">
+            <span class="ypp-tier-name">${escapeHtml(t1.name)}</span>
+            <span class="badge ${mon.ypp_enabled ? 'badge-emerald' : 'badge-cyan'}">${mon.ypp_enabled ? 'Unlocked' : `${t1.subs_pct}% Subs`}</span>
+          </div>
+          ${renderReq("Subscribers (Required)", fmtNum(t1.subs_current), fmtNum(t1.subs_goal), t1.subs_pct)}
+          ${renderReq("90-Day Shorts Views (Option A)", fmtNum(t1.shorts_views_current), "3,000,000", t1.shorts_views_pct)}
+          ${renderReq("Public Watch Hours 365d (Option B)", String(t1.watch_hours_current), fmtNum(t1.watch_hours_goal), t1.watch_hours_pct, "purple")}
+        </div>
+        <div class="ypp-tier-box">
+          <div class="ypp-tier-head">
+            <span class="ypp-tier-name">${escapeHtml(t2.name)}</span>
+            <span class="badge ${mon.ypp_enabled ? 'badge-emerald' : 'badge-amber'}">${mon.ypp_enabled ? 'Active 45% Split' : `${t2.subs_pct}% Subs`}</span>
+          </div>
+          ${renderReq("Subscribers (Required)", fmtNum(t2.subs_current), fmtNum(t2.subs_goal), t2.subs_pct)}
+          ${renderReq("90-Day Shorts Views (Option A)", fmtNum(t2.shorts_views_current), "10,000,000", t2.shorts_views_pct)}
+          ${renderReq("Public Watch Hours 365d (Option B)", String(t2.watch_hours_current), fmtNum(t2.watch_hours_goal), t2.watch_hours_pct, "purple")}
+        </div>`;
+
+      // Highlight active RPM chip & daily view chip
+      document.querySelectorAll("#rpmPresets .rpm-chip").forEach(btn => {
+        const chipRpm = parseFloat(btn.getAttribute("data-rpm") || "0");
+        btn.classList.toggle("active", Math.abs(chipRpm - monRpmUsd) < 0.001);
+      });
+      document.querySelectorAll("#dailyViewChips .rpm-chip").forEach((btn, idx) => {
+        const targets = [Number(mon.avg_recent_views || 1370), 10000, 50000, 100000, 500000];
+        btn.classList.toggle("active", monDailyViews === targets[idx]);
+      });
+
+      // Forecast Readouts
+      const dailyUsd = (monDailyViews / 1000.0) * monRpmUsd;
+      const monthlyUsd = dailyUsd * 30.0;
+      const yearlyUsd = dailyUsd * 365.0;
+      document.getElementById("simReadoutGrid").innerHTML = `
+        <div class="sim-box">
+          <div class="sim-box-label">Daily Est.</div>
+          <div class="sim-box-val">${fmtMoney(dailyUsd, 2)}</div>
+          <div class="sim-box-sub">${fmtNum(monDailyViews)} views/day</div>
+        </div>
+        <div class="sim-box">
+          <div class="sim-box-label">Monthly (30d)</div>
+          <div class="sim-box-val" style="color:var(--emerald);">${fmtMoney(monthlyUsd, 2)}</div>
+          <div class="sim-box-sub">${fmtNum(monDailyViews * 30)} views</div>
+        </div>
+        <div class="sim-box">
+          <div class="sim-box-label">Annual (365d)</div>
+          <div class="sim-box-val" style="color:var(--cyan);">${fmtMoney(yearlyUsd, 2)}</div>
+          <div class="sim-box-sub">If YPP active</div>
+        </div>`;
+
+      const thresholdUsd = Number(mon.adsense_threshold_usd || 100);
+      const daysToPayout = dailyUsd > 0 ? Math.ceil(thresholdUsd / dailyUsd) : null;
+      const payoutMsg = daysToPayout
+        ? (daysToPayout <= 30
+            ? `Clears YouTube's ${fmtMoney(thresholdUsd, 0)} AdSense payout minimum in ~${daysToPayout} days (monthly payout ready).`
+            : `Reaches ${fmtMoney(thresholdUsd, 0)} AdSense payout in ~${daysToPayout} days (${(daysToPayout / 30).toFixed(1)} months).`)
+        : "Enter daily views above 0 to forecast payout pace.";
+      document.getElementById("simThresholdHint").innerHTML =
+        `${payoutMsg} <span style="color:var(--text-muted);">YPP pace needed: ~33.4K views/day (3M) or ~111.1K views/day (10M).</span>`;
+
+      // Per-Video Table
+      const list = mon.per_video || [];
+      const tbody = document.getElementById("monVideoTableBody");
+      tbody.innerHTML = list.length ? list.map(v => {
+        const simVideoUsd = (Number(v.views || 0) / 1000.0) * monRpmUsd;
+        const actualUsd = mon.ypp_enabled ? Number(v.official_revenue_usd || 0) : 0.0;
+        const actualBadge = mon.ypp_enabled
+          ? `<span class="mono" style="font-weight:700;color:var(--emerald);">${fmtMoney(actualUsd, 2)}</span>`
+          : `<span class="mono" style="color:var(--text-secondary);">${fmtMoney(0, 2)}</span> <span class="badge badge-muted" style="margin-left:4px;">Pre-YPP</span>`;
+        return `
+          <tr>
+            <td>
+              <div class="lib-video-cell">
+                <div class="lib-thumb"><img src="${escapeHtml(v.thumbnail)}" alt="Thumbnail" /><span class="thumb-dur">${escapeHtml(v.duration || "—")}</span></div>
+                <div style="min-width:0;">
+                  <div class="lib-title" title="${escapeHtml(v.title)}">${escapeHtml(v.title)}</div>
+                  <div class="lib-sub mono">${escapeHtml(v.id)}</div>
+                </div>
+              </div>
+            </td>
+            <td style="color:var(--text-secondary);font-size:0.8rem;">${fmtDate(v.published_at)}</td>
+            <td class="mono" style="font-weight:700;color:#fff;">${fmtNum(v.views)}</td>
+            <td class="mono" style="color:var(--text-secondary);">${v.view_share_pct || 0}%</td>
+            <td>${actualBadge}</td>
+            <td class="mono" style="color:var(--cyan);font-weight:700;">${fmtMoney(simVideoUsd, 2)}</td>
+            <td style="text-align:right;"><a class="btn btn-xs" href="${escapeHtml(v.studio_earn_url)}" target="_blank" rel="noopener">Studio</a></td>
+          </tr>`;
+      }).join("") : `<tr><td colspan="7" style="color:var(--text-muted);">No published YouTube videos yet.</td></tr>`;
+    }
+
     /* Render Automation & Health Tab */
     function renderAutomation(auto, qSummary) {
       const strip = document.getElementById("activeStrip");
@@ -1931,6 +2395,7 @@
         renderLibraryTable(data.projects || []);
         populateManualSelector(data.projects || []);
         renderAnalytics(data.youtube || {});
+        renderMonetization(data.monetization || {});
         renderAutomation(data.automation || {}, data.queue_summary || {});
         renderHealth(data.system_health || []);
         renderUploadStatus(data.queue_summary?.upload_job);

@@ -95,6 +95,10 @@ def sync() -> None:
         json.dumps(runs_out, indent=2, ensure_ascii=False), encoding="utf-8"
     )
 
+    monetization_src = PROJECTS_ROOT / "monetization.json"
+    if monetization_src.exists():
+        shutil.copy2(monetization_src, CLOUD_DATA_DIR / "monetization.json")
+
     # Sanitized scheduler snapshot (no secret IDs or local prompt contents)
     cfg = _read_json(GEMINI_CONFIG_JSON, {})
     sidecar = _read_json(SIDECAR_JSON, {})

@@ -29,6 +29,7 @@ CLOUD_MODE = IS_VERCEL or not LOCAL_PROJECTS_ROOT.exists()
 PROJECTS_ROOT = CLOUD_DATA_DIR if CLOUD_MODE else LOCAL_PROJECTS_ROOT
 SKILL_ROOT = Path(r"C:\Users\DELL\OneDrive\Desktop\faceless\faceless-shorts")
 RUNS_JSON_PATH = PROJECTS_ROOT / "runs.json"
+MONETIZATION_JSON_PATH = PROJECTS_ROOT / "monetization.json"
 UPLOAD_JOB_PATH = PROJECTS_ROOT / "upload_job.json"
 MANUAL_UPLOADS_DIR = PROJECTS_ROOT / "manual-uploads"
 UPLOAD_MEDIA_PY = PROJECTS_ROOT / "upload_media.py"
@@ -125,6 +126,7 @@ if PROJECTS_ROOT.exists():
 _yt_lock = threading.Lock()
 _runs_lock = threading.Lock()
 _upload_lock = threading.Lock()
+_mon_lock = threading.Lock()
 _yt_cache: Dict[str, Any] = {"timestamp": 0.0, "data": None}
 YT_CACHE_TTL_SEC = 120.0
 _yt_in_flight = False
@@ -1314,6 +1316,178 @@ def get_system_health() -> List[Dict[str, Any]]:
     ]
 
 
+def _parse_sub_count(raw: Any) -> int:
+    s = str(raw or "0").strip().upper().replace(",", "")
+    if not s:
+        return 0
+    mult = 1
+    if s.endswith("K"):
+        mult = 1000
+        s = s[:-1]
+    elif s.endswith("M"):
+        mult = 1_000_000
+        s = s[:-1]
+    elif s.endswith("B"):
+        mult = 1_000_000_000
+        s = s[:-1]
+    try:
+        return int(float(s) * mult)
+    except Exception:
+        return 0
+
+
+def _parse_iso_dt(ts: Optional[str]) -> Optional[datetime]:
+    if not ts:
+        return None
+    try:
+        dt = datetime.fromisoformat(str(ts).strip().replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=ZoneInfo("UTC"))
+        return dt
+    except Exception:
+        return None
+
+
+def get_monetization_overview(yt_data: Dict[str, Any]) -> Dict[str, Any]:
+    snap = _read_json(MONETIZATION_JSON_PATH, {}) or {}
+    ypp_enabled = bool(snap.get("ypp_enabled", False))
+    currency = str(snap.get("default_currency") or "USD").upper()
+    if currency not in ("USD", "INR"):
+        currency = "USD"
+    try:
+        usd_to_inr = float(snap.get("usd_to_inr_rate") or 84.5)
+    except Exception:
+        usd_to_inr = 84.5
+    try:
+        shorts_rpm_usd = float(snap.get("shorts_rpm_usd") or 0.05)
+    except Exception:
+        shorts_rpm_usd = 0.05
+
+    summary = yt_data.get("summary", {})
+    videos = yt_data.get("videos", [])
+    subs_count = _parse_sub_count(summary.get("subscribers", 5))
+    lifetime_views = int(summary.get("total_views") or sum(int(v.get("views") or 0) for v in videos))
+
+    now_utc = datetime.now(ZoneInfo("UTC"))
+    cutoff_90d = now_utc - timedelta(days=90)
+    cutoff_30d = now_utc - timedelta(days=30)
+
+    shorts_views_90d = 0
+    recent_shorts_count = 0
+    recent_shorts_views = 0
+    for v in videos:
+        views = int(v.get("views") or 0)
+        dt = _parse_iso_dt(v.get("published_at"))
+        is_short = bool(v.get("is_short", True))
+        if is_short and (dt is None or dt >= cutoff_90d):
+            shorts_views_90d += views
+        if is_short and dt is not None and dt >= cutoff_30d:
+            recent_shorts_count += 1
+            recent_shorts_views += views
+
+    avg_recent_views = round(recent_shorts_views / recent_shorts_count) if recent_shorts_count else (
+        round(lifetime_views / len(videos)) if videos else 0
+    )
+
+    video_rev_map = snap.get("video_revenue", {}) if isinstance(snap.get("video_revenue"), dict) else {}
+    official_total_usd = float(snap.get("official_revenue_usd") or 0.0) if ypp_enabled else 0.0
+    per_video = []
+    for v in videos:
+        vid = v.get("id", "")
+        views = int(v.get("views") or 0)
+        v_rev_entry = video_rev_map.get(vid, {}) if ypp_enabled else {}
+        actual_usd = float(v_rev_entry.get("estimated_revenue_usd") or 0.0) if ypp_enabled else 0.0
+        sim_usd = round((views / 1000.0) * shorts_rpm_usd, 4)
+        per_video.append(
+            {
+                "id": vid,
+                "title": v.get("title", vid),
+                "thumbnail": v.get("thumbnail"),
+                "published_at": v.get("published_at"),
+                "duration": v.get("duration", "0:45"),
+                "is_short": bool(v.get("is_short", True)),
+                "views": views,
+                "likes": int(v.get("likes") or 0),
+                "engagement_pct": v.get("engagement_pct", 0.0),
+                "view_share_pct": round((views / lifetime_views * 100), 1) if lifetime_views > 0 else 0.0,
+                "official_revenue_usd": round(actual_usd, 4),
+                "estimated_if_ypp_usd": sim_usd,
+                "play_url": v.get("play_url"),
+                "shorts_url": v.get("shorts_url"),
+                "studio_earn_url": f"https://studio.youtube.com/video/{vid}/analytics/tab-earn_video",
+            }
+        )
+
+    sim_lifetime_usd = round((lifetime_views / 1000.0) * shorts_rpm_usd, 4)
+    sim_90d_usd = round((shorts_views_90d / 1000.0) * shorts_rpm_usd, 4)
+    adsense_min_usd = 100.0
+
+    t1_subs_goal = 500
+    t1_shorts_goal = 3_000_000
+    t1_watch_goal = 3_000.0
+    t2_subs_goal = 1_000
+    t2_shorts_goal = 10_000_000
+    t2_watch_goal = 4_000.0
+    watch_hours_365d = float(snap.get("long_form_watch_hours_365d") or 0.0)
+
+    return {
+        "channel_id": YOUTUBE_CHANNEL_ID,
+        "channel_title": YOUTUBE_CHANNEL_TITLE,
+        "channel_country": snap.get("channel_country", "IN"),
+        "ypp_enabled": ypp_enabled,
+        "ypp_status_label": "Partner Monetization Active" if ypp_enabled else "Pre-Monetization (YPP Not Enabled)",
+        "official_revenue_usd": round(official_total_usd, 2),
+        "official_ad_revenue_usd": round(float(snap.get("official_ad_revenue_usd") or 0.0) if ypp_enabled else 0.0, 2),
+        "monetized_playbacks": int(snap.get("monetized_playbacks") or 0) if ypp_enabled else 0,
+        "analytics_minutes_watched": int(snap.get("analytics_minutes_watched") or 0),
+        "analytics_views_settled": int(snap.get("analytics_views_settled") or 0),
+        "analytics_subscribers_gained": int(snap.get("analytics_subscribers_gained") or 0),
+        "api_source": snap.get("api_source", "YouTube Data API v3 + YouTube Analytics API v2"),
+        "api_checked_at": snap.get("api_checked_at"),
+        "studio_earn_url": f"https://studio.youtube.com/channel/{YOUTUBE_CHANNEL_ID}/monetization",
+        "default_currency": currency,
+        "usd_to_inr_rate": usd_to_inr,
+        "shorts_rpm_usd": shorts_rpm_usd,
+        "shorts_creator_share_pct": 45,
+        "adsense_threshold_usd": adsense_min_usd,
+        "adsense_progress_pct": round(min(100.0, (official_total_usd / adsense_min_usd) * 100.0), 2),
+        "subscribers_count": subs_count,
+        "lifetime_views": lifetime_views,
+        "shorts_views_90d": shorts_views_90d,
+        "recent_shorts_count": recent_shorts_count,
+        "avg_recent_views": avg_recent_views,
+        "simulated_lifetime_usd": sim_lifetime_usd,
+        "simulated_90d_usd": sim_90d_usd,
+        "tiers": {
+            "tier1": {
+                "name": "Tier 1 · Fan Funding & Early Access",
+                "subs_current": subs_count,
+                "subs_goal": t1_subs_goal,
+                "subs_pct": round(min(100.0, subs_count / t1_subs_goal * 100.0), 2),
+                "shorts_views_current": shorts_views_90d,
+                "shorts_views_goal": t1_shorts_goal,
+                "shorts_views_pct": round(min(100.0, shorts_views_90d / t1_shorts_goal * 100.0), 4),
+                "watch_hours_current": watch_hours_365d,
+                "watch_hours_goal": t1_watch_goal,
+                "watch_hours_pct": round(min(100.0, watch_hours_365d / t1_watch_goal * 100.0), 3),
+            },
+            "tier2": {
+                "name": "Tier 2 · Full Ad Revenue Sharing (45% Shorts Pool)",
+                "subs_current": subs_count,
+                "subs_goal": t2_subs_goal,
+                "subs_pct": round(min(100.0, subs_count / t2_subs_goal * 100.0), 2),
+                "shorts_views_current": shorts_views_90d,
+                "shorts_views_goal": t2_shorts_goal,
+                "shorts_views_pct": round(min(100.0, shorts_views_90d / t2_shorts_goal * 100.0), 4),
+                "watch_hours_current": watch_hours_365d,
+                "watch_hours_goal": t2_watch_goal,
+                "watch_hours_pct": round(min(100.0, watch_hours_365d / t2_watch_goal * 100.0), 3),
+            },
+        },
+        "per_video": per_video,
+    }
+
+
 @app.get("/", response_class=HTMLResponse)
 def serve_home():
     index_file = STATIC_DIR / "index.html"
@@ -1348,6 +1522,7 @@ def api_overview(refresh_yt: bool = Query(False)):
     automation = get_automation_status()
     active_proj = automation.get("active_processes", {}).get("active_project")
     projects = get_projects_pipeline(yt_data, active_project=active_proj)
+    monetization = get_monetization_overview(yt_data)
     health = get_system_health()
 
     queued = [p for p in projects if p["queue_status"] == "queued"]
@@ -1372,6 +1547,7 @@ def api_overview(refresh_yt: bool = Query(False)):
             "projects": projects,
             "queue_summary": queue_summary,
             "youtube": yt_data,
+            "monetization": monetization,
             "system_health": health,
         }
     )
@@ -1380,6 +1556,37 @@ def api_overview(refresh_yt: bool = Query(False)):
 @app.get("/api/youtube")
 def api_youtube(refresh: int = Query(0)):
     return JSONResponse(fetch_youtube_analytics(force=bool(refresh)))
+
+
+@app.get("/api/monetization")
+def api_monetization(refresh: int = Query(0)):
+    yt_data = fetch_youtube_analytics(force=bool(refresh))
+    return JSONResponse(get_monetization_overview(yt_data))
+
+
+@app.post("/api/monetization/settings")
+def api_monetization_settings(payload: Dict[str, Any] = Body(...)):
+    _require_local_write("saving monetization benchmark settings")
+    with _mon_lock:
+        snap = _read_json(MONETIZATION_JSON_PATH, {}) or {}
+        if payload.get("default_currency") in ("USD", "INR"):
+            snap["default_currency"] = payload["default_currency"]
+        if payload.get("shorts_rpm_usd") is not None:
+            try:
+                rpm = max(0.001, min(10.0, float(payload["shorts_rpm_usd"])))
+                snap["shorts_rpm_usd"] = round(rpm, 4)
+            except Exception:
+                raise HTTPException(status_code=400, detail="Invalid shorts_rpm_usd value")
+        if payload.get("usd_to_inr_rate") is not None:
+            try:
+                fx = max(10.0, min(500.0, float(payload["usd_to_inr_rate"])))
+                snap["usd_to_inr_rate"] = round(fx, 2)
+            except Exception:
+                raise HTTPException(status_code=400, detail="Invalid usd_to_inr_rate value")
+        snap["updated_at"] = datetime.now().astimezone().isoformat(timespec="seconds")
+        _write_json_atomic(MONETIZATION_JSON_PATH, snap)
+    yt_data = fetch_youtube_analytics(force=False)
+    return JSONResponse({"ok": True, "monetization": get_monetization_overview(yt_data)})
 
 
 @app.get("/api/projects/{slug}/script")

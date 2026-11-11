@@ -1,0 +1,23 @@
+{
+  "channel_id": "UCT-NT5b7lbS1mqaITYfeZ4g",
+  "channel_title": "Animated_Crew",
+  "channel_country": "IN",
+  "ypp_enabled": false,
+  "ypp_status_label": "Not Yet Eligible (Pre-YPP)",
+  "official_revenue_usd": 0.0,
+  "official_ad_revenue_usd": 0.0,
+  "gross_revenue_usd": 0.0,
+  "monetized_playbacks": 0,
+  "cpm_usd": 0.0,
+  "analytics_views_settled": 83,
+  "analytics_minutes_watched": 37,
+  "analytics_subscribers_gained": 1,
+  "long_form_watch_hours_365d": 0.6,
+  "default_currency": "USD",
+  "usd_to_inr_rate": 84.5,
+  "shorts_rpm_usd": 0.05,
+  "api_source": "YouTube Data API v3 + YouTube Analytics API v2 (Zapier OAuth)",
+  "api_checked_at": "2026-11-11T06:34:00+05:30",
+  "video_revenue": {},
+  "updated_at": "2026-11-11T10:16:09+05:30"
+}
