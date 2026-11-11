@@ -743,7 +743,9 @@
           <div style="font-size:0.76rem;color:var(--text-secondary);" id="activeStripSub">Rendering video assets...</div>
         </div>
       </div>
-      <span class="badge badge-cyan">Live Process</span>
+      <div id="activeStripActions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span class="badge badge-cyan">Live Process</span>
+      </div>
     </div>
 
     <!-- ============================================================ -->
@@ -838,10 +840,10 @@
 
           <div id="customFileWrap" style="display:none;">
             <label class="dropzone" for="manualFileInput" id="customDropzone">
-              <input type="file" id="manualFileInput" accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.mkv" style="display:none;" onchange="onCustomFileSelected(this)" />
+              <input type="file" id="manualFileInput" accept="video/mp4,video/quicktime,video/webm,video/x-matroska,.mp4,.mov,.mkv,.webm" style="display:none;" onclick="this.value=''" onchange="onCustomFileSelected(this)" />
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9aa5b8" stroke-width="1.8" style="margin-bottom:8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              <div id="customFileDropText" style="font-weight:600;font-size:0.86rem;color:#fff;">Click or drop a local .mp4 / .mov file here</div>
-              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Stages automatically and uploads to Animated_Crew via Zapier</div>
+              <div id="customFileDropText" style="font-weight:600;font-size:0.86rem;color:#fff;">Click or drop a local .mp4 / .mov / .webm file here</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Up to 480 MB (≤ 120 MB fastest) · Stages automatically and uploads to Animated_Crew via Zapier</div>
             </label>
           </div>
 
@@ -905,7 +907,7 @@
             <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;">
               <button type="submit" class="btn btn-crimson" id="btnManualUpload" style="flex:1;padding:10px 16px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                <span>Publish to Animated_Crew Now</span>
+                <span id="btnManualUploadLabel">Publish to Animated_Crew Now</span>
               </button>
               <button type="button" class="btn" id="btnSaveQueueMeta" onclick="saveCurrentManualMetadata()">
                 Save Metadata to Queue
@@ -916,6 +918,9 @@
           <div class="upload-tracker" id="manualUploadStatus">
             <div style="font-weight:700;color:#fff;margin-bottom:3px;" id="uploadStatusHeadline">Ready for Manual Upload</div>
             <div style="color:var(--text-secondary);" id="uploadStatusDetail">Pick a queued project or upload a custom .mp4 file. Manual uploads do not disrupt remaining queued days.</div>
+            <div id="uploadStatusProgressWrap" style="display:none;margin-top:9px;">
+              <div class="ypp-prog-track"><div class="ypp-prog-fill" id="uploadStatusProgressBar" style="width:0%"></div></div>
+            </div>
             <div id="uploadStatusLinks" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;"></div>
           </div>
         </div>
@@ -1031,7 +1036,7 @@
               <span class="kpi-label">YPP Subscribers Progress</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
             </div>
-            <div class="kpi-val" id="monSubsVal">5 / 500</div>
+            <div class="kpi-val" id="monSubsVal">— / 500</div>
             <div class="kpi-sub" id="monSubsSub">Tier 1: 500 · Ad Revenue: 1,000</div>
           </div>
 
@@ -1040,7 +1045,7 @@
               <span class="kpi-label">90-Day Shorts Views</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             </div>
-            <div class="kpi-val" id="monViews90Val">4,111</div>
+            <div class="kpi-val" id="monViews90Val">—</div>
             <div class="kpi-sub" id="monViews90Sub">Goal: 3M (Tier 1) · 10M (Ad Share)</div>
           </div>
         </div>
@@ -1237,6 +1242,17 @@
     let secondsRemaining = 0;
     let manualMode = "queued";
     let customFileObjectUrl = null;
+    let activeCustomXhr = null;
+    let currentUploadJobActive = false;
+    let queuedFormDirty = false;
+    let customFormDraft = {
+      title: "",
+      description: "",
+      tags: "Shorts, Animation, YouTubeShorts, Viral",
+      privacy: "public",
+      category: "23",
+      dirty: false,
+    };
     let projectsBySlug = {};
     let currentOverviewData = null;
     let monCurrency = localStorage.getItem("crewtube_mon_currency") || "USD";
@@ -1510,13 +1526,41 @@
     }
 
     /* Manual Upload Controls */
+    function setUploadButtonBusy(busy, label = "Upload Running...") {
+      const btn = document.getElementById("btnManualUpload");
+      const lbl = document.getElementById("btnManualUploadLabel");
+      if (btn) btn.disabled = Boolean(busy);
+      if (lbl) lbl.textContent = busy ? label : "Publish to Animated_Crew Now";
+    }
+
+    function _syncCustomDraftFromInputs() {
+      customFormDraft.title = document.getElementById("manualTitleInput")?.value || "";
+      customFormDraft.description = document.getElementById("manualDescInput")?.value || "";
+      customFormDraft.tags = document.getElementById("manualTagsInput")?.value || "";
+      customFormDraft.privacy = document.getElementById("manualPrivacySelect")?.value || "public";
+      customFormDraft.category = document.getElementById("manualCategorySelect")?.value || "23";
+    }
+
+    function _applyCustomDraftToInputs() {
+      document.getElementById("manualTitleInput").value = customFormDraft.title || "";
+      document.getElementById("manualDescInput").value = customFormDraft.description || "";
+      document.getElementById("manualTagsInput").value = customFormDraft.tags || "Shorts, Animation, YouTubeShorts, Viral";
+      document.getElementById("manualPrivacySelect").value = customFormDraft.privacy || "public";
+      document.getElementById("manualCategorySelect").value = customFormDraft.category || "23";
+      updateTitleCounter();
+    }
+
     function renderManualPreview() {
       const stage = document.getElementById("manualPreviewStage");
+      if (!stage) return;
       if (manualMode === "custom") {
+        const key = customFileObjectUrl ? `custom:${customFileObjectUrl}` : "custom:empty";
+        if (stage.dataset.previewKey === key) return;
+        stage.dataset.previewKey = key;
         if (customFileObjectUrl) {
           stage.innerHTML = `<video class="preview-video" src="${customFileObjectUrl}" controls playsinline></video>`;
         } else {
-          stage.innerHTML = `<div style="color:var(--text-muted);font-size:0.82rem;text-align:center;">Choose an .mp4 file above to preview it here</div>`;
+          stage.innerHTML = `<div style="color:var(--text-muted);font-size:0.82rem;text-align:center;">Choose an .mp4 / .mov / .webm file above to preview it here</div>`;
         }
         return;
       }
@@ -1524,9 +1568,14 @@
       const slug = document.getElementById("manualSlugSelect").value;
       const p = projectsBySlug[slug];
       if (!p) {
+        if (stage.dataset.previewKey === "queued:none") return;
+        stage.dataset.previewKey = "queued:none";
         stage.innerHTML = `<div style="color:var(--text-muted);font-size:0.82rem;">No project selected</div>`;
         return;
       }
+      const key = `queued:${slug}:${p.mp4_url || p.cover_url || p.sheet_url || "pending"}`;
+      if (stage.dataset.previewKey === key) return;
+      stage.dataset.previewKey = key;
       if (p.mp4_url) {
         stage.innerHTML = `<video class="preview-video" src="${escapeHtml(p.mp4_url)}" ${p.cover_url ? `poster="${escapeHtml(p.cover_url)}"` : ""} controls playsinline></video>`;
       } else if (p.cover_url || p.sheet_url) {
@@ -1537,14 +1586,21 @@
     }
 
     function setManualMode(mode) {
+      if (manualMode === "custom" && mode !== "custom") {
+        _syncCustomDraftFromInputs();
+      }
       manualMode = mode;
       document.getElementById("tabQueuedBtn").classList.toggle("active", mode === "queued");
       document.getElementById("tabCustomBtn").classList.toggle("active", mode === "custom");
       document.getElementById("queuedSelectWrap").style.display = mode === "queued" ? "block" : "none";
       document.getElementById("customFileWrap").style.display = mode === "custom" ? "block" : "none";
       document.getElementById("btnSaveQueueMeta").style.display = mode === "queued" ? "inline-flex" : "none";
-      if (mode === "queued") onManualSlugChanged(false);
-      else renderManualPreview();
+      if (mode === "queued") {
+        onManualSlugChanged(queuedFormDirty);
+      } else {
+        _applyCustomDraftToInputs();
+        renderManualPreview();
+      }
     }
 
     function onCustomFileSelected(input) {
@@ -1553,11 +1609,26 @@
       if (customFileObjectUrl) URL.revokeObjectURL(customFileObjectUrl);
       customFileObjectUrl = URL.createObjectURL(file);
       const mb = (file.size / (1024 * 1024)).toFixed(2);
-      document.getElementById("customFileDropText").textContent = `Selected: ${file.name} (${mb} MB)`;
-      const tInput = document.getElementById("manualTitleInput");
-      if (!tInput.value.trim()) {
-        const stem = file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ");
-        tInput.value = `${stem} #Shorts`.slice(0, 100);
+      const dropText = document.getElementById("customFileDropText");
+      if (file.size > 480 * 1024 * 1024) {
+        dropText.textContent = `Too large: ${file.name} (${mb} MB > 480 MB limit)`;
+        showToast("Video exceeds 480 MB limit — compress before uploading");
+      } else if (file.size < 4096) {
+        dropText.textContent = `Invalid file: ${file.name} (${file.size} bytes)`;
+        showToast("Video file is empty or corrupted (< 4 KB)");
+      } else {
+        dropText.textContent = `Selected: ${file.name} (${mb} MB)`;
+      }
+
+      if (!customFormDraft.dirty) {
+        const stem = file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim() || "CrewTube Short";
+        const autoTitle = (`${stem} #Shorts`).slice(0, 100);
+        const autoDesc = `${stem}\n\n#Shorts #YouTubeShorts #Viral`;
+        document.getElementById("manualTitleInput").value = autoTitle;
+        document.getElementById("manualDescInput").value = autoDesc;
+        document.getElementById("manualTagsInput").value = customFormDraft.tags || "Shorts, Animation, YouTubeShorts, Viral";
+        customFormDraft.title = autoTitle;
+        customFormDraft.description = autoDesc;
         updateTitleCounter();
       }
       renderManualPreview();
@@ -1584,10 +1655,10 @@
       if (prev && uploadable.some(p => p.slug === prev)) select.value = prev;
       else select.value = uploadable[0].slug;
 
-      if (!window._manualFormDirty && manualMode === "queued") onManualSlugChanged(false);
+      if (!queuedFormDirty && manualMode === "queued") onManualSlugChanged(false);
     }
 
-    function onManualSlugChanged(markDirty = false) {
+    function onManualSlugChanged(preserveInputs = false) {
       const slug = document.getElementById("manualSlugSelect").value;
       const p = projectsBySlug[slug];
       if (!p) {
@@ -1598,12 +1669,13 @@
       document.getElementById("selectedMp4Info").textContent = p.ready_to_upload
         ? `Ready · ${p.mp4_size_mb} MB`
         : "Rendering MP4...";
-      if (!markDirty) {
+      if (!preserveInputs) {
         document.getElementById("manualTitleInput").value = p.youtube_title || p.title || "";
         document.getElementById("manualDescInput").value = p.youtube_description || "";
         document.getElementById("manualTagsInput").value = (p.youtube_tags || []).join(", ");
         document.getElementById("manualPrivacySelect").value = p.privacy_status || "public";
         document.getElementById("manualCategorySelect").value = p.category_id || "23";
+        queuedFormDirty = false;
         updateTitleCounter();
       }
       renderManualPreview();
@@ -1613,7 +1685,7 @@
       switchTab("upload");
       setManualMode("queued");
       document.getElementById("manualSlugSelect").value = slug;
-      window._manualFormDirty = false;
+      queuedFormDirty = false;
       onManualSlugChanged(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
       showToast(`Loaded "${projectsBySlug[slug]?.title || slug}" into Manual Upload`);
@@ -1641,7 +1713,7 @@
         });
         const d = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(d.detail || `HTTP ${res.status}`);
-        window._manualFormDirty = false;
+        queuedFormDirty = false;
         showToast("Metadata saved to queue");
         await loadDashboard(false, false);
       } catch (e) {
@@ -1669,9 +1741,79 @@
       }
     }
 
+    async function _parseSafeResponse(res) {
+      const txt = await res.text().catch(() => "");
+      let data = {};
+      try { data = JSON.parse(txt || "{}"); } catch {}
+      if (!res.ok) {
+        throw new Error(data.detail || txt.slice(0, 220) || `HTTP ${res.status}`);
+      }
+      return data;
+    }
+
+    function _postMultipartWithProgress(fd, title, file) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        activeCustomXhr = xhr;
+        xhr.open("POST", "/api/upload/manual", true);
+        setUploadButtonBusy(true, "Transferring Video...");
+
+        xhr.upload.onprogress = ev => {
+          const pct = ev.lengthComputable && ev.total > 0 ? Math.min(99, Math.round((ev.loaded / ev.total) * 100)) : 50;
+          const loadedMb = (ev.loaded / (1024 * 1024)).toFixed(1);
+          const totalMb = ((ev.total || file.size) / (1024 * 1024)).toFixed(1);
+          renderUploadStatus({
+            active: true,
+            status: "staging",
+            title: title || file.name,
+            _clientPct: pct,
+            step: `Transferring local video (${loadedMb} / ${totalMb} MB · ${pct}%)...`,
+          });
+        };
+
+        xhr.upload.onload = () => {
+          renderUploadStatus({
+            active: true,
+            status: "staging",
+            title: title || file.name,
+            _clientPct: 100,
+            step: "Received by studio server — staging to cloud host...",
+          });
+        };
+
+        xhr.onload = () => {
+          activeCustomXhr = null;
+          let data = {};
+          try { data = JSON.parse(xhr.responseText || "{}"); } catch {}
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(data);
+          } else {
+            reject(new Error(data.detail || (xhr.responseText || "").slice(0, 220) || `HTTP ${xhr.status}`));
+          }
+        };
+
+        xhr.onerror = () => {
+          activeCustomXhr = null;
+          reject(new Error("Network connection failed while transferring video to local server."));
+        };
+
+        xhr.onabort = () => {
+          activeCustomXhr = null;
+          reject(new Error("__ABORTED__"));
+        };
+
+        xhr.send(fd);
+      });
+    }
+
     async function quickUploadNow(slug) {
       if (currentOverviewData?.cloud_mode) {
         showToast("Cloud Monitor mode on Vercel is read-only — trigger Zapier uploads on http://127.0.0.1:8765");
+        return;
+      }
+      if (currentUploadJobActive || activeCustomXhr) {
+        switchTab("upload");
+        showToast("Another upload is already running — monitor or cancel it in Manual Upload.");
         return;
       }
       const p = projectsBySlug[slug];
@@ -1679,7 +1821,17 @@
         showToast("Wait for MP4 render to finish before uploading");
         return;
       }
-      if (!confirm(`Publish "${p.youtube_title || p.title}" live to Animated_Crew now?\n\nOther queued videos will stay in queue for upcoming 7:00 PM IST runs.`)) return;
+      const displayTitle = p.youtube_title || p.title || slug;
+      if (!confirm(`Publish "${displayTitle}" live to Animated_Crew now?\n\nOther queued videos will stay in queue for upcoming 7:00 PM IST runs.`)) return;
+
+      switchTab("upload");
+      setManualMode("queued");
+      const sel = document.getElementById("manualSlugSelect");
+      if (sel) sel.value = slug;
+      queuedFormDirty = false;
+      onManualSlugChanged(false);
+
+      setUploadButtonBusy(true, "Starting Upload...");
       try {
         const res = await fetch("/api/upload/manual", {
           method: "POST",
@@ -1693,12 +1845,13 @@
             category_id: p.category_id || "23",
           }),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+        const data = await _parseSafeResponse(res);
         showToast("Manual upload started — staging MP4...");
         renderUploadStatus(data.job);
         startUploadStatusPolling();
       } catch (err) {
+        setUploadButtonBusy(false);
+        renderUploadStatus({ status: "error", title: displayTitle, error: err.message });
         showToast("Upload failed: " + err.message);
       }
     }
@@ -1709,21 +1862,27 @@
         showToast("Cloud Monitor mode on Vercel is read-only — publish live from your local CrewTube server (http://127.0.0.1:8765)");
         return;
       }
-      const btn = document.getElementById("btnManualUpload");
+      if (currentUploadJobActive || activeCustomXhr) {
+        showToast("An upload is already in progress. Cancel it first before starting another.");
+        return;
+      }
+
       const title = document.getElementById("manualTitleInput").value.trim();
       const description = document.getElementById("manualDescInput").value.trim();
       const tags = document.getElementById("manualTagsInput").value.trim();
       const privacy_status = document.getElementById("manualPrivacySelect").value;
       const category_id = document.getElementById("manualCategorySelect").value;
 
-      btn.disabled = true;
+      setUploadButtonBusy(true, "Preparing Upload...");
       try {
-        let res;
+        let data;
         if (manualMode === "custom") {
           const file = document.getElementById("manualFileInput").files[0];
-          if (!file) throw new Error("Choose an .mp4 file from your computer first.");
+          if (!file) throw new Error("Choose an .mp4 / .mov / .webm file from your computer first.");
+          if (file.size < 4096) throw new Error("Selected file is empty or corrupted (< 4 KB).");
+          if (file.size > 480 * 1024 * 1024) throw new Error("Video exceeds 480 MB temporary host limit. Compress below 200 MB first.");
           if (!confirm(`Upload "${file.name}" to Animated_Crew as ${privacy_status.toUpperCase()}?`)) {
-            btn.disabled = false;
+            setUploadButtonBusy(false);
             return;
           }
           const fd = new FormData();
@@ -1733,31 +1892,37 @@
           fd.append("tags", tags);
           fd.append("privacy_status", privacy_status);
           fd.append("category_id", category_id);
-          res = await fetch("/api/upload/manual", { method: "POST", body: fd });
+          data = await _postMultipartWithProgress(fd, title || file.name, file);
+          customFormDraft.dirty = false;
         } else {
           const slug = document.getElementById("manualSlugSelect").value;
           const p = projectsBySlug[slug];
           if (!p) throw new Error("Select a valid project.");
           if (!p.ready_to_upload) throw new Error("MP4 render is still in progress.");
           if (!confirm(`Publish "${title}" live to Animated_Crew on YouTube now?`)) {
-            btn.disabled = false;
+            setUploadButtonBusy(false);
             return;
           }
-          res = await fetch("/api/upload/manual", {
+          const res = await fetch("/api/upload/manual", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ slug, title, description, tags, privacy_status, category_id }),
           });
+          data = await _parseSafeResponse(res);
         }
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
-        showToast("Upload dispatched to YouTube");
+        showToast("Upload dispatched — monitoring live progress");
         renderUploadStatus(data.job);
         startUploadStatusPolling();
       } catch (err) {
-        showToast(err.message);
-      } finally {
-        btn.disabled = false;
+        if (err && err.message === "__ABORTED__") {
+          setUploadButtonBusy(false);
+          renderUploadStatus({ status: "idle" });
+          showToast("Upload transfer cancelled");
+          return;
+        }
+        setUploadButtonBusy(false);
+        renderUploadStatus({ status: "error", title: title || "Manual Upload", error: err.message });
+        showToast("Upload failed: " + err.message);
       }
     }
 
@@ -1765,27 +1930,59 @@
       const box = document.getElementById("manualUploadStatus");
       const head = document.getElementById("uploadStatusHeadline");
       const detail = document.getElementById("uploadStatusDetail");
+      const progWrap = document.getElementById("uploadStatusProgressWrap");
+      const progBar = document.getElementById("uploadStatusProgressBar");
       const links = document.getElementById("uploadStatusLinks");
+
+      const isActive = Boolean(job && job.active && !currentOverviewData?.cloud_mode);
+      currentUploadJobActive = isActive && !activeCustomXhr;
 
       box.className = "upload-tracker";
       links.innerHTML = "";
+      progWrap.style.display = "none";
+      progBar.style.width = "0%";
+
       if (!job || job.status === "idle") {
+        if (!activeCustomXhr) setUploadButtonBusy(false);
         head.textContent = "Ready for Manual Upload";
         detail.textContent = "Pick a queued project or upload a custom .mp4 file. Remaining queued videos stay intact.";
         return;
       }
+
       if (job.active) {
+        setUploadButtonBusy(true, activeCustomXhr ? "Transferring Video..." : "Upload Running...");
         box.classList.add("running");
         head.textContent = `Uploading: ${job.title || "Short"}`;
         detail.textContent = job.step || "Processing...";
+
+        let pct = typeof job._clientPct === "number" ? job._clientPct : null;
+        if (pct === null && job.step) {
+          const pm = String(job.step).match(/(\d{1,3})%/);
+          if (pm) pct = Math.max(2, Math.min(100, Number(pm[1])));
+        }
+        if (pct !== null || job.status === "dispatching_agent" || job.status === "uploading") {
+          progWrap.style.display = "block";
+          const displayPct = pct !== null ? pct : (job.status === "uploading" ? 85 : 65);
+          progBar.style.width = `${Math.max(4, Math.min(100, displayPct))}%`;
+        }
+        if (!currentOverviewData?.cloud_mode) {
+          links.innerHTML = `<button type="button" class="btn btn-xs btn-outline-crimson" onclick="clearUploadBanner()">Cancel Upload</button>`;
+        }
       } else if (job.status === "published") {
+        setUploadButtonBusy(false);
         box.classList.add("success");
         head.textContent = `Published Live: ${job.title || "Short"}`;
         detail.textContent = `Uploaded at ${fmtDate(job.completed_at || job.updated_at)}`;
+        const parts = [];
         if (job.youtube_url) {
-          links.innerHTML = `<a class="btn btn-xs btn-crimson" href="${escapeHtml(job.youtube_url)}" target="_blank" rel="noopener">Watch on YouTube</a>`;
+          parts.push(`<a class="btn btn-xs btn-crimson" href="${escapeHtml(job.youtube_url)}" target="_blank" rel="noopener">Watch on YouTube</a>`);
         }
+        if (!currentOverviewData?.cloud_mode) {
+          parts.push(`<button type="button" class="btn btn-xs" onclick="clearUploadBanner()">Clear Status</button>`);
+        }
+        links.innerHTML = parts.join("");
       } else if (job.status === "error") {
+        setUploadButtonBusy(false);
         box.classList.add("error");
         head.textContent = `Upload Error: ${job.title || "Short"}`;
         detail.textContent = job.error || job.step || "Upload failed.";
@@ -1793,16 +1990,28 @@
           links.innerHTML = `<button type="button" class="btn btn-xs" onclick="clearUploadBanner()">Dismiss Error</button>`;
         }
       } else {
+        setUploadButtonBusy(false);
         head.textContent = `Status: ${job.status}`;
         detail.textContent = job.step || "";
       }
     }
 
     async function clearUploadBanner() {
+      if (activeCustomXhr) {
+        try { activeCustomXhr.abort(); } catch {}
+        activeCustomXhr = null;
+      }
+      if (uploadPollTimer) {
+        clearInterval(uploadPollTimer);
+        uploadPollTimer = null;
+      }
+      currentUploadJobActive = false;
+      setUploadButtonBusy(false);
       try {
         await fetch("/api/upload/clear", { method: "POST" });
-        renderUploadStatus({ status: "idle" });
       } catch {}
+      renderUploadStatus({ status: "idle" });
+      loadDashboard(false, false);
     }
 
     function startUploadStatusPolling() {
@@ -1819,7 +2028,7 @@
             loadDashboard(true, false);
           }
         } catch {}
-      }, 2500);
+      }, 2000);
     }
 
     /* Drag & Drop support for Custom File */
@@ -2305,16 +2514,24 @@
     /* Render Automation & Health Tab */
     function renderAutomation(auto, qSummary) {
       const strip = document.getElementById("activeStrip");
+      const stripActions = document.getElementById("activeStripActions");
       const activeProj = auto.active_processes?.active_project;
       const uploadJob = qSummary?.upload_job;
       if (uploadJob?.active) {
         strip.classList.add("show");
         document.getElementById("activeStripTitle").textContent = `Uploading "${uploadJob.title}" to YouTube`;
         document.getElementById("activeStripSub").textContent = uploadJob.step || "Uploading via Zapier...";
+        if (stripActions) {
+          stripActions.innerHTML = currentOverviewData?.cloud_mode
+            ? `<span class="badge badge-cyan">Live Process</span>`
+            : `<button type="button" class="btn btn-xs" onclick="switchTab('upload')">View Progress</button>
+               <button type="button" class="btn btn-xs btn-outline-crimson" onclick="clearUploadBanner()">Cancel</button>`;
+        }
       } else if (auto.run_state === "running") {
         strip.classList.add("show");
         document.getElementById("activeStripTitle").textContent = activeProj ? `Rendering "${activeProj}"` : "AI Pipeline Active";
         document.getElementById("activeStripSub").textContent = "Generating 3D frames & audio mix locally...";
+        if (stripActions) stripActions.innerHTML = `<span class="badge badge-cyan">Live Process</span>`;
       } else {
         strip.classList.remove("show");
       }
@@ -2398,7 +2615,9 @@
         renderMonetization(data.monetization || {});
         renderAutomation(data.automation || {}, data.queue_summary || {});
         renderHealth(data.system_health || []);
-        renderUploadStatus(data.queue_summary?.upload_job);
+        if (!activeCustomXhr) {
+          renderUploadStatus(data.queue_summary?.upload_job);
+        }
         if (data.queue_summary?.upload_job?.active && !uploadPollTimer) startUploadStatusPolling();
 
         document.getElementById("syncText").textContent = data.cloud_mode
@@ -2414,7 +2633,14 @@
     }
 
     ["manualTitleInput", "manualDescInput", "manualTagsInput", "manualPrivacySelect", "manualCategorySelect"].forEach(id => {
-      document.getElementById(id)?.addEventListener("input", () => { window._manualFormDirty = true; });
+      document.getElementById(id)?.addEventListener("input", () => {
+        if (manualMode === "custom") {
+          customFormDraft.dirty = true;
+          _syncCustomDraftFromInputs();
+        } else {
+          queuedFormDirty = true;
+        }
+      });
     });
 
     loadDashboard(false, false).then(d => {

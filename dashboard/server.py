@@ -2,6 +2,7 @@ import html as html_lib
 import json
 import os
 import re
+import socket
 import subprocess
 import threading
 import time
@@ -14,10 +15,15 @@ from typing import Any, Dict, List, Optional, Tuple
 from zoneinfo import ZoneInfo
 
 import requests
+import urllib3.util.connection as _urllib3_conn
 from fastapi import Body, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
+
+# Prefer IPv4 on Windows/local networks where IPv6 SSL handshakes to YouTube stall or EOF
+if os.name == "nt":
+    _urllib3_conn.allowed_gai_family = lambda: socket.AF_INET
 
 # Paths & Runtime Mode (Local Windows Workstation vs Vercel Serverless Cloud Monitor)
 BASE_DIR = Path(__file__).resolve().parent
@@ -33,8 +39,10 @@ MONETIZATION_JSON_PATH = PROJECTS_ROOT / "monetization.json"
 UPLOAD_JOB_PATH = PROJECTS_ROOT / "upload_job.json"
 MANUAL_UPLOADS_DIR = PROJECTS_ROOT / "manual-uploads"
 UPLOAD_MEDIA_PY = PROJECTS_ROOT / "upload_media.py"
+FINALIZE_UPLOAD_PY = PROJECTS_ROOT / "finalize_upload.py"
 PYTHON_BIN = Path(r"C:\Python314\python.exe")
 AGENTAPI_BAT = Path(r"C:\Users\DELL\.gemini\antigravity\bin\agentapi.bat")
+LANGUAGE_SERVER_EXE = Path(r"C:\Users\DELL\AppData\Local\Programs\antigravity\resources\bin\language_server.exe")
 
 GEMINI_CONFIG_DIR = Path(r"C:\Users\DELL\.gemini\config")
 GEMINI_CONFIG_JSON = GEMINI_CONFIG_DIR / "config.json"
@@ -52,12 +60,21 @@ EXCLUDED_DIRS = {"manual-uploads", "__pycache__", "renders", "review", "tmp", "t
 
 # Fallback analytics baseline (from verified Zapier / YouTube API snapshots)
 BASELINE_VIDEO_META: Dict[str, Dict[str, Any]] = {
+    "Ju_GMnwmskA": {
+        "title": "Thieves Stole 3,000 Tons Of Maple Syrup ($18.7M Heist!) 🍁🕵️ #Shorts",
+        "publishedAt": "2026-11-11T05:11:09Z",
+        "duration": "0:50",
+        "is_short": True,
+        "views": 141,
+        "likes": 16,
+        "comments": 0,
+    },
     "ACCzOdTOvMM": {
         "title": "The Con Artist Who Sold The Eiffel Tower TWICE! 🗼💸 #Shorts",
         "publishedAt": "2026-11-10T13:35:00Z",
         "duration": "0:52",
         "is_short": True,
-        "views": 1344,
+        "views": 1342,
         "likes": 46,
         "comments": 4,
     },
@@ -131,6 +148,8 @@ _yt_cache: Dict[str, Any] = {"timestamp": 0.0, "data": None}
 YT_CACHE_TTL_SEC = 120.0
 _yt_in_flight = False
 _active_worker_jobs: set[str] = set()
+_active_upload_procs: Dict[str, subprocess.Popen] = {}
+_cancelled_jobs: set[str] = set()
 
 
 def _read_json(path: Path, default: Any = None) -> Any:
@@ -172,12 +191,62 @@ def _file_mtime_iso(path: Path) -> Optional[str]:
 
 def _normalize_tags(raw_tags: Any) -> List[str]:
     if isinstance(raw_tags, list):
-        out = [str(t).strip().lstrip("#") for t in raw_tags if str(t).strip()]
-        return out or ["Shorts", "History", "TrueStory", "Animation"]
-    if isinstance(raw_tags, str):
-        parts = [p.strip().lstrip("#") for p in re.split(r"[,\s]+", raw_tags) if p.strip()]
-        return parts or ["Shorts", "History", "TrueStory", "Animation"]
-    return ["Shorts", "History", "TrueStory", "Animation"]
+        candidates = [str(t).strip().lstrip("#") for t in raw_tags]
+    elif isinstance(raw_tags, str):
+        # Support comma-separated phrases (preferred by YouTube) or space-separated hashtags
+        sep_pattern = r"[,;\n]+" if ("," in raw_tags or ";" in raw_tags or "\n" in raw_tags) else r"[,\s]+"
+        candidates = [p.strip().lstrip("#") for p in re.split(sep_pattern, raw_tags)]
+    else:
+        candidates = []
+
+    out: List[str] = []
+    seen: set[str] = set()
+    total_chars = 0
+    for c in candidates:
+        clean = re.sub(r"[<>\"`]+", "", c).strip()
+        if not clean:
+            continue
+        key = clean.lower()
+        if key in seen:
+            continue
+        cost = len(clean) + (3 if " " in clean else 1)
+        if len(out) >= 30 or (total_chars + cost) > 420:
+            break
+        seen.add(key)
+        out.append(clean)
+        total_chars += cost
+
+    return out or ["Shorts", "History", "TrueStory", "Animation"]
+
+
+def _sanitize_youtube_meta(
+    title: str,
+    description: str,
+    tags_raw: Any,
+    privacy_status: str,
+    category_id: str,
+) -> Tuple[str, str, List[str], str, str]:
+    clean_title = re.sub(r"[<>]+", "", str(title or "")).strip()
+    clean_title = re.sub(r"\s+", " ", clean_title)
+    if not clean_title:
+        clean_title = "CrewTube Short #Shorts"
+    if len(clean_title) > 100:
+        clean_title = clean_title[:97].rstrip() + "..."
+
+    clean_desc = re.sub(r"[<>]+", "", str(description or "")).strip()
+    if not clean_desc:
+        clean_desc = f"{clean_title}\n\n#Shorts #Animation #History #TrueStory"
+    elif "#shorts" not in clean_desc.lower():
+        clean_desc = clean_desc.rstrip() + "\n\n#Shorts"
+    if len(clean_desc) > 4900:
+        clean_desc = clean_desc[:4880].rstrip() + "\n\n#Shorts"
+
+    clean_tags = _normalize_tags(tags_raw)
+    clean_priv = privacy_status.strip().lower() if privacy_status else "public"
+    if clean_priv not in ("public", "unlisted", "private"):
+        clean_priv = "public"
+    clean_cat = re.sub(r"[^0-9]", "", str(category_id or "23")) or "23"
+    return clean_title, clean_desc, clean_tags, clean_priv, clean_cat
 
 
 def _build_default_metadata(slug: str, script: Dict[str, Any], run_meta: Dict[str, Any]) -> Dict[str, Any]:
@@ -222,39 +291,61 @@ def _normalize_queue_locked(runs_data: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _parse_multipart(content_type: str, body: bytes) -> Tuple[Dict[str, str], Dict[str, Dict[str, Any]]]:
-    m = re.search(r'boundary=([^;]+)', content_type or "", re.IGNORECASE)
+    m = re.search(r'boundary=(?:"([^"]+)"|([^;\s]+))', content_type or "", re.IGNORECASE)
     if not m:
         raise ValueError("Missing multipart boundary")
-    boundary = m.group(1).strip().strip('"').encode("latin-1")
-    delim = b"--" + boundary
-    parts = body.split(delim)
+    boundary_str = (m.group(1) or m.group(2) or "").strip()
+    if not boundary_str:
+        raise ValueError("Empty multipart boundary")
+    delim = b"--" + boundary_str.encode("latin-1")
     fields: Dict[str, str] = {}
     files: Dict[str, Dict[str, Any]] = {}
 
-    for part in parts[1:]:
-        if not part or part.startswith(b"--"):
+    pos = body.find(delim)
+    if pos == -1:
+        raise ValueError("Multipart boundary delimiter not found in payload")
+    mv = memoryview(body)
+
+    while pos != -1:
+        after_delim = pos + len(delim)
+        if body[after_delim : after_delim + 2] == b"--":
             break
-        if part.startswith(b"\r\n"):
-            part = part[2:]
-        if part.endswith(b"\r\n"):
-            part = part[:-2]
-        sep_idx = part.find(b"\r\n\r\n")
+        part_start = after_delim
+        if body[part_start : part_start + 2] == b"\r\n":
+            part_start += 2
+        elif body[part_start : part_start + 1] == b"\n":
+            part_start += 1
+
+        next_pos = body.find(delim, part_start)
+        if next_pos == -1:
+            break
+        part_end = next_pos
+        if body[part_end - 2 : part_end] == b"\r\n":
+            part_end -= 2
+        elif body[part_end - 1 : part_end] == b"\n":
+            part_end -= 1
+
+        sep_idx = body.find(b"\r\n\r\n", part_start, part_end)
+        sep_len = 4
         if sep_idx == -1:
-            continue
-        hdr_bytes = part[:sep_idx].decode("utf-8", errors="replace")
-        payload = part[sep_idx + 4 :]
-        name_m = re.search(r'name="([^"]+)"', hdr_bytes)
-        if not name_m:
-            continue
-        field_name = name_m.group(1)
-        fn_m = re.search(r'filename="([^"]*)"', hdr_bytes)
-        if fn_m:
-            files[field_name] = {
-                "filename": os.path.basename(fn_m.group(1)),
-                "content": payload,
-            }
-        else:
-            fields[field_name] = payload.decode("utf-8", errors="replace")
+            sep_idx = body.find(b"\n\n", part_start, part_end)
+            sep_len = 2
+        if sep_idx != -1:
+            hdr_bytes = body[part_start:sep_idx].decode("utf-8", errors="replace")
+            payload_mv = mv[sep_idx + sep_len : part_end]
+            name_m = re.search(r'name="([^"]+)"', hdr_bytes)
+            if name_m:
+                field_name = name_m.group(1)
+                fn_m = re.search(r'filename="([^"]*)"', hdr_bytes)
+                if fn_m:
+                    files[field_name] = {
+                        "filename": os.path.basename(fn_m.group(1)),
+                        "content": payload_mv,
+                    }
+                else:
+                    fields[field_name] = bytes(payload_mv).decode("utf-8", errors="replace")
+        pos = next_pos
+
     return fields, files
 
 
@@ -496,7 +587,7 @@ def _fetch_watch_metrics(video_id: str, session: Optional[requests.Session] = No
     }
     cookies = {"CONSENT": "PENDING+987", "SOCS": "CAESHAgBEhJnd3NfMjAyMzA4MTAtMF9SQzIaAmVuIAEaBgiA_LyaBg"}
     getter = session or requests
-    resp = getter.get(url, headers=headers, cookies=cookies, timeout=(3.5, 4.5))
+    resp = getter.get(url, headers=headers, cookies=cookies, timeout=(4.5, 6.5))
     html = resp.text
 
     title_m = re.search(r"<title>(.*?)</title>", html)
@@ -596,7 +687,7 @@ def _build_baseline_yt() -> Dict[str, Any]:
             "total_videos": len(videos_list),
             "shorts_count": sum(1 for v in videos_list if v["is_short"]),
             "long_count": sum(1 for v in videos_list if not v["is_short"]),
-            "subscribers": "5",
+            "subscribers": "7",
             "total_views": total_views,
             "total_likes": total_likes,
             "avg_views": round(total_views / len(videos_list), 1) if videos_list else 0.0,
@@ -625,45 +716,31 @@ def _refresh_youtube_analytics_sync() -> Dict[str, Any]:
         yid = r.get("youtube_id")
         if yid and yid not in seed_ids:
             seed_ids.append(yid)
+    job_snap = _read_json(UPLOAD_JOB_PATH, None)
+    if isinstance(job_snap, dict):
+        j_yid = job_snap.get("youtube_id")
+        if j_yid and j_yid not in seed_ids:
+            seed_ids.append(j_yid)
 
     discovered_shorts: set[str] = set()
-    subscribers_display: str = "5"
+    subscribers_display: str = "7"
     session = requests.Session()
+    adapter = requests.adapters.HTTPAdapter(pool_connections=16, pool_maxsize=16)
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
     session.headers.update(headers)
     session.cookies.update({"CONSENT": "PENDING+987", "SOCS": "CAESHAgBEhJnd3NfMjAyMzA4MTAtMF9SQzIaAmVuIAEaBgiA_LyaBg"})
 
     try:
-        try:
-            def _fetch_tab(tab_url: str) -> str:
-                return session.get(tab_url, timeout=(3.5, 4.5)).text
-
-            with ThreadPoolExecutor(max_workers=2) as tab_pool:
-                f_shorts = tab_pool.submit(_fetch_tab, f"https://www.youtube.com/channel/{YOUTUBE_CHANNEL_ID}/shorts")
-                f_videos = tab_pool.submit(_fetch_tab, f"https://www.youtube.com/channel/{YOUTUBE_CHANNEL_ID}/videos")
-                html_s = f_shorts.result()
-                html_v = f_videos.result()
-
-            live_online = True
-            sub_m = re.search(r"([\d.,]+[KMB]?)\s+subscribers?", html_s or html_v, re.I)
-            if sub_m:
-                subscribers_display = sub_m.group(1)
-            for vid in re.findall(r"/shorts/([a-zA-Z0-9_-]{11})", html_s):
-                discovered_shorts.add(vid)
-                if vid not in seed_ids:
-                    seed_ids.append(vid)
-
-            for vid in re.findall(r'"videoId":"([a-zA-Z0-9_-]{11})"', html_v):
-                if vid not in seed_ids:
-                    seed_ids.append(vid)
-        except Exception as e:
-            fetch_error = str(e)
+        def _fetch_tab(tab_url: str) -> str:
+            return session.get(tab_url, timeout=(4.5, 6.5)).text
 
         def _load_one(vid: str):
             base = baseline_map.get(vid, {})
             try:
                 live = _fetch_watch_metrics(vid, session=session)
                 if live.get("unavailable"):
-                    return None
+                    return None, True
                 views = max(live["views"], base.get("views", 0)) if live["views"] == 0 and base else live["views"]
                 likes = max(live["likes"], base.get("likes", 0)) if live["likes"] == 0 and base else live["likes"]
                 dur_sec = live.get("duration_sec")
@@ -672,49 +749,80 @@ def _refresh_youtube_analytics_sync() -> Dict[str, Any]:
                     if dur_sec is not None
                     else base.get("duration", "0:40")
                 )
-                return {
-                    "id": vid,
-                    "title": live["title"] or base.get("title", vid),
-                    "views": views,
-                    "likes": likes,
-                    "comments": base.get("comments", 0),
-                    "published_at": live.get("published_at") or base.get("publishedAt"),
-                    "duration": dur_text,
-                    "duration_sec": dur_sec,
-                    "is_short": (vid in discovered_shorts) or (dur_sec is not None and dur_sec <= 62) or base.get("is_short", True),
-                    "thumbnail": live["thumbnail"],
-                    "play_url": live["play_url"],
-                    "shorts_url": live["shorts_url"],
-                    "engagement_pct": round((likes / views * 100), 1) if views > 0 else 0.0,
-                }
+                return (
+                    {
+                        "id": vid,
+                        "title": live["title"] or base.get("title", vid),
+                        "views": views,
+                        "likes": likes,
+                        "comments": base.get("comments", 0),
+                        "published_at": live.get("published_at") or base.get("publishedAt"),
+                        "duration": dur_text,
+                        "duration_sec": dur_sec,
+                        "is_short": (vid in discovered_shorts) or (dur_sec is not None and dur_sec <= 62) or base.get("is_short", True),
+                        "thumbnail": live["thumbnail"],
+                        "play_url": live["play_url"],
+                        "shorts_url": live["shorts_url"],
+                        "engagement_pct": round((likes / views * 100), 1) if views > 0 else 0.0,
+                    },
+                    True,
+                )
             except Exception:
                 if base:
                     views = base.get("views", 0)
                     likes = base.get("likes", 0)
-                    return {
-                        "id": vid,
-                        "title": base["title"],
-                        "views": views,
-                        "likes": likes,
-                        "comments": base.get("comments", 0),
-                        "published_at": base.get("publishedAt"),
-                        "duration": base.get("duration", "0:40"),
-                        "duration_sec": None,
-                        "is_short": base.get("is_short", True),
-                        "thumbnail": f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg",
-                        "play_url": f"https://www.youtube.com/watch?v={vid}",
-                        "shorts_url": f"https://www.youtube.com/shorts/{vid}",
-                        "engagement_pct": round((likes / views * 100), 1) if views > 0 else 0.0,
-                    }
-                return None
+                    return (
+                        {
+                            "id": vid,
+                            "title": base["title"],
+                            "views": views,
+                            "likes": likes,
+                            "comments": base.get("comments", 0),
+                            "published_at": base.get("publishedAt"),
+                            "duration": base.get("duration", "0:40"),
+                            "duration_sec": None,
+                            "is_short": base.get("is_short", True),
+                            "thumbnail": f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg",
+                            "play_url": f"https://www.youtube.com/watch?v={vid}",
+                            "shorts_url": f"https://www.youtube.com/shorts/{vid}",
+                            "engagement_pct": round((likes / views * 100), 1) if views > 0 else 0.0,
+                        },
+                        False,
+                    )
+                return None, False
 
-        with ThreadPoolExecutor(max_workers=8) as pool:
-            futures = [pool.submit(_load_one, vid) for vid in seed_ids[:15]]
-            for fut in as_completed(futures):
-                item = fut.result()
+        extra_ids: List[str] = []
+        with ThreadPoolExecutor(max_workers=10) as pool:
+            f_shorts = pool.submit(_fetch_tab, f"https://www.youtube.com/channel/{YOUTUBE_CHANNEL_ID}/shorts")
+            f_videos = pool.submit(_fetch_tab, f"https://www.youtube.com/channel/{YOUTUBE_CHANNEL_ID}/videos")
+            seed_futs = {pool.submit(_load_one, vid): vid for vid in seed_ids[:15]}
+
+            try:
+                html_s = f_shorts.result()
+                html_v = f_videos.result()
+                live_online = True
+                sub_m = re.search(r"([\d.,]+[KMB]?)\s+subscribers?", html_s or html_v, re.I)
+                if sub_m:
+                    subscribers_display = sub_m.group(1)
+                for vid in re.findall(r"/shorts/([a-zA-Z0-9_-]{11})", html_s):
+                    discovered_shorts.add(vid)
+                    if vid not in seed_ids and vid not in extra_ids:
+                        extra_ids.append(vid)
+                for vid in re.findall(r'"videoId":"([a-zA-Z0-9_-]{11})"', html_v):
+                    if vid not in seed_ids and vid not in extra_ids:
+                        extra_ids.append(vid)
+            except Exception as e:
+                fetch_error = str(e)
+
+            extra_futs = {pool.submit(_load_one, vid): vid for vid in extra_ids[:max(0, 15 - len(seed_futs))]}
+            for fut in as_completed(list(seed_futs.keys()) + list(extra_futs.keys())):
+                item, was_live = fut.result()
                 if item:
+                    if item["id"] in discovered_shorts:
+                        item["is_short"] = True
                     videos_map[item["id"]] = item
-                    live_online = True
+                    if was_live:
+                        live_online = True
 
         videos_list = sorted(
             videos_map.values(),
@@ -987,6 +1095,234 @@ def get_projects_pipeline(yt_data: Dict[str, Any], active_project: Optional[str]
     return projects
 
 
+def _kill_proc_tree(proc: Optional[subprocess.Popen]) -> None:
+    if proc is None:
+        return
+    try:
+        if proc.poll() is None:
+            if os.name == "nt":
+                subprocess.run(
+                    ["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    timeout=5,
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                )
+            else:
+                proc.kill()
+    except Exception:
+        try:
+            proc.kill()
+        except Exception:
+            pass
+
+
+def _is_job_cancelled(job_id: Optional[str]) -> bool:
+    if not job_id:
+        return False
+    if job_id in _cancelled_jobs:
+        return True
+    cur = _read_json(UPLOAD_JOB_PATH, None)
+    if not cur or cur.get("job_id") != job_id or cur.get("status") == "cancelled":
+        return True
+    return False
+
+
+def _verify_staged_url_sync(url: str) -> Tuple[bool, str]:
+    if not url or not url.startswith("http"):
+        return False, "Invalid staged URL"
+    try:
+        res = subprocess.run(
+            [
+                "curl.exe",
+                "-4",
+                "-sSL",
+                "-r",
+                "0-31",
+                "--max-time",
+                "20",
+                "-A",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/126.0.0.0",
+                "-o",
+                os.devnull,
+                "-w",
+                "%{http_code} %{content_type}",
+                url,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=25,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        parts = (res.stdout or "").strip().split(None, 1)
+        code = int(parts[0]) if parts and parts[0].isdigit() else 0
+        ctype = (parts[1] if len(parts) > 1 else "").lower()
+        if code in (200, 206) and "text/html" not in ctype:
+            return True, f"HTTP {code}"
+        head = requests.head(url, timeout=15, allow_redirects=True)
+        h_ct = (head.headers.get("content-type") or "").lower()
+        if head.status_code < 400 and "text/html" not in h_ct:
+            return True, f"HTTP {head.status_code}"
+        return False, f"HTTP {code or head.status_code} ({ctype or h_ct or 'unknown'})"
+    except Exception as exc:
+        return False, str(exc)
+
+
+def _scan_transcript_for_upload(conv_id: str) -> Dict[str, Any]:
+    """Scan all transcript steps for YouTube publish completion, errors, or live activity."""
+    tpath = BRAIN_DIR / conv_id / ".system_generated" / "logs" / "transcript.jsonl"
+    if not tpath.exists():
+        return {"exists": False}
+    try:
+        mtime = tpath.stat().st_mtime
+        lines = tpath.read_text(encoding="utf-8", errors="replace").splitlines()
+        youtube_id: Optional[str] = None
+        last_error: Optional[str] = None
+        last_type: Optional[str] = None
+        last_status: Optional[str] = None
+        last_text: str = ""
+        last_tool: Optional[str] = None
+
+        for raw in lines:
+            if not raw.strip():
+                continue
+            try:
+                step = json.loads(raw)
+            except Exception:
+                continue
+            last_type = step.get("type")
+            last_status = step.get("status")
+            idx = step.get("step_index", 0)
+            content = str(step.get("content") or "")
+            if last_type == "PLANNER_RESPONSE" and content:
+                last_text = content
+            for tc in step.get("tool_calls") or []:
+                last_tool = tc.get("name") or last_tool
+            if idx == 0:
+                continue
+
+            m_watch = re.search(r"https?://(?:www\.)?youtube\.com/watch\?v=([a-zA-Z0-9_-]{11})", content)
+            if m_watch:
+                youtube_id = m_watch.group(1)
+            elif '"uploadStatus":"uploaded"' in content or '"play_url"' in content:
+                m_json_id = re.search(r'"id"\s*:\s*"([a-zA-Z0-9_-]{11})"', content)
+                if m_json_id:
+                    youtube_id = m_json_id.group(1)
+
+            if step.get("status") == "ERROR" and step.get("error"):
+                last_error = str(step.get("error"))
+            elif "Encountered error in tool execution:" in content and '"error"' in content:
+                m_err = re.search(r'"error"\s*:\s*"([^"]+)"', content)
+                if m_err:
+                    last_error = m_err.group(1)
+
+        finished = bool(last_type == "PLANNER_RESPONSE" and last_status == "DONE" and (time.time() - mtime) >= 6)
+        return {
+            "exists": True,
+            "age_sec": max(0.0, time.time() - mtime),
+            "steps": len(lines),
+            "youtube_id": youtube_id,
+            "last_error": last_error,
+            "last_text": last_text,
+            "last_tool": last_tool,
+            "finished": finished,
+        }
+    except Exception:
+        return {"exists": False}
+
+
+def _find_matching_brain_conv(job_id: str, min_epoch: float) -> Optional[str]:
+    if not BRAIN_DIR.exists() or not job_id:
+        return None
+    try:
+        candidates = sorted(
+            [d for d in BRAIN_DIR.iterdir() if d.is_dir()],
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )[:12]
+        for d in candidates:
+            tpath = d / ".system_generated" / "logs" / "transcript.jsonl"
+            if not tpath.exists():
+                continue
+            if tpath.stat().st_mtime < (min_epoch - 10):
+                continue
+            with tpath.open("r", encoding="utf-8", errors="replace") as f:
+                first_line = f.readline()
+            if job_id in first_line:
+                return d.name
+    except Exception:
+        pass
+    return None
+
+
+def _finalize_published_run(job: Dict[str, Any], vid: str) -> Dict[str, Any]:
+    now_iso = job.get("completed_at") or datetime.now().astimezone().isoformat(timespec="seconds")
+    yurl = f"https://www.youtube.com/watch?v={vid}"
+
+    updated_job = _update_upload_job(
+        {
+            "status": "published",
+            "step": "Published live to YouTube!",
+            "youtube_id": vid,
+            "youtube_url": yurl,
+            "error": None,
+            "completed_at": now_iso,
+        },
+        expected_job_id=job.get("job_id"),
+    ) or {**job, "status": "published", "youtube_id": vid, "youtube_url": yurl, "completed_at": now_iso}
+
+    slug = (updated_job.get("slug") or "").strip()
+    if slug and not CLOUD_MODE:
+        with _runs_lock:
+            runs_data = _read_json(
+                RUNS_JSON_PATH,
+                {"channel_id": YOUTUBE_CHANNEL_ID, "channel_title": YOUTUBE_CHANNEL_TITLE, "runs": []},
+            )
+            for r in runs_data.get("runs", []):
+                if r.get("slug") == slug:
+                    r["status"] = "published"
+                    r["stage"] = "completed"
+                    r["queue_order"] = None
+                    r["youtube_id"] = vid
+                    r["youtube_url"] = yurl
+                    if updated_job.get("title"):
+                        r["youtube_title"] = updated_job["title"]
+                    if updated_job.get("description"):
+                        r["youtube_description"] = updated_job["description"]
+                    if updated_job.get("tags"):
+                        r["youtube_tags"] = updated_job["tags"]
+                    r["privacy_status"] = updated_job.get("privacy_status") or "public"
+                    r["category_id"] = updated_job.get("category_id") or "23"
+                    r["published_at"] = r.get("published_at") or now_iso
+                    r["notes"] = f"Published live on {YOUTUBE_CHANNEL_TITLE} channel as {vid}."
+                    break
+            _normalize_queue_locked(runs_data)
+            for r in runs_data.get("runs", []):
+                if r.get("status") == "queued" and r.get("queue_order"):
+                    qo = r["queue_order"]
+                    r["notes"] = (
+                        "Queued #1: Next scheduled automatic upload at 7:00 PM IST (only 1 queued video uploads per day)."
+                        if qo == 1
+                        else f"Queued #{qo}: Held in queue for future daily auto-upload."
+                    )
+            _write_json_atomic(RUNS_JSON_PATH, runs_data)
+
+    with _yt_lock:
+        _yt_cache["timestamp"] = 0.0
+    threading.Thread(target=fetch_youtube_analytics, kwargs={"force": True}, daemon=True).start()
+    if not CLOUD_MODE and (BASE_DIR / "sync_cloud_data.py").exists():
+        try:
+            subprocess.Popen(
+                [str(PYTHON_BIN), str(BASE_DIR / "sync_cloud_data.py")],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            )
+        except Exception:
+            pass
+    return updated_job
+
+
 def _inspect_upload_job() -> Dict[str, Any]:
     if CLOUD_MODE:
         return {
@@ -999,46 +1335,57 @@ def _inspect_upload_job() -> Dict[str, Any]:
     if not job:
         return {"active": False, "status": "idle", "step": "No manual upload running."}
 
+    job_id = job.get("job_id")
+    if job.get("status") == "cancelled" or (job_id and job_id in _cancelled_jobs):
+        return {"active": False, "status": "idle", "step": "Upload cancelled."}
+
+    # Ensure published jobs also finalize runs.json idempotently
+    if job.get("status") == "published" and job.get("youtube_id") and job.get("slug"):
+        runs_data = _read_json(RUNS_JSON_PATH, {"runs": []})
+        match_run = next((r for r in runs_data.get("runs", []) if r.get("slug") == job["slug"]), None)
+        if match_run and match_run.get("status") != "published":
+            job = _finalize_published_run(job, job["youtube_id"])
+
     # Live conversation tracking when agent is uploading
     conv_id = job.get("conversation_id")
+    transcript_age: Optional[float] = None
     if conv_id and job.get("status") in ("dispatching_agent", "uploading"):
-        transcript_path = BRAIN_DIR / conv_id / ".system_generated" / "logs" / "transcript.jsonl"
-        if transcript_path.exists():
-            try:
-                t_lines = transcript_path.read_text(encoding="utf-8", errors="replace").splitlines()
-                if t_lines:
-                    last_step = json.loads(t_lines[-1])
-                    content = last_step.get("content", "")
-                    m_id = re.search(r"https?://(?:www\.)?youtube\.com/watch\?v=([a-zA-Z0-9_-]{11})", content)
-                    if m_id and job.get("status") != "published":
-                        vid = m_id.group(1)
-                        job["status"] = "published"
-                        job["step"] = "Published live to YouTube!"
-                        job["youtube_id"] = vid
-                        job["youtube_url"] = f"https://www.youtube.com/watch?v={vid}"
-            except Exception:
-                pass
+        scan = _scan_transcript_for_upload(conv_id)
+        if scan.get("exists"):
+            transcript_age = scan.get("age_sec")
+            if scan.get("youtube_id"):
+                job = _finalize_published_run(job, scan["youtube_id"])
+            elif scan.get("finished") and job_id not in _active_worker_jobs:
+                err_txt = scan.get("last_error") or scan.get("last_text") or "Uploader conversation finished without returning a YouTube video ID."
+                job["status"] = "error"
+                job["step"] = "YouTube upload did not complete"
+                job["error"] = str(err_txt)[:500]
+                _update_upload_job(
+                    {"status": job["status"], "step": job["step"], "error": job["error"]},
+                    expected_job_id=job_id,
+                )
 
     status = job.get("status", "idle")
-    job_id = job.get("job_id")
     started_at = job.get("started_at")
     is_stale = False
     if started_at and status in ("staging", "dispatching_agent", "uploading"):
         try:
             age = (datetime.now().astimezone() - datetime.fromisoformat(started_at)).total_seconds()
-            if status in ("staging", "dispatching_agent") and job_id not in _active_worker_jobs and age > 10:
+            worker_alive = job_id in _active_worker_jobs
+            agent_alive = transcript_age is not None and transcript_age < 240
+            if not worker_alive and not agent_alive and age > 15:
                 is_stale = True
-                job["status"] = "error"
-                job["step"] = "Previous upload was interrupted before reaching YouTube"
-                job["error"] = "Background staging stopped when the local server restarted. Click 'Publish to Animated_Crew Now' to retry cleanly."
-                _update_upload_job(
-                    {
-                        "status": job["status"],
-                        "step": job["step"],
-                        "error": job["error"],
-                    }
+                err_msg = (
+                    "Background upload stopped when the local server restarted before completing YouTube dispatch. Retry cleanly."
                 )
-            elif age > 1200:
+                job["status"] = "error"
+                job["step"] = "Previous upload was interrupted"
+                job["error"] = err_msg
+                _update_upload_job(
+                    {"status": job["status"], "step": job["step"], "error": err_msg},
+                    expected_job_id=job_id,
+                )
+            elif age > 2100:
                 is_stale = True
         except Exception:
             pass
@@ -1047,186 +1394,316 @@ def _inspect_upload_job() -> Dict[str, Any]:
     return job
 
 
-def _update_upload_job(updates: Dict[str, Any]) -> Dict[str, Any]:
+def _update_upload_job(updates: Dict[str, Any], expected_job_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
     with _upload_lock:
-        job = _read_json(UPLOAD_JOB_PATH, {}) or {}
+        if expected_job_id and expected_job_id in _cancelled_jobs:
+            return None
+        job = _read_json(UPLOAD_JOB_PATH, None)
+        if expected_job_id:
+            if not job or job.get("job_id") != expected_job_id or job.get("status") == "cancelled":
+                return None
+        job = job or {}
         job.update(updates)
         job["updated_at"] = datetime.now().astimezone().isoformat(timespec="seconds")
         _write_json_atomic(UPLOAD_JOB_PATH, job)
         return job
 
 
-def _run_manual_upload_worker(job_id: str, local_mp4_path: Path) -> None:
-    proc: Optional[subprocess.Popen] = None
+def _run_manual_upload_worker(job_id: str, local_mp4_path: Path, reuse_staged_url: Optional[str] = None) -> None:
+    stage_proc: Optional[subprocess.Popen] = None
+    dispatch_proc: Optional[subprocess.Popen] = None
     try:
-        size_mb = round(local_mp4_path.stat().st_size / (1024 * 1024), 1) if local_mp4_path.exists() else 0.0
-        # 1. Stage to direct HTTPS host (IPv4 curl streaming via upload_media.py)
-        proc = subprocess.Popen(
-            [str(PYTHON_BIN), str(UPLOAD_MEDIA_PY), str(local_mp4_path)],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            bufsize=1,
-            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
-        )
-        out_lines: List[str] = []
-        err_lines: List[str] = []
-        current_host = ["uguu.se"]
-
-        def _drain_stdout():
-            if proc and proc.stdout:
-                for line in proc.stdout:
-                    out_lines.append(line.rstrip("\r\n"))
-
-        def _drain_stderr():
-            if proc and proc.stderr:
-                for line in proc.stderr:
-                    clean = line.rstrip("\r\n")
-                    if clean.startswith("HOST:"):
-                        current_host[0] = clean.split(":", 1)[1].strip() or current_host[0]
-                    elif clean:
-                        err_lines.append(clean)
-
-        t_out = threading.Thread(target=_drain_stdout, daemon=True)
-        t_err = threading.Thread(target=_drain_stderr, daemon=True)
-        t_out.start()
-        t_err.start()
-
-        start_ts = time.time()
-        last_tick = 0.0
-        while proc.poll() is None:
-            elapsed = int(time.time() - start_ts)
-            if elapsed >= 600:
-                proc.kill()
-                t_out.join(timeout=2)
-                t_err.join(timeout=2)
-                _update_upload_job(
-                    {
-                        "status": "error",
-                        "step": "Cloud staging timed out",
-                        "error": f"Staging {size_mb:.1f} MB exceeded 600s limit across hosts. Check internet uplink speed and retry.",
-                    }
-                )
-                return
-            if time.time() - last_tick >= 3.0:
-                last_tick = time.time()
-                cur = _read_json(UPLOAD_JOB_PATH, None)
-                if not cur or cur.get("job_id") != job_id:
-                    proc.kill()
-                    return
-                _update_upload_job(
-                    {
-                        "step": f"Staging {size_mb:.1f} MB via {current_host[0]} ({elapsed}s elapsed)...",
-                    }
-                )
-            time.sleep(0.5)
-
-        t_out.join(timeout=5)
-        t_err.join(timeout=5)
-        stdout_text = "\n".join(out_lines).strip()
-        stderr_text = "\n".join(err_lines).strip()
-
-        if proc.returncode != 0 or not stdout_text.startswith("http"):
-            err = stderr_text or stdout_text or f"Failed to stage MP4 file (exit {proc.returncode})."
-            _update_upload_job({"status": "error", "step": "Cloud staging failed", "error": err[:500]})
+        if _is_job_cancelled(job_id):
             return
 
-        staged_url = stdout_text.splitlines()[-1].strip()
-        try:
-            head_cmd = subprocess.run(
-                ["curl.exe", "-4", "-sSIL", "--max-time", "20", staged_url],
-                capture_output=True,
+        size_mb = round(local_mp4_path.stat().st_size / (1024 * 1024), 1) if local_mp4_path.exists() else 0.0
+        staged_url: Optional[str] = None
+
+        # 0. Fast-path reuse if identical file already has a verified live staged URL
+        if reuse_staged_url:
+            _update_upload_job({"step": f"Verifying cached cloud URL for {size_mb:.1f} MB MP4..."}, expected_job_id=job_id)
+            ok, _ = _verify_staged_url_sync(reuse_staged_url)
+            if ok:
+                staged_url = reuse_staged_url
+
+        # 1. Stage to direct binary HTTPS host (uguu.se -> catbox.moe -> x0.at over IPv4)
+        if not staged_url:
+            stage_proc = subprocess.Popen(
+                [str(PYTHON_BIN), str(UPLOAD_MEDIA_PY), str(local_mp4_path)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 text=True,
-                timeout=25,
+                bufsize=1,
                 creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
             )
-            if head_cmd.returncode != 0 or not any(c in (head_cmd.stdout or "") for c in ("200 ", "206 ")):
-                head = requests.head(staged_url, timeout=20, allow_redirects=True)
-                if head.status_code >= 400:
-                    _update_upload_job({"status": "error", "step": "Staged URL check failed", "error": f"HTTP {head.status_code}"})
+            with _upload_lock:
+                _active_upload_procs[job_id] = stage_proc
+
+            out_lines: List[str] = []
+            err_lines: List[str] = []
+            stage_state = {"host": "uguu.se", "pct": None}
+
+            def _drain_stdout():
+                if stage_proc and stage_proc.stdout:
+                    for line in stage_proc.stdout:
+                        out_lines.append(line.rstrip("\r\n"))
+
+            def _drain_stderr():
+                if stage_proc and stage_proc.stderr:
+                    for line in stage_proc.stderr:
+                        clean = line.rstrip("\r\n")
+                        if clean.startswith("HOST:"):
+                            stage_state["host"] = clean.split(":", 1)[1].strip() or stage_state["host"]
+                            stage_state["pct"] = 0
+                        elif clean.startswith("PROGRESS:"):
+                            try:
+                                stage_state["pct"] = int(float(clean.split(":", 1)[1].strip()))
+                            except Exception:
+                                pass
+                        elif clean:
+                            err_lines.append(clean)
+
+            t_out = threading.Thread(target=_drain_stdout, daemon=True)
+            t_err = threading.Thread(target=_drain_stderr, daemon=True)
+            t_out.start()
+            t_err.start()
+
+            start_ts = time.time()
+            last_tick = 0.0
+            while stage_proc.poll() is None:
+                if _is_job_cancelled(job_id):
+                    _kill_proc_tree(stage_proc)
                     return
-        except Exception as e:
-            _update_upload_job({"status": "error", "step": "Staged URL unreachable", "error": str(e)})
+                elapsed = int(time.time() - start_ts)
+                if elapsed >= 900:
+                    _kill_proc_tree(stage_proc)
+                    t_out.join(timeout=2)
+                    t_err.join(timeout=2)
+                    _update_upload_job(
+                        {
+                            "status": "error",
+                            "step": "Cloud staging timed out",
+                            "error": f"Staging {size_mb:.1f} MB exceeded 900s limit across hosts. Check uplink speed and retry.",
+                        },
+                        expected_job_id=job_id,
+                    )
+                    return
+                if time.time() - last_tick >= 2.0:
+                    last_tick = time.time()
+                    pct_part = f" — {stage_state['pct']}%" if stage_state["pct"] is not None else ""
+                    _update_upload_job(
+                        {"step": f"Staging {size_mb:.1f} MB via {stage_state['host']}{pct_part} ({elapsed}s)..."},
+                        expected_job_id=job_id,
+                    )
+                time.sleep(0.4)
+
+            t_out.join(timeout=5)
+            t_err.join(timeout=5)
+            if _is_job_cancelled(job_id):
+                return
+
+            stdout_text = "\n".join(out_lines).strip()
+            stderr_text = "\n".join(err_lines).strip()
+            if stage_proc.returncode != 0 or not stdout_text.startswith("http"):
+                err = stderr_text or stdout_text or f"Failed to stage MP4 file (exit {stage_proc.returncode})."
+                _update_upload_job(
+                    {"status": "error", "step": "Cloud staging failed", "error": err[:500]},
+                    expected_job_id=job_id,
+                )
+                return
+
+            staged_url = stdout_text.splitlines()[-1].strip()
+            ok, reason = _verify_staged_url_sync(staged_url)
+            if not ok:
+                _update_upload_job(
+                    {"status": "error", "step": "Staged URL verification failed", "error": reason},
+                    expected_job_id=job_id,
+                )
+                return
+
+        if _is_job_cancelled(job_id):
             return
 
         _update_upload_job(
             {
                 "staged_url": staged_url,
                 "status": "dispatching_agent",
-                "step": "Staged! Dispatching YouTube upload via Zapier...",
-            }
+                "step": "Staged! Starting Zapier YouTube publisher...",
+            },
+            expected_job_id=job_id,
         )
 
-        # 2. Trigger single-line agentapi conversation for UPLOAD_PROMPT.md
+        # 2. Launch non-blocking Popen to language_server agentapi (no space-split flags, no 90s false timeout)
         prompt = (
-            "Read C:\\Users\\DELL\\faceless-shorts\\UPLOAD_PROMPT.md and immediately execute every step "
-            "using C:\\Users\\DELL\\faceless-shorts\\upload_job.json to publish the video to YouTube without asking."
+            f"Job {job_id}: Read C:\\Users\\DELL\\faceless-shorts\\UPLOAD_PROMPT.md and immediately "
+            f"execute every step using C:\\Users\\DELL\\faceless-shorts\\upload_job.json to publish the video to YouTube without asking."
         )
-        res = subprocess.run(
-            ["cmd", "/c", str(AGENTAPI_BAT), "new-conversation", "--title=Manual YouTube Upload", prompt],
-            capture_output=True,
+        if LANGUAGE_SERVER_EXE.exists():
+            cmd = [
+                str(LANGUAGE_SERVER_EXE),
+                "agentapi",
+                "new-conversation",
+                "--model=flash",
+                "--title=ManualUpload",
+                "--",
+                prompt,
+            ]
+        else:
+            cmd = [
+                "cmd",
+                "/c",
+                str(AGENTAPI_BAT),
+                "new-conversation",
+                "--model=flash",
+                "--title=ManualUpload",
+                "--",
+                prompt,
+            ]
+
+        dispatch_epoch = time.time()
+        dispatch_proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
-            timeout=90,
-            cwd=r"C:\Users\DELL\OneDrive\Desktop\faceless",
+            cwd=str(LOCAL_PROJECTS_ROOT if LOCAL_PROJECTS_ROOT.exists() else BASE_DIR.parent),
             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
         )
-        combined = (res.stdout or "") + "\n" + (res.stderr or "")
-        m_uuid = re.search(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", combined, re.IGNORECASE)
-        if res.returncode != 0 and not m_uuid:
+        with _upload_lock:
+            _active_upload_procs[job_id] = dispatch_proc
+
+        d_out: List[str] = []
+        d_err: List[str] = []
+
+        def _drain_d_out():
+            if dispatch_proc and dispatch_proc.stdout:
+                d_out.append(dispatch_proc.stdout.read())
+
+        def _drain_d_err():
+            if dispatch_proc and dispatch_proc.stderr:
+                d_err.append(dispatch_proc.stderr.read())
+
+        td_out = threading.Thread(target=_drain_d_out, daemon=True)
+        td_err = threading.Thread(target=_drain_d_err, daemon=True)
+        td_out.start()
+        td_err.start()
+
+        conv_id: Optional[str] = None
+        d_start = time.time()
+        while (time.time() - d_start) < 300:
+            if _is_job_cancelled(job_id):
+                _kill_proc_tree(dispatch_proc)
+                return
+
+            # Check stdout chunks or matching brain directory if already spawned
+            conv_id = _find_matching_brain_conv(job_id, dispatch_epoch)
+            if dispatch_proc.poll() is not None:
+                td_out.join(timeout=3)
+                td_err.join(timeout=3)
+                combined = "".join(d_out) + "\n" + "".join(d_err)
+                m_uuid = re.search(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", combined, re.IGNORECASE)
+                if m_uuid:
+                    conv_id = m_uuid.group(0)
+                break
+            if conv_id:
+                break
+
+            d_elapsed = int(time.time() - d_start)
+            if d_elapsed >= 4 and d_elapsed % 4 == 0:
+                _update_upload_job(
+                    {"step": f"Connecting to Zapier uploader agent ({d_elapsed}s)..."},
+                    expected_job_id=job_id,
+                )
+            time.sleep(1.0)
+
+        if not conv_id:
+            conv_id = _find_matching_brain_conv(job_id, dispatch_epoch)
+        if not conv_id:
+            if dispatch_proc.poll() is None:
+                _kill_proc_tree(dispatch_proc)
+            combined_err = ("".join(d_out) + " " + "".join(d_err)).strip()
             _update_upload_job(
                 {
                     "status": "error",
-                    "step": "Could not dispatch uploader agent",
-                    "error": combined.strip()[:400] or f"Exit code {res.returncode}",
-                }
+                    "step": "Uploader agent failed to start",
+                    "error": combined_err[:400] or "Timed out after 300s waiting for Antigravity agentapi.",
+                },
+                expected_job_id=job_id,
             )
             return
 
-        conv_id = m_uuid.group(0) if m_uuid else None
         _update_upload_job(
             {
                 "conversation_id": conv_id,
                 "status": "uploading",
-                "step": "Uploading video to Animated_Crew on YouTube via Zapier...",
-            }
+                "step": f"Publishing video to {YOUTUBE_CHANNEL_TITLE} via Zapier...",
+            },
+            expected_job_id=job_id,
         )
 
-        # Poll transcript / upload_job for completion to clear YouTube cache promptly
-        for _ in range(180):
-            time.sleep(2)
-            cur = _read_json(UPLOAD_JOB_PATH, {}) or {}
-            if cur.get("job_id") != job_id:
+        # 3. Monitor upload_job.json AND transcript.jsonl up to 20 minutes without premature timeout
+        upload_start = time.time()
+        while (time.time() - upload_start) < 1200:
+            time.sleep(2.0)
+            if _is_job_cancelled(job_id):
                 return
-            if cur.get("status") in ("published", "error"):
-                if cur.get("status") == "published":
-                    threading.Thread(target=fetch_youtube_analytics, kwargs={"force": True}, daemon=True).start()
+
+            cur = _read_json(UPLOAD_JOB_PATH, None)
+            if not cur or cur.get("job_id") != job_id:
                 return
-            if conv_id:
-                tpath = BRAIN_DIR / conv_id / ".system_generated" / "logs" / "transcript.jsonl"
-                if tpath.exists():
-                    txt = tpath.read_text(encoding="utf-8", errors="replace")
-                    m_yt = re.search(r"https?://(?:www\.)?youtube\.com/watch\?v=([a-zA-Z0-9_-]{11})", txt)
-                    if m_yt:
-                        vid = m_yt.group(1)
-                        _update_upload_job(
-                            {
-                                "status": "published",
-                                "step": "Published live to YouTube!",
-                                "youtube_id": vid,
-                                "youtube_url": f"https://www.youtube.com/watch?v={vid}",
-                                "completed_at": datetime.now().astimezone().isoformat(timespec="seconds"),
-                            }
-                        )
-                        threading.Thread(target=fetch_youtube_analytics, kwargs={"force": True}, daemon=True).start()
-                        return
+            if cur.get("status") == "published" and cur.get("youtube_id"):
+                _finalize_published_run(cur, cur["youtube_id"])
+                return
+            if cur.get("status") == "error":
+                return
+
+            scan = _scan_transcript_for_upload(conv_id)
+            if scan.get("exists"):
+                if scan.get("youtube_id"):
+                    _finalize_published_run(cur, scan["youtube_id"])
+                    return
+                if scan.get("finished"):
+                    err_txt = scan.get("last_error") or scan.get("last_text") or "Uploader conversation finished without returning a YouTube video ID."
+                    _update_upload_job(
+                        {
+                            "status": "error",
+                            "step": "YouTube upload did not complete",
+                            "error": str(err_txt)[:500],
+                        },
+                        expected_job_id=job_id,
+                    )
+                    return
+
+            elapsed = int(time.time() - upload_start)
+            if elapsed >= 6 and elapsed % 4 == 0:
+                tool_hint = f" [{scan.get('last_tool')}]" if scan.get("exists") and scan.get("last_tool") else ""
+                _update_upload_job(
+                    {"step": f"Publishing video to {YOUTUBE_CHANNEL_TITLE} via Zapier{tool_hint} ({elapsed}s)..."},
+                    expected_job_id=job_id,
+                )
+
+        _update_upload_job(
+            {
+                "status": "error",
+                "step": "Upload monitor timed out after 20 minutes",
+                "error": f"Check conversation {conv_id} or YouTube Studio before retrying to avoid duplicates.",
+            },
+            expected_job_id=job_id,
+        )
     except Exception as exc:
-        _update_upload_job({"status": "error", "step": "Manual upload error", "error": str(exc)})
+        if not _is_job_cancelled(job_id):
+            _update_upload_job(
+                {"status": "error", "step": "Manual upload error", "error": str(exc)},
+                expected_job_id=job_id,
+            )
     finally:
-        if proc and proc.poll() is None:
-            try:
-                proc.kill()
-            except Exception:
-                pass
+        with _upload_lock:
+            _active_upload_procs.pop(job_id, None)
+        if _is_job_cancelled(job_id):
+            _kill_proc_tree(stage_proc)
+            _kill_proc_tree(dispatch_proc)
+        elif stage_proc and stage_proc.poll() is None:
+            _kill_proc_tree(stage_proc)
         _active_worker_jobs.discard(job_id)
 
 
@@ -1365,7 +1842,7 @@ def get_monetization_overview(yt_data: Dict[str, Any]) -> Dict[str, Any]:
 
     summary = yt_data.get("summary", {})
     videos = yt_data.get("videos", [])
-    subs_count = _parse_sub_count(summary.get("subscribers", 5))
+    subs_count = _parse_sub_count(summary.get("subscribers", 7))
     lifetime_views = int(summary.get("total_views") or sum(int(v.get("views") or 0) for v in videos))
 
     now_utc = datetime.now(ZoneInfo("UTC"))
@@ -1762,9 +2239,28 @@ def api_upload_status():
 def api_upload_clear():
     _require_local_write("clearing upload status")
     with _upload_lock:
+        cur = _read_json(UPLOAD_JOB_PATH, None)
+        cur_id = cur.get("job_id") if isinstance(cur, dict) else None
+        if cur_id:
+            _cancelled_jobs.add(cur_id)
+            _active_worker_jobs.discard(cur_id)
+            proc = _active_upload_procs.pop(cur_id, None)
+            _kill_proc_tree(proc)
+        for jid, proc in list(_active_upload_procs.items()):
+            _cancelled_jobs.add(jid)
+            _active_worker_jobs.discard(jid)
+            _kill_proc_tree(proc)
+            _active_upload_procs.pop(jid, None)
+        if cur and cur.get("status") in ("staging", "dispatching_agent", "uploading"):
+            cur["status"] = "cancelled"
+            cur["step"] = "Upload cancelled"
+            _write_json_atomic(UPLOAD_JOB_PATH, cur)
         if UPLOAD_JOB_PATH.exists():
-            UPLOAD_JOB_PATH.unlink()
-    return JSONResponse({"ok": True, "status": "idle"})
+            try:
+                UPLOAD_JOB_PATH.unlink()
+            except Exception:
+                pass
+    return JSONResponse({"ok": True, "status": "idle", "cancelled": True})
 
 
 @app.post("/api/upload/manual")
@@ -1774,7 +2270,7 @@ async def api_upload_manual(request: Request):
     if cur_job.get("active"):
         raise HTTPException(
             status_code=409,
-            detail=f"An upload job is already running ({cur_job.get('step')}). Please wait for it to finish.",
+            detail=f"An upload job is already running ({cur_job.get('step')}). Cancel it first or wait for it to finish.",
         )
 
     content_type = request.headers.get("content-type", "")
@@ -1784,11 +2280,14 @@ async def api_upload_manual(request: Request):
     tags_raw: Any = None
     privacy_status: str = "public"
     category_id: str = "23"
+    force_reupload: bool = False
     source_type: str = "queued_project"
     mp4_path: Optional[Path] = None
 
     if "multipart/form-data" in content_type.lower():
         raw_body = await request.body()
+        if len(raw_body) > 510 * 1024 * 1024:
+            raise HTTPException(status_code=413, detail="Uploaded file exceeds 500 MB staging cap.")
         try:
             fields, files = _parse_multipart(content_type, raw_body)
         except Exception as exc:
@@ -1800,20 +2299,27 @@ async def api_upload_manual(request: Request):
         tags_raw = fields.get("tags")
         privacy_status = (fields.get("privacy_status") or "public").strip()
         category_id = (fields.get("category_id") or "23").strip()
+        force_reupload = str(fields.get("force") or "").lower() in ("1", "true", "yes")
 
         uploaded_file = files.get("file")
-        if uploaded_file and uploaded_file.get("content"):
+        if uploaded_file is not None:
+            content_bytes = uploaded_file.get("content") or b""
+            if len(content_bytes) < 4096:
+                raise HTTPException(status_code=400, detail="Uploaded video file is empty or too small (< 4 KB).")
+            if len(content_bytes) > 480 * 1024 * 1024:
+                raise HTTPException(status_code=413, detail="Video exceeds 480 MB limit for automated upload hosts. Compress below 200 MB first.")
             source_type = "custom_file"
             raw_name = uploaded_file.get("filename") or "custom-short.mp4"
-            safe_name = re.sub(r"[^a-zA-Z0-9._-]+", "-", raw_name).strip("-") or "custom-short.mp4"
+            safe_name = re.sub(r"[^a-zA-Z0-9._-]+", "-", raw_name).strip("-.") or "custom-short.mp4"
             if not safe_name.lower().endswith((".mp4", ".mov", ".webm", ".mkv")):
                 safe_name += ".mp4"
             MANUAL_UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
             ts = datetime.now().strftime("%Y%m%d-%H%M%S")
             mp4_path = MANUAL_UPLOADS_DIR / f"{ts}_{safe_name}"
-            mp4_path.write_bytes(uploaded_file["content"])
+            with mp4_path.open("wb") as fp:
+                fp.write(content_bytes)
             if not title:
-                title = Path(raw_name).stem.replace("-", " ").replace("_", " ").title() + " #Shorts"
+                title = Path(raw_name).stem.replace("-", " ").replace("_", " ").strip().title() + " #Shorts"
     else:
         try:
             data = await request.json()
@@ -1825,6 +2331,7 @@ async def api_upload_manual(request: Request):
         tags_raw = data.get("tags") or data.get("youtube_tags")
         privacy_status = str(data.get("privacy_status") or "public").strip()
         category_id = str(data.get("category_id") or "23").strip()
+        force_reupload = bool(data.get("force"))
 
     if mp4_path is None:
         if not slug:
@@ -1835,6 +2342,13 @@ async def api_upload_manual(request: Request):
 
         runs_data = _read_json(RUNS_JSON_PATH, {"runs": []})
         run_meta = next((r for r in runs_data.get("runs", []) if r.get("slug") == slug), {})
+        if (run_meta.get("status") == "published" or run_meta.get("youtube_id")) and not force_reupload:
+            existing_url = run_meta.get("youtube_url") or f"https://www.youtube.com/watch?v={run_meta.get('youtube_id')}"
+            raise HTTPException(
+                status_code=409,
+                detail=f"'{slug}' is already published on YouTube ({existing_url}). Pick another Short or custom MP4.",
+            )
+
         script = _read_json(proj_dir / "script.json", {})
         defaults = _build_default_metadata(slug, script, run_meta)
 
@@ -1854,33 +2368,47 @@ async def api_upload_manual(request: Request):
             renders = sorted((proj_dir / "renders").glob("*.mp4"), key=lambda p: p.stat().st_mtime, reverse=True) if (proj_dir / "renders").exists() else []
             mp4_path = renders[0] if renders else None
 
-        if not mp4_path or not mp4_path.exists() or mp4_path.stat().st_size < 100_000:
+        if not mp4_path or not mp4_path.exists() or mp4_path.stat().st_size < 50_000:
             raise HTTPException(status_code=409, detail=f"MP4 video for '{slug}' is still rendering or not ready yet.")
 
-        # Persist edited metadata into runs.json so queue/history matches
+    title, description, tags, privacy_status, category_id = _sanitize_youtube_meta(
+        title, description, tags_raw, privacy_status, category_id
+    )
+
+    if source_type == "queued_project" and slug:
         with _runs_lock:
             latest_runs = _read_json(RUNS_JSON_PATH, {"runs": []})
             entry = next((r for r in latest_runs.get("runs", []) if r.get("slug") == slug), None)
             if entry is not None:
                 entry["youtube_title"] = title
                 entry["youtube_description"] = description
-                entry["youtube_tags"] = _normalize_tags(tags_raw)
-                entry["privacy_status"] = privacy_status if privacy_status in ("public", "unlisted", "private") else "public"
+                entry["youtube_tags"] = tags
+                entry["privacy_status"] = privacy_status
                 entry["category_id"] = category_id
                 _write_json_atomic(RUNS_JSON_PATH, latest_runs)
 
-    if privacy_status not in ("public", "unlisted", "private"):
-        privacy_status = "public"
-    tags = _normalize_tags(tags_raw)
-    if not description:
-        description = f"{title}\n\n#Shorts #Animation #History #TrueStory"
-    elif "#shorts" not in description.lower():
-        description = description.rstrip() + "\n\n#Shorts"
+    st = mp4_path.stat()
+    source_sig = f"{mp4_path}|{st.st_size}|{int(st.st_mtime)}"
+    reuse_staged_url: Optional[str] = None
+    prev = _read_json(UPLOAD_JOB_PATH, None)
+    if (
+        isinstance(prev, dict)
+        and prev.get("status") != "published"
+        and prev.get("source_sig") == source_sig
+        and str(prev.get("staged_url") or "").startswith("https://")
+    ):
+        try:
+            prev_ts = datetime.fromisoformat(str(prev.get("updated_at") or prev.get("started_at")))
+            if (datetime.now().astimezone() - prev_ts).total_seconds() < 5400:
+                reuse_staged_url = str(prev["staged_url"])
+        except Exception:
+            pass
 
     job_id = uuid.uuid4().hex[:10]
     job = {
         "job_id": job_id,
         "source_type": source_type,
+        "source_sig": source_sig,
         "slug": slug,
         "local_mp4_path": str(mp4_path),
         "title": title,
@@ -1888,21 +2416,23 @@ async def api_upload_manual(request: Request):
         "tags": tags,
         "category_id": category_id,
         "privacy_status": privacy_status,
-        "staged_url": None,
+        "staged_url": reuse_staged_url,
         "status": "staging",
-        "step": "Staging MP4 to cloud host...",
+        "step": "Verifying cached cloud URL..." if reuse_staged_url else "Staging MP4 to cloud host...",
         "conversation_id": None,
         "youtube_id": None,
         "youtube_url": None,
         "error": None,
         "started_at": datetime.now().astimezone().isoformat(timespec="seconds"),
         "updated_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "completed_at": None,
     }
     with _upload_lock:
+        _cancelled_jobs.discard(job_id)
         _write_json_atomic(UPLOAD_JOB_PATH, job)
         _active_worker_jobs.add(job_id)
 
-    threading.Thread(target=_run_manual_upload_worker, args=(job_id, mp4_path), daemon=True).start()
+    threading.Thread(target=_run_manual_upload_worker, args=(job_id, mp4_path, reuse_staged_url), daemon=True).start()
     return JSONResponse({"ok": True, "job": {**job, "active": True}})
 
 
