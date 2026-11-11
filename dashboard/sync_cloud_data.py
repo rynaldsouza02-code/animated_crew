@@ -99,6 +99,10 @@ def sync() -> None:
     if monetization_src.exists():
         shutil.copy2(monetization_src, CLOUD_DATA_DIR / "monetization.json")
 
+    studio_src = PROJECTS_ROOT / "studio_analytics.json"
+    if studio_src.exists():
+        shutil.copy2(studio_src, CLOUD_DATA_DIR / "studio_analytics.json")
+
     # Sanitized scheduler snapshot (no secret IDs or local prompt contents)
     cfg = _read_json(GEMINI_CONFIG_JSON, {})
     sidecar = _read_json(SIDECAR_JSON, {})

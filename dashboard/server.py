@@ -1,14 +1,19 @@
 import html as html_lib
+import ipaddress
 import json
 import os
+import random
 import re
 import socket
+import ssl
+import struct
 import subprocess
+import sys
 import threading
 import time
 import uuid
 import wave
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError, as_completed
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -16,6 +21,12 @@ from zoneinfo import ZoneInfo
 
 import requests
 import urllib3.util.connection as _urllib3_conn
+from requests.adapters import HTTPAdapter
+from urllib3.connection import HTTPSConnection
+from urllib3.connectionpool import HTTPSConnectionPool
+from urllib3.exceptions import ConnectTimeoutError, NameResolutionError, NewConnectionError
+from urllib3.poolmanager import PoolManager
+from urllib3.util.retry import Retry
 from fastapi import Body, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
@@ -36,10 +47,15 @@ PROJECTS_ROOT = CLOUD_DATA_DIR if CLOUD_MODE else LOCAL_PROJECTS_ROOT
 SKILL_ROOT = Path(r"C:\Users\DELL\OneDrive\Desktop\faceless\faceless-shorts")
 RUNS_JSON_PATH = PROJECTS_ROOT / "runs.json"
 MONETIZATION_JSON_PATH = PROJECTS_ROOT / "monetization.json"
+STUDIO_ANALYTICS_PATH = PROJECTS_ROOT / "studio_analytics.json"
+STUDIO_CONFIG_PATH = LOCAL_PROJECTS_ROOT / "studio_config.json"
+STUDIO_SYNC_JOB_PATH = PROJECTS_ROOT / "studio_sync_job.json"
+YT_LIVE_CACHE_PATH = LOCAL_PROJECTS_ROOT / "yt_live_cache.json"
 UPLOAD_JOB_PATH = PROJECTS_ROOT / "upload_job.json"
 MANUAL_UPLOADS_DIR = PROJECTS_ROOT / "manual-uploads"
 UPLOAD_MEDIA_PY = PROJECTS_ROOT / "upload_media.py"
 FINALIZE_UPLOAD_PY = PROJECTS_ROOT / "finalize_upload.py"
+FINALIZE_STUDIO_SYNC_PY = PROJECTS_ROOT / "finalize_studio_sync.py"
 PYTHON_BIN = Path(r"C:\Python314\python.exe")
 AGENTAPI_BAT = Path(r"C:\Users\DELL\.gemini\antigravity\bin\agentapi.bat")
 LANGUAGE_SERVER_EXE = Path(r"C:\Users\DELL\AppData\Local\Programs\antigravity\resources\bin\language_server.exe")
@@ -58,23 +74,25 @@ YOUTUBE_CHANNEL_TITLE = "Animated_Crew"
 
 EXCLUDED_DIRS = {"manual-uploads", "__pycache__", "renders", "review", "tmp", "temp"}
 
-# Fallback analytics baseline (from verified Zapier / YouTube API snapshots)
+# Fallback analytics baseline (refreshed continuously by real-time InnerTube + disk cache)
 BASELINE_VIDEO_META: Dict[str, Dict[str, Any]] = {
     "Ju_GMnwmskA": {
         "title": "Thieves Stole 3,000 Tons Of Maple Syrup ($18.7M Heist!) 🍁🕵️ #Shorts",
         "publishedAt": "2026-11-11T05:11:09Z",
         "duration": "0:50",
+        "duration_sec": 50,
         "is_short": True,
-        "views": 141,
-        "likes": 16,
+        "views": 926,
+        "likes": 47,
         "comments": 0,
     },
     "ACCzOdTOvMM": {
         "title": "The Con Artist Who Sold The Eiffel Tower TWICE! 🗼💸 #Shorts",
         "publishedAt": "2026-11-10T13:35:00Z",
         "duration": "0:52",
+        "duration_sec": 52,
         "is_short": True,
-        "views": 1342,
+        "views": 1345,
         "likes": 46,
         "comments": 4,
     },
@@ -82,8 +100,9 @@ BASELINE_VIDEO_META: Dict[str, Dict[str, Any]] = {
         "title": "Parents Legally Mailed Their 5-Year-Old Daughter For 53¢! 📦🤯 #Shorts",
         "publishedAt": "2026-11-10T09:09:54Z",
         "duration": "0:52",
+        "duration_sec": 52,
         "is_short": True,
-        "views": 1439,
+        "views": 1442,
         "likes": 88,
         "comments": 6,
     },
@@ -91,6 +110,7 @@ BASELINE_VIDEO_META: Dict[str, Dict[str, Any]] = {
         "title": "He bought the Queen’s bank for $1… 🤯 #Shorts #animation #funny #memes #animationmeme #joker",
         "publishedAt": "2026-11-09T13:52:52Z",
         "duration": "0:39",
+        "duration_sec": 39,
         "is_short": True,
         "views": 1328,
         "likes": 41,
@@ -100,6 +120,7 @@ BASELINE_VIDEO_META: Dict[str, Dict[str, Any]] = {
         "title": "France Football Facts! 🇫🇷⚽️ World Cup Glory! #Shorts #France #WorldCupFacts",
         "publishedAt": "2026-06-13T12:30:41Z",
         "duration": "1:01",
+        "duration_sec": 61,
         "is_short": True,
         "views": 19,
         "likes": 3,
@@ -109,8 +130,9 @@ BASELINE_VIDEO_META: Dict[str, Dict[str, Any]] = {
         "title": "🤯 FIFA World Cup 2026: SHOCKING FACTS! #shorts #worldcup #fifa",
         "publishedAt": "2026-06-12T16:16:29Z",
         "duration": "1:03",
+        "duration_sec": 63,
         "is_short": True,
-        "views": 14,
+        "views": 15,
         "likes": 2,
         "comments": 0,
     },
@@ -118,8 +140,9 @@ BASELINE_VIDEO_META: Dict[str, Dict[str, Any]] = {
         "title": "Brazil's FIFA World Cup Dominance: Top 10 Facts! 🇧🇷🏆 #shorts #WorldCupFacts",
         "publishedAt": "2026-06-12T13:26:01Z",
         "duration": "1:01",
+        "duration_sec": 61,
         "is_short": True,
-        "views": 17,
+        "views": 18,
         "likes": 2,
         "comments": 1,
     },
@@ -139,15 +162,38 @@ if STATIC_DIR.exists():
 if PROJECTS_ROOT.exists():
     app.mount("/media", StaticFiles(directory=str(PROJECTS_ROOT)), name="media")
 
-# Simple thread-safe locks & caches
-_yt_lock = threading.Lock()
+# Simple thread-safe locks, persistent workers & caches
+_yt_lock = threading.RLock()
+_yt_session_lock = threading.Lock()
+_proc_lock = threading.Lock()
 _runs_lock = threading.Lock()
 _upload_lock = threading.Lock()
 _mon_lock = threading.Lock()
+_studio_sync_lock = threading.Lock()
 _yt_cache: Dict[str, Any] = {"timestamp": 0.0, "data": None}
-YT_CACHE_TTL_SEC = 120.0
+_yt_static_meta: Dict[str, Dict[str, Any]] = {}
+_yt_discovery_cache: Dict[str, Any] = {
+    "timestamp": 0.0,
+    "shorts": set(BASELINE_VIDEO_META.keys()),
+    "extra_ids": [],
+    "subscribers": None,
+}
+_yt_disc_in_flight = False
+_proc_cache: Dict[str, Any] = {
+    "ts": 0.0,
+    "in_flight": False,
+    "active_tools": [],
+}
+YT_CACHE_TTL_SEC = 4.0
+YT_DISCOVERY_TTL_SEC = 180.0
 _yt_in_flight = False
+_yt_live_in_ram = False
+_yt_cold_worker_seq = 0
+_yt_done_cond = threading.Condition(_yt_lock)
+_yt_thread_local = threading.local()
+_yt_executor: Optional[ThreadPoolExecutor] = None
 _active_worker_jobs: set[str] = set()
+_active_studio_sync_jobs: set[str] = set()
 _active_upload_procs: Dict[str, subprocess.Popen] = {}
 _cancelled_jobs: set[str] = set()
 
@@ -349,12 +395,8 @@ def _parse_multipart(content_type: str, body: bytes) -> Tuple[Dict[str, str], Di
     return fields, files
 
 
-def _detect_active_processes() -> Dict[str, Any]:
-    """Quickly detect whether local rendering/voice/ffmpeg tools are actively running."""
-    if CLOUD_MODE or os.name != "nt":
-        return {"is_rendering": False, "active_tools": [], "active_project": None}
-
-    active_tools: List[str] = []
+def _refresh_proc_tools_bg() -> None:
+    tools: List[str] = []
     try:
         out = subprocess.check_output(
             ["tasklist", "/fo", "csv", "/nh"],
@@ -364,15 +406,34 @@ def _detect_active_processes() -> Dict[str, Any]:
         )
         lower = out.lower()
         if "ffmpeg.exe" in lower:
-            active_tools.append("ffmpeg")
-        if "chrome-headless-shell" in lower or "chrome.exe" in lower:
-            if "ffmpeg.exe" in lower:
-                active_tools.append("headless-chrome")
+            tools.append("ffmpeg")
+        if ("chrome-headless-shell" in lower or "chrome.exe" in lower) and "ffmpeg.exe" in lower:
+            tools.append("headless-chrome")
     except Exception:
         pass
+    finally:
+        with _proc_lock:
+            _proc_cache["active_tools"] = tools
+            _proc_cache["ts"] = time.time()
+            _proc_cache["in_flight"] = False
+
+
+def _detect_active_processes() -> Dict[str, Any]:
+    """Quickly detect whether local rendering/voice/ffmpeg tools are actively running without blocking HTTP requests."""
+    if CLOUD_MODE or os.name != "nt":
+        return {"is_rendering": False, "active_tools": [], "active_project": None}
+
+    now = time.time()
+    trigger_bg = False
+    with _proc_lock:
+        active_tools = list(_proc_cache["active_tools"])
+        if not _proc_cache["in_flight"] and (now - _proc_cache["ts"]) >= 5.0:
+            _proc_cache["in_flight"] = True
+            trigger_bg = True
+    if trigger_bg:
+        threading.Thread(target=_refresh_proc_tools_bg, daemon=True).start()
 
     recent_project = None
-    now = time.time()
     if PROJECTS_ROOT.exists():
         for d in PROJECTS_ROOT.iterdir():
             if not d.is_dir() or d.name.startswith(".") or d.name in EXCLUDED_DIRS:
@@ -579,15 +640,851 @@ def get_automation_status() -> Dict[str, Any]:
     }
 
 
+_INNERTUBE_WEB_CTX = {
+    "client": {
+        "clientName": "WEB",
+        "clientVersion": "2.20240726.00.00",
+        "hl": "en",
+        "gl": "US",
+    }
+}
+_YT_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+    "Accept-Language": "en-US,en;q=0.9",
+}
+_YT_COOKIES = {"CONSENT": "PENDING+987", "SOCS": "CAESHAgBEhJnd3NfMjAyMzA4MTAtMF9SQzIaAmVuIAEaBgiA_LyaBg"}
+_YT_NEXT_FIELDS = (
+    "contents.twoColumnWatchNextResults.results.results.contents("
+    "videoPrimaryInfoRenderer(title.runs.text,viewCount.videoViewCountRenderer),"
+    "videoSecondaryInfoRenderer.owner.videoOwnerRenderer.subscriberCountText.simpleText),"
+    "engagementPanels.engagementPanelSectionListRenderer.content.structuredDescriptionContentRenderer.items.videoDescriptionHeaderRenderer.factoid"
+)
+_YT_PLAYER_FIELDS = "videoDetails(videoId,lengthSeconds),microformat.playerMicroformatRenderer.publishDate"
+
+
+_YT_SSL_CTX = ssl.create_default_context()
+_YT_SSL_CTX.options |= getattr(ssl, "OP_IGNORE_UNEXPECTED_EOF", 0x80)
+_yt_dns_lock = threading.Lock()
+_yt_dns_cache: Dict[Tuple[str, int], Tuple[float, List[str]]] = {}
+_yt_dns_stale: Dict[Tuple[str, int], List[str]] = {}
+_yt_dns_inflight: Dict[Tuple[str, int], threading.Event] = {}
+_yt_good_ips: Dict[str, str] = {}
+_YT_DNS_TTL_SEC = 600.0
+_YT_DNS_SWR_SEC = 300.0
+
+
+def _skip_dns_name(data: bytes, idx: int) -> int:
+    seen_jumps = 0
+    while idx < len(data):
+        ln = data[idx]
+        if ln == 0:
+            return idx + 1
+        if (ln & 0xC0) == 0xC0:
+            if idx + 1 >= len(data) or seen_jumps > 4:
+                return len(data)
+            return idx + 2
+        idx += 1 + ln
+        seen_jumps += 1
+    return len(data)
+
+
+def _udp_dns_lookup_a(host: str, resolver: str, timeout: float = 1.6) -> Tuple[List[str], bool]:
+    """Query DNS A records via UDP:53 and return (ipv4_list, nxdomain)."""
+    tid = random.randint(0, 65535)
+    header = struct.pack("!HHHHHH", tid, 0x0100, 1, 0, 0, 0)
+    try:
+        labels = [p.encode("idna") for p in host.strip(".").split(".") if p]
+    except Exception:
+        labels = [p.encode("ascii", errors="ignore") for p in host.strip(".").split(".") if p]
+    if not labels:
+        return [], True
+    qname = b"".join(bytes([len(lbl)]) + lbl for lbl in labels if len(lbl) < 64) + b"\x00"
+    pkt = header + qname + struct.pack("!HH", 1, 1)
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.settimeout(timeout)
+    try:
+        s.connect((resolver, 53))
+        s.send(pkt)
+        data = s.recv(2048)
+    finally:
+        s.close()
+
+    if len(data) < 12:
+        return [], False
+    r_tid, flags, qdcount, ancount, _, _ = struct.unpack("!HHHHHH", data[:12])
+    if r_tid != tid or (flags & 0x8000) == 0:
+        return [], False
+    rcode = flags & 0x0F
+    if rcode == 3:
+        return [], True
+    if rcode != 0:
+        return [], False
+
+    idx = 12
+    for _ in range(qdcount):
+        idx = _skip_dns_name(data, idx) + 4
+        if idx > len(data):
+            return [], False
+
+    ips: List[str] = []
+    for _ in range(ancount):
+        idx = _skip_dns_name(data, idx)
+        if idx + 10 > len(data):
+            break
+        rtype, rclass, _, rdlen = struct.unpack("!HHIH", data[idx : idx + 10])
+        idx += 10
+        if rtype == 1 and rclass == 1 and rdlen == 4 and idx + 4 <= len(data):
+            ip_str = socket.inet_ntoa(data[idx : idx + 4])
+            try:
+                ip_obj = ipaddress.IPv4Address(ip_str)
+                if not ip_obj.is_unspecified and not ip_obj.is_multicast and ip_str not in ips:
+                    ips.append(ip_str)
+            except Exception:
+                pass
+        idx += rdlen
+    return ips, False
+
+
+def _resolve_ipv4s_uncached(host: str, port: int) -> List[str]:
+    """Race fast UDP resolvers (1.1.1.1 / 8.8.8.8 / 9.9.9.9) alongside OS getaddrinfo."""
+    try:
+        ipaddress.IPv4Address(host)
+        return [host]
+    except Exception:
+        pass
+
+    use_udp = "." in host and not host.endswith(".local")
+    targets = ["1.1.1.1", "8.8.8.8", "9.9.9.9"] if use_udp else []
+    total_workers = len(targets) + 1
+    pending = [total_workers]
+    win_ips: List[List[str]] = [[]]
+    nxdomain_hits = [0]
+    last_err: List[Optional[Exception]] = [None]
+    rlock = threading.Lock()
+    done_evt = threading.Event()
+
+    def _finish_check() -> None:
+        pending[0] -= 1
+        if pending[0] <= 0 or win_ips[0]:
+            done_evt.set()
+
+    def _run_udp(resolver: str) -> None:
+        try:
+            ips, is_nx = _udp_dns_lookup_a(host, resolver, timeout=1.6)
+            with rlock:
+                if ips and not win_ips[0]:
+                    win_ips[0] = ips
+                elif is_nx:
+                    nxdomain_hits[0] += 1
+                _finish_check()
+        except Exception as exc:
+            with rlock:
+                last_err[0] = exc
+                _finish_check()
+
+    def _run_sys() -> None:
+        try:
+            addrs = socket.getaddrinfo(host, port, socket.AF_INET, socket.SOCK_STREAM)
+            ips = list(dict.fromkeys(a[4][0] for a in addrs))
+            with rlock:
+                if ips and not win_ips[0]:
+                    win_ips[0] = ips
+                _finish_check()
+        except Exception as exc:
+            with rlock:
+                last_err[0] = exc
+                _finish_check()
+
+    for res in targets:
+        threading.Thread(target=_run_udp, args=(res,), daemon=True, name="yt-dns-udp").start()
+    threading.Thread(target=_run_sys, daemon=True, name="yt-dns-sys").start()
+
+    done_evt.wait(timeout=2.2 if use_udp else 3.2)
+    with rlock:
+        ips_out = list(win_ips[0])
+        is_nx = nxdomain_hits[0] > 0 and not ips_out
+        err_out = last_err[0]
+
+    if not ips_out and not is_nx and use_udp:
+        # Give OS getaddrinfo one brief extra window before falling back to stale cache
+        done_evt.wait(timeout=1.1)
+        with rlock:
+            ips_out = list(win_ips[0])
+
+    if not ips_out:
+        stale = _yt_dns_stale.get((host, port)) if not is_nx else None
+        if stale:
+            return list(stale)
+        if isinstance(err_out, socket.gaierror):
+            raise err_out
+        raise socket.gaierror(11001, f"DNS resolution failed for {host}")
+    return ips_out
+
+
+def _refresh_dns_bg(host: str, port: int) -> None:
+    key = (host, port)
+    with _yt_dns_lock:
+        if key in _yt_dns_inflight:
+            return
+        evt = threading.Event()
+        _yt_dns_inflight[key] = evt
+    try:
+        ips = _resolve_ipv4s_uncached(host, port)
+        now = time.time()
+        with _yt_dns_lock:
+            _yt_dns_cache[key] = (now, ips)
+            _yt_dns_stale[key] = list(ips)
+    except Exception:
+        pass
+    finally:
+        with _yt_dns_lock:
+            _yt_dns_inflight.pop(key, None)
+        evt.set()
+
+
+def _yt_get_ipv4s(host: str, port: int) -> List[str]:
+    key = (host, port)
+    now = time.time()
+    wait_evt: Optional[threading.Event] = None
+    is_leader = False
+
+    with _yt_dns_lock:
+        cached = _yt_dns_cache.get(key)
+        if cached and (now - cached[0]) < _YT_DNS_TTL_SEC and cached[1]:
+            if (now - cached[0]) >= _YT_DNS_SWR_SEC and key not in _yt_dns_inflight:
+                threading.Thread(target=_refresh_dns_bg, args=(host, port), daemon=True, name="yt-dns-swr").start()
+            return list(cached[1])
+        wait_evt = _yt_dns_inflight.get(key)
+        if wait_evt is None:
+            wait_evt = threading.Event()
+            _yt_dns_inflight[key] = wait_evt
+            is_leader = True
+
+    if not is_leader and wait_evt is not None:
+        wait_evt.wait(timeout=3.6)
+        with _yt_dns_lock:
+            cached = _yt_dns_cache.get(key)
+            if cached and cached[1]:
+                return list(cached[1])
+            stale = _yt_dns_stale.get(key)
+            if stale:
+                return list(stale)
+        # Leader failed without caching; fall back to direct resolution
+        return _resolve_ipv4s_uncached(host, port)
+
+    try:
+        ips = _resolve_ipv4s_uncached(host, port)
+        done_now = time.time()
+        with _yt_dns_lock:
+            _yt_dns_cache[key] = (done_now, ips)
+            _yt_dns_stale[key] = list(ips)
+        return ips
+    finally:
+        with _yt_dns_lock:
+            _yt_dns_inflight.pop(key, None)
+        wait_evt.set()
+
+
+def _yt_race_ipv4_connect(
+    conn_obj: Any,
+    host: str,
+    port: int,
+    tcp_timeout: float = 2.6,
+    io_timeout: float = 5.0,
+) -> socket.socket:
+    try:
+        ips = _yt_get_ipv4s(host, port)
+    except socket.gaierror as exc:
+        raise NameResolutionError(host, conn_obj, exc) from exc
+
+    with _yt_dns_lock:
+        pinned = _yt_good_ips.get(host)
+    others = [ip for ip in ips if ip != pinned]
+    random.shuffle(others)
+    candidates = ([pinned] + others[:2]) if (pinned and pinned in ips) else others[:3]
+
+    winner: List[Optional[Any]] = [None, None]
+    last_err: List[Optional[Exception]] = [None]
+    race_lock = threading.Lock()
+    done_evt = threading.Event()
+    opened_socks: List[socket.socket] = []
+
+    def _attempt(ip: str, delay: float) -> None:
+        if delay > 0 and done_evt.wait(delay):
+            return
+        if done_evt.is_set():
+            return
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(tcp_timeout)
+        with race_lock:
+            if done_evt.is_set():
+                try:
+                    sock.close()
+                except Exception:
+                    pass
+                return
+            opened_socks.append(sock)
+        try:
+            sock.connect((ip, port))
+            with race_lock:
+                if winner[0] is None and not done_evt.is_set():
+                    winner[0] = sock
+                    winner[1] = ip
+                    done_evt.set()
+                    return
+            try:
+                sock.close()
+            except Exception:
+                pass
+        except Exception as exc:
+            with race_lock:
+                last_err[0] = exc
+            try:
+                sock.close()
+            except Exception:
+                pass
+
+    for idx, ip in enumerate(candidates):
+        threading.Thread(target=_attempt, args=(ip, idx * 0.18), daemon=True, name="yt-he-conn").start()
+
+    done_evt.wait(timeout=tcp_timeout)
+    with race_lock:
+        done_evt.set()
+        win_sock = winner[0]
+        win_ip = winner[1]
+        for s in opened_socks:
+            if s is not win_sock:
+                try:
+                    s.close()
+                except Exception:
+                    pass
+        err = last_err[0]
+
+    if win_sock is None:
+        with _yt_dns_lock:
+            if candidates and _yt_good_ips.get(host) == candidates[0]:
+                _yt_good_ips.pop(host, None)
+        if isinstance(err, OSError) and not isinstance(err, socket.timeout):
+            raise NewConnectionError(conn_obj, f"Failed to establish a new connection: {err}") from err
+        raise ConnectTimeoutError(conn_obj, f"Connection to {host} timed out. (connect timeout={tcp_timeout})")
+
+    with _yt_dns_lock:
+        _yt_good_ips[host] = str(win_ip)
+    win_sock.settimeout(io_timeout)
+    sys.audit("http.client.connect", conn_obj, conn_obj.host, conn_obj.port)
+    return win_sock
+
+
+class _FastHTTPSConnection(HTTPSConnection):
+    def _new_conn(self) -> socket.socket:
+        raw_t = self.timeout
+        connect_t = float(raw_t) if isinstance(raw_t, (int, float)) and raw_t > 0 else 3.8
+        return _yt_race_ipv4_connect(
+            self,
+            self._dns_host,
+            self.port,
+            tcp_timeout=min(3.4, max(1.5, connect_t)),
+            io_timeout=max(2.8, min(connect_t + 1.0, 5.2)),
+        )
+
+
+class _FastHTTPSPool(HTTPSConnectionPool):
+    ConnectionCls = _FastHTTPSConnection
+
+
+class _FastPoolManager(PoolManager):
+    def _new_pool(self, scheme, host, port, request_context=None):
+        if scheme == "https" and not IS_VERCEL and os.name == "nt":
+            kwargs = dict(self.connection_pool_kw)
+            kwargs.pop("strict", None)
+            return _FastHTTPSPool(host, port, **kwargs)
+        return super()._new_pool(scheme, host, port, request_context)
+
+
+class _YTCompatTLSAdapter(HTTPAdapter):
+    """HTTP/1.1 keep-alive adapter with IPv4 2-edge failover on Windows and OpenSSL 3 EOF resilience."""
+
+    def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
+        manager_cls = _FastPoolManager if (not IS_VERCEL and os.name == "nt") else PoolManager
+        self.poolmanager = manager_cls(
+            num_pools=connections,
+            maxsize=maxsize,
+            block=block,
+            ssl_context=_YT_SSL_CTX,
+            **pool_kwargs,
+        )
+
+
+def _new_yt_session() -> requests.Session:
+    s = requests.Session()
+    retry = Retry(
+        total=0,
+        connect=0,
+        read=0,
+        allowed_methods=frozenset(["GET", "POST"]),
+        raise_on_status=False,
+    )
+    adapter = _YTCompatTLSAdapter(pool_connections=4, pool_maxsize=4, max_retries=retry)
+    s.mount("https://", adapter)
+    s.mount("http://", adapter)
+    s.headers.update(_YT_HEADERS)
+    s.cookies.update(_YT_COOKIES)
+    return s
+
+
+def _get_batch_yt_session(
+    batch_id: Optional[str] = None,
+    batch_sessions: Optional[List[requests.Session]] = None,
+) -> Tuple[requests.Session, bool]:
+    """Reuse keep-alive sockets only within one active poll batch when batch_id is given."""
+    if batch_id:
+        cur_id = getattr(_yt_thread_local, "batch_id", None)
+        cur_sess = getattr(_yt_thread_local, "batch_session", None)
+        if cur_id == batch_id and cur_sess is not None:
+            return cur_sess, False
+        s = _new_yt_session()
+        _yt_thread_local.batch_id = batch_id
+        _yt_thread_local.batch_session = s
+        if batch_sessions is not None:
+            with _yt_lock:
+                batch_sessions.append(s)
+        return s, False
+    return _get_worker_yt_session(), False
+
+
+def _get_worker_yt_session() -> requests.Session:
+    global _yt_cold_worker_seq
+    sess = getattr(_yt_thread_local, "worker_session", None)
+    if sess is None:
+        if not IS_VERCEL and os.name == "nt":
+            with _yt_lock:
+                seq = _yt_cold_worker_seq
+                _yt_cold_worker_seq += 1
+            if seq < 7 and (seq % 7) > 0:
+                time.sleep((seq % 7) * 0.22)
+        sess = _new_yt_session()
+        _yt_thread_local.worker_session = sess
+    return sess
+
+
+def _reset_worker_yt_session() -> requests.Session:
+    old = getattr(_yt_thread_local, "worker_session", None)
+    if old is not None:
+        try:
+            old.close()
+        except Exception:
+            pass
+    sess = _new_yt_session()
+    _yt_thread_local.worker_session = sess
+    return sess
+
+
+def _get_yt_session() -> requests.Session:
+    return _get_worker_yt_session()
+
+
+def _get_yt_executor() -> ThreadPoolExecutor:
+    global _yt_executor
+    with _yt_lock:
+        if _yt_executor is None:
+            _yt_executor = ThreadPoolExecutor(max_workers=8 if IS_VERCEL else 7, thread_name_prefix="yt-live")
+        return _yt_executor
+
+
+def _get_studio_config() -> Dict[str, Any]:
+    cfg: Dict[str, Any] = {}
+    if not CLOUD_MODE and STUDIO_CONFIG_PATH.exists():
+        raw = _read_json(STUDIO_CONFIG_PATH, {})
+        if isinstance(raw, dict):
+            cfg.update(raw)
+    env_map = {
+        "youtube_api_key": "YOUTUBE_API_KEY",
+        "oauth_access_token": "YOUTUBE_OAUTH_ACCESS_TOKEN",
+        "oauth_refresh_token": "YOUTUBE_OAUTH_REFRESH_TOKEN",
+        "oauth_client_id": "YOUTUBE_OAUTH_CLIENT_ID",
+        "oauth_client_secret": "YOUTUBE_OAUTH_CLIENT_SECRET",
+        "zapier_webhook_url": "ZAPIER_STUDIO_WEBHOOK_URL",
+    }
+    for key, env_name in env_map.items():
+        val = (os.environ.get(env_name) or "").strip()
+        if val:
+            cfg[key] = val
+    return cfg
+
+
+def _refresh_oauth_token_if_needed(cfg: Dict[str, Any], sess: requests.Session, force: bool = False) -> Optional[str]:
+    access_tok = (cfg.get("oauth_access_token") or "").strip()
+    expires_at = float(cfg.get("oauth_expires_at") or 0.0)
+    if access_tok and not force and (expires_at == 0.0 or time.time() < expires_at - 60):
+        return access_tok
+    rt = (cfg.get("oauth_refresh_token") or "").strip()
+    cid = (cfg.get("oauth_client_id") or "").strip()
+    csec = (cfg.get("oauth_client_secret") or "").strip()
+    if not (rt and cid and csec):
+        return access_tok or None
+    try:
+        tr = sess.post(
+            "https://oauth2.googleapis.com/token",
+            data={
+                "client_id": cid,
+                "client_secret": csec,
+                "refresh_token": rt,
+                "grant_type": "refresh_token",
+            },
+            timeout=(3.0, 4.0),
+        )
+        if tr.status_code == 200:
+            tj = tr.json()
+            new_tok = str(tj.get("access_token") or "").strip()
+            if new_tok:
+                cfg["oauth_access_token"] = new_tok
+                cfg["oauth_expires_at"] = time.time() + int(tj.get("expires_in") or 3500)
+                if not CLOUD_MODE and STUDIO_CONFIG_PATH.exists():
+                    try:
+                        _write_json_atomic(STUDIO_CONFIG_PATH, cfg)
+                    except Exception:
+                        pass
+                return new_tok
+    except Exception:
+        pass
+    return access_tok or None
+
+
+def _parse_iso8601_dur_sec(dur: str) -> Optional[int]:
+    m = re.match(r"^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$", str(dur or "").strip())
+    if not m:
+        return None
+    return int(m.group(1) or 0) * 3600 + int(m.group(2) or 0) * 60 + int(m.group(3) or 0)
+
+
+def _load_studio_snapshot() -> Dict[str, Any]:
+    raw = _read_json(STUDIO_ANALYTICS_PATH, None)
+    return raw if isinstance(raw, dict) else {}
+
+
+def _fetch_via_youtube_data_api_v3(
+    seed_ids: List[str],
+    force_discovery: bool = False,
+) -> Optional[Dict[str, Any]]:
+    cfg = _get_studio_config()
+    api_key = (cfg.get("youtube_api_key") or "").strip()
+    has_oauth_cfg = bool(
+        (cfg.get("oauth_access_token") or "").strip()
+        or (
+            (cfg.get("oauth_refresh_token") or "").strip()
+            and (cfg.get("oauth_client_id") or "").strip()
+            and (cfg.get("oauth_client_secret") or "").strip()
+        )
+    )
+    if not api_key and not has_oauth_cfg:
+        return None
+
+    with _new_yt_session() as sess:
+        oauth_token = _refresh_oauth_token_if_needed(cfg, sess)
+        if not api_key and not oauth_token:
+            return None
+
+        headers = {"Authorization": f"Bearer {oauth_token}"} if oauth_token else {}
+        auth_params: Dict[str, Any] = {} if oauth_token else {"key": api_key}
+
+        all_ids: List[str] = list(dict.fromkeys(seed_ids))
+        with _yt_lock:
+            disc_age = time.time() - _yt_discovery_cache["timestamp"] if _yt_discovery_cache["timestamp"] > 0 else 999999.0
+
+        # Discover channel uploads playlist when stale or forced
+        if force_discovery or disc_age >= YT_DISCOVERY_TTL_SEC:
+            try:
+                uploads_pid = "UU" + YOUTUBE_CHANNEL_ID[2:] if YOUTUBE_CHANNEL_ID.startswith("UC") else f"UU{YOUTUBE_CHANNEL_ID}"
+                rp = sess.get(
+                    "https://www.googleapis.com/youtube/v3/playlistItems",
+                    params={"part": "contentDetails", "playlistId": uploads_pid, "maxResults": 25, **auth_params},
+                    headers=headers,
+                    timeout=(2.8, 4.0),
+                )
+                if rp.status_code == 200:
+                    found_ids = [
+                        str(it.get("contentDetails", {}).get("videoId") or "")
+                        for it in rp.json().get("items", [])
+                        if isinstance(it, dict)
+                    ]
+                    found_ids = [v for v in found_ids if v]
+                    for vid in found_ids:
+                        if vid not in all_ids:
+                            all_ids.append(vid)
+                    with _yt_lock:
+                        _yt_discovery_cache["timestamp"] = time.time()
+                        _yt_discovery_cache["extra_ids"] = all_ids[:]
+            except Exception:
+                pass
+
+        if not all_ids:
+            return None
+
+        ch_params: Dict[str, Any] = {"part": "statistics,status,snippet", **auth_params}
+        if oauth_token:
+            ch_params["mine"] = "true"
+        else:
+            ch_params["id"] = YOUTUBE_CHANNEL_ID
+
+        vid_resp = sess.get(
+            "https://www.googleapis.com/youtube/v3/videos",
+            params={"part": "snippet,statistics,contentDetails,status", "id": ",".join(all_ids[:50]), **auth_params},
+            headers=headers,
+            timeout=(2.8, 4.0),
+        )
+        if vid_resp.status_code == 401 and oauth_token:
+            oauth_token = _refresh_oauth_token_if_needed(cfg, sess, force=True)
+            if oauth_token:
+                headers = {"Authorization": f"Bearer {oauth_token}"}
+                vid_resp = sess.get(
+                    "https://www.googleapis.com/youtube/v3/videos",
+                    params={"part": "snippet,statistics,contentDetails,status", "id": ",".join(all_ids[:50])},
+                    headers=headers,
+                    timeout=(2.8, 4.0),
+                )
+        if vid_resp.status_code != 200:
+            return None
+
+        ch_stats: Dict[str, Any] = {}
+        ch_status: Dict[str, Any] = {}
+        try:
+            rc = sess.get("https://www.googleapis.com/youtube/v3/channels", params=ch_params, headers=headers, timeout=(2.5, 3.5))
+            if rc.status_code == 200:
+                items_c = rc.json().get("items") or []
+                if items_c:
+                    ch_stats = items_c[0].get("statistics", {}) or {}
+                    ch_status = items_c[0].get("status", {}) or {}
+        except Exception:
+            pass
+
+        videos_out: Dict[str, Dict[str, Any]] = {}
+        for item in vid_resp.json().get("items", []):
+            vid = str(item.get("id") or "")
+            if not vid:
+                continue
+            sn = item.get("snippet", {}) or {}
+            st = item.get("statistics", {}) or {}
+            cd = item.get("contentDetails", {}) or {}
+            dur_sec = _parse_iso8601_dur_sec(cd.get("duration", ""))
+            views = int(st.get("viewCount") or 0)
+            likes = int(st.get("likeCount") or 0)
+            comments = int(st.get("commentCount") or 0)
+            dur_str = f"{dur_sec // 60}:{dur_sec % 60:02d}" if dur_sec is not None else "0:45"
+            videos_out[vid] = {
+                "id": vid,
+                "title": sn.get("title") or vid,
+                "views": views,
+                "likes": likes,
+                "comments": comments,
+                "published_at": sn.get("publishedAt"),
+                "duration": dur_str,
+                "duration_sec": dur_sec,
+                "is_short": (dur_sec <= 65) if dur_sec is not None else True,
+                "thumbnail": f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg",
+                "play_url": f"https://www.youtube.com/watch?v={vid}",
+                "shorts_url": f"https://www.youtube.com/shorts/{vid}",
+                "engagement_pct": round((likes / views * 100), 1) if views > 0 else 0.0,
+            }
+        return {
+            "videos": videos_out,
+            "subscribers": str(ch_stats.get("subscriberCount")) if ch_stats.get("subscriberCount") is not None else None,
+            "channel_views_settled": int(ch_stats.get("viewCount") or 0) if ch_stats.get("viewCount") is not None else None,
+            "ypp_enabled": ch_status.get("isChannelMonetizationEnabled"),
+            "source_mode": "youtube_oauth_api_v3" if oauth_token else "youtube_data_api_v3",
+            "source_label": "YouTube Studio OAuth (Data API v3)" if oauth_token else "YouTube Studio Data API v3 (Key)",
+        }
+
+
+def _load_disk_yt_cache() -> Optional[Dict[str, Any]]:
+    if CLOUD_MODE or not YT_LIVE_CACHE_PATH.exists():
+        return None
+    raw = _read_json(YT_LIVE_CACHE_PATH, None)
+    if isinstance(raw, dict) and isinstance(raw.get("videos"), list) and raw["videos"]:
+        return raw
+    return None
+
+
+def _build_studio_summary(
+    videos_list: List[Dict[str, Any]],
+    studio_snap: Optional[Dict[str, Any]] = None,
+    api_v3_meta: Optional[Dict[str, Any]] = None,
+    mon_snap: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    cfg = _get_studio_config()
+    snap = studio_snap if isinstance(studio_snap, dict) else {}
+    mon = mon_snap if isinstance(mon_snap, dict) else {}
+    api_key_set = bool((cfg.get("youtube_api_key") or "").strip())
+    oauth_set = bool(
+        (cfg.get("oauth_access_token") or "").strip()
+        or (
+            (cfg.get("oauth_refresh_token") or "").strip()
+            and (cfg.get("oauth_client_id") or "").strip()
+            and (cfg.get("oauth_client_secret") or "").strip()
+        )
+    )
+
+    if api_v3_meta:
+        api_mode = api_v3_meta.get("source_mode") or "youtube_data_api_v3"
+        source_label = api_v3_meta.get("source_label") or "YouTube Studio Data API v3"
+    elif snap:
+        api_mode = "zapier_studio_sync+innertube"
+        source_label = f"{snap.get('source') or 'YouTube Studio (Zapier OAuth)'} + 5s Live Stream"
+    else:
+        api_mode = "innertube_live"
+        source_label = "Real-Time InnerTube Stream (5s)"
+
+    mins_watched = int(snap.get("analytics_minutes_watched") if snap.get("analytics_minutes_watched") is not None else (mon.get("analytics_minutes_watched") or 0))
+    settled_views = int(snap.get("analytics_views_settled") if snap.get("analytics_views_settled") is not None else (mon.get("analytics_views_settled") or 0))
+    avg_dur_sec = int(snap.get("analytics_avg_view_duration_sec") or 0)
+    subs_gained = int(snap.get("analytics_subscribers_gained") if snap.get("analytics_subscribers_gained") is not None else (mon.get("analytics_subscribers_gained") or 0))
+    total_comments = sum(int(v.get("comments") or 0) for v in videos_list) if videos_list else int(snap.get("total_comments") or 0)
+    ch_views_settled = (
+        api_v3_meta.get("channel_views_settled")
+        if (api_v3_meta and api_v3_meta.get("channel_views_settled") is not None)
+        else snap.get("channel_views_settled")
+    )
+    ypp_enabled = (
+        bool(api_v3_meta.get("ypp_enabled"))
+        if (api_v3_meta and api_v3_meta.get("ypp_enabled") is not None)
+        else bool(snap.get("ypp_enabled") if snap.get("ypp_enabled") is not None else mon.get("ypp_enabled", False))
+    )
+
+    return {
+        "channel_id": YOUTUBE_CHANNEL_ID,
+        "channel_title": YOUTUBE_CHANNEL_TITLE,
+        "api_mode": api_mode,
+        "source": source_label,
+        "api_key_configured": api_key_set,
+        "oauth_connected": oauth_set,
+        "zapier_oauth_connected": True,
+        "ypp_enabled": ypp_enabled,
+        "channel_views_settled": ch_views_settled,
+        "live_video_views_sum": sum(int(v.get("views") or 0) for v in videos_list),
+        "live_likes_sum": sum(int(v.get("likes") or 0) for v in videos_list),
+        "total_comments": total_comments,
+        "analytics_views_settled": settled_views,
+        "analytics_likes_settled": int(snap.get("analytics_likes_settled") or 0),
+        "analytics_comments_settled": int(snap.get("analytics_comments_settled") or 0),
+        "analytics_minutes_watched": mins_watched,
+        "analytics_hours_watched": round(mins_watched / 60.0, 2),
+        "analytics_avg_view_duration_sec": avg_dur_sec,
+        "analytics_subscribers_gained": subs_gained,
+        "synced_at": snap.get("synced_at") or mon.get("api_checked_at"),
+        "synced_epoch": snap.get("synced_epoch"),
+        "studio_channel_url": f"https://studio.youtube.com/channel/{YOUTUBE_CHANNEL_ID}/analytics/tab-overview/period-default",
+        "studio_realtime_url": f"https://studio.youtube.com/channel/{YOUTUBE_CHANNEL_ID}/analytics/tab-overview/period-4_weeks",
+        "analytics_lag_note": "Video views & likes update live (~5s); YouTube Analytics API watch-time & AVD settle every 24–48h.",
+    }
+
+
+def _with_yt_meta(data: Dict[str, Any], cache_ts: float) -> Dict[str, Any]:
+    out = dict(data)
+    out["age_sec"] = round(max(0.0, time.time() - cache_ts), 1) if cache_ts > 0 else None
+    out["cache_ttl_sec"] = YT_CACHE_TTL_SEC
+    if not isinstance(out.get("studio_analytics"), dict):
+        out["studio_analytics"] = _build_studio_summary(
+            out.get("videos") or [],
+            _load_studio_snapshot(),
+            mon_snap=_read_json(MONETIZATION_JSON_PATH, {}),
+        )
+    return out
+
+
+def _parse_innertube_next(data: Dict[str, Any]) -> Dict[str, Any]:
+    contents = (
+        data.get("contents", {})
+        .get("twoColumnWatchNextResults", {})
+        .get("results", {})
+        .get("results", {})
+        .get("contents", [])
+    )
+    primary = next(
+        (c.get("videoPrimaryInfoRenderer") for c in contents if isinstance(c, dict) and "videoPrimaryInfoRenderer" in c),
+        {},
+    ) or {}
+    secondary = next(
+        (c.get("videoSecondaryInfoRenderer") for c in contents if isinstance(c, dict) and "videoSecondaryInfoRenderer" in c),
+        {},
+    ) or {}
+
+    title = "".join(r.get("text", "") for r in primary.get("title", {}).get("runs", [])).strip()
+
+    vvc = primary.get("viewCount", {}).get("videoViewCountRenderer", {})
+    raw_orig = str(vvc.get("originalViewCount") or "").strip()
+    simple_views = str(vvc.get("viewCount", {}).get("simpleText") or "").strip()
+    views: Optional[int] = None
+    if raw_orig.isdigit() and int(raw_orig) > 0:
+        views = int(raw_orig)
+    elif simple_views:
+        if "no views" in simple_views.lower():
+            views = 0
+        else:
+            m_sv = re.search(r"([\d,]+)", simple_views)
+            if m_sv:
+                views = int(m_sv.group(1).replace(",", ""))
+    if views is None and raw_orig.isdigit():
+        views = int(raw_orig)
+
+    # Extract exact unrounded likes from engagementPanels (factoidRenderer) first, then primary buttons
+    likes: Optional[int] = None
+    panels_json = json.dumps(data.get("engagementPanels", []), ensure_ascii=False)
+    m_fl = re.search(r'"accessibilityText"\s*:\s*"([\d,]+)\s+likes?\b"', panels_json, re.I)
+    if m_fl:
+        likes = int(m_fl.group(1).replace(",", ""))
+    if likes is None:
+        m_fv = re.search(
+            r'"label"\s*:\s*"Likes"[^}]*"value"\s*:\s*"([\d,]+)"|"value"\s*:\s*"([\d,]+)"[^}]*"label"\s*:\s*"Likes"',
+            panels_json,
+        )
+        if m_fv:
+            likes = int((m_fv.group(1) or m_fv.group(2)).replace(",", ""))
+
+    primary_json = json.dumps(primary, ensure_ascii=False)
+    if likes is None:
+        for pat in [
+            r"like this video along with ([\d,]+) other",
+            r'"accessibilityText"\s*:\s*"([\d,]+)\s+likes?\b"',
+            r'"likeCount"\s*:\s*(\d+)',
+        ]:
+            m_l = re.search(pat, primary_json, re.I)
+            if m_l:
+                likes = int(m_l.group(1).replace(",", ""))
+                break
+    if likes is None and primary and ("Dislike this video" in primary_json or "likeCountEntity" in primary_json):
+        likes = 0
+
+    sub_text = (
+        secondary.get("owner", {})
+        .get("videoOwnerRenderer", {})
+        .get("subscriberCountText", {})
+        .get("simpleText", "")
+    )
+    subs: Optional[str] = None
+    m_sub = re.search(r"([\d.,]+[KMB]?)\s+subscriber", sub_text or "", re.I)
+    if m_sub:
+        subs = m_sub.group(1)
+
+    return {
+        "title": title,
+        "views": views,
+        "likes": likes,
+        "subs": subs,
+        "has_primary": bool(primary),
+    }
+
+
 def _fetch_watch_metrics(video_id: str, session: Optional[requests.Session] = None) -> Dict[str, Any]:
     url = f"https://www.youtube.com/watch?v={video_id}"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-        "Accept-Language": "en-US,en;q=0.9",
-    }
-    cookies = {"CONSENT": "PENDING+987", "SOCS": "CAESHAgBEhJnd3NfMjAyMzA4MTAtMF9SQzIaAmVuIAEaBgiA_LyaBg"}
-    getter = session or requests
-    resp = getter.get(url, headers=headers, cookies=cookies, timeout=(4.5, 6.5))
+    getter = session or _new_yt_session()
+    try:
+        resp = getter.get(url, headers=_YT_HEADERS, cookies=_YT_COOKIES, timeout=(3.0, 3.5))
+    finally:
+        if session is None:
+            try:
+                getter.close()
+            except Exception:
+                pass
     html = resp.text
 
     title_m = re.search(r"<title>(.*?)</title>", html)
@@ -595,19 +1492,17 @@ def _fetch_watch_metrics(video_id: str, session: Optional[requests.Session] = No
     play_m = re.search(r'"status":"(.*?)","reason":"(.*?)"', html)
     unavailable = bool(play_m and play_m.group(1) == "ERROR")
 
-    views = 0
+    views: Optional[int] = None
     vm = re.search(r'"viewCount":"(\d+)"', html)
     if vm:
         views = int(vm.group(1))
 
-    likes = 0
-    lm = re.search(r'"accessibilityText":"([\d,]+) likes?"', html)
-    if lm:
-        likes = int(lm.group(1).replace(",", ""))
-    else:
-        lm2 = re.search(r'"likeCount":(\d+)', html)
-        if lm2:
-            likes = int(lm2.group(1))
+    likes: Optional[int] = None
+    for pat in [r'"accessibilityText":"([\d,]+)\s+likes?\b"', r'like this video along with ([\d,]+) other', r'"likeCount":(\d+)']:
+        lm = re.search(pat, html, re.I)
+        if lm:
+            likes = int(lm.group(1).replace(",", ""))
+            break
 
     pub_m = re.search(r'"publishDate":"([^"]+)"', html)
     published_at = pub_m.group(1) if pub_m else None
@@ -629,8 +1524,269 @@ def _fetch_watch_metrics(video_id: str, session: Optional[requests.Session] = No
     }
 
 
-def _merged_baseline_meta(runs_data: Optional[Dict[str, Any]] = None) -> Dict[str, Dict[str, Any]]:
+def _fetch_video_live_metrics(
+    video_id: str,
+    session: Optional[requests.Session] = None,
+    needs_static_meta: bool = False,
+    allow_watch_fallback: bool = False,
+    batch_id: Optional[str] = None,
+    batch_sessions: Optional[List[requests.Session]] = None,
+) -> Dict[str, Any]:
+    t0 = time.time()
+    created_ephemeral: List[requests.Session] = []
+    if session is not None:
+        sess = session
+    else:
+        sess, is_eph = _get_batch_yt_session(batch_id=batch_id, batch_sessions=batch_sessions)
+        if is_eph:
+            created_ephemeral.append(sess)
+
+    cached_static = _yt_static_meta.get(video_id, {})
+    published_at = cached_static.get("published_at")
+    duration_sec = cached_static.get("duration_sec")
+
+    try:
+        # 1. Fast compact InnerTube JSON via persistent keep-alive worker session (~3.3 KB payload)
+        r_next = None
+        last_exc: Optional[Exception] = None
+        attempt_urls = (
+            f"https://www.youtube.com/youtubei/v1/next?prettyPrint=false&$fields={_YT_NEXT_FIELDS}",
+            f"https://www.youtube.com/youtubei/v1/next?prettyPrint=false&$fields={_YT_NEXT_FIELDS}",
+            f"https://youtubei.googleapis.com/youtubei/v1/next?prettyPrint=false&$fields={_YT_NEXT_FIELDS}",
+        )
+        for idx, ep_url in enumerate(attempt_urls):
+            if idx == 1:
+                # Only retry www.youtube.com immediately if attempt 0 died fast on a closed keep-alive socket
+                continue
+            if idx > 0 and (time.time() - t0) > 4.6:
+                break
+            req_t0 = time.time()
+            try:
+                r_next = sess.post(
+                    ep_url,
+                    json={"context": _INNERTUBE_WEB_CTX, "videoId": video_id},
+                    timeout=(4.0, 4.2) if idx == 0 else (3.0, 3.0),
+                )
+                if r_next.status_code == 200:
+                    break
+            except Exception as exc:
+                last_exc = exc
+                req_dt = time.time() - req_t0
+                if session is None:
+                    if batch_id:
+                        _yt_thread_local.batch_session = None
+                        sess, _ = _get_batch_yt_session(batch_id=batch_id, batch_sessions=batch_sessions)
+                    else:
+                        sess = _reset_worker_yt_session()
+                # Immediate fast retry on fresh socket if GFE/NAT reset an idle keep-alive socket
+                if idx == 0 and req_dt < 0.7 and (time.time() - t0) < 4.0:
+                    try:
+                        r_next = sess.post(
+                            attempt_urls[1],
+                            json={"context": _INNERTUBE_WEB_CTX, "videoId": video_id},
+                            timeout=(3.0, 3.0),
+                        )
+                        if r_next.status_code == 200:
+                            break
+                    except Exception as exc2:
+                        last_exc = exc2
+                        if session is None and not batch_id:
+                            sess = _reset_worker_yt_session()
+
+        if r_next is not None and r_next.status_code == 200:
+            parsed = _parse_innertube_next(r_next.json())
+            if needs_static_meta and (not published_at or duration_sec is None):
+                try:
+                    r_pl = sess.post(
+                        f"https://www.youtube.com/youtubei/v1/player?prettyPrint=false&$fields={_YT_PLAYER_FIELDS}",
+                        json={"context": _INNERTUBE_WEB_CTX, "videoId": video_id},
+                        timeout=(2.4, 2.2),
+                    )
+                    if r_pl.status_code == 200:
+                        pl_js = r_pl.json()
+                        vd = pl_js.get("videoDetails", {})
+                        mc = pl_js.get("microformat", {}).get("playerMicroformatRenderer", {})
+                        if str(vd.get("lengthSeconds") or "").isdigit():
+                            duration_sec = int(vd["lengthSeconds"])
+                        if mc.get("publishDate"):
+                            published_at = str(mc["publishDate"])
+                        if published_at or duration_sec is not None:
+                            _yt_static_meta[video_id] = {
+                                "published_at": published_at,
+                                "duration_sec": duration_sec,
+                            }
+                except Exception:
+                    pass
+
+            if parsed["views"] is not None or parsed["has_primary"]:
+                return {
+                    "id": video_id,
+                    "title": parsed["title"],
+                    "views": parsed["views"],
+                    "likes": parsed["likes"],
+                    "subs": parsed["subs"],
+                    "published_at": published_at,
+                    "duration_sec": duration_sec,
+                    "unavailable": False,
+                    "thumbnail": f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg",
+                    "play_url": f"https://www.youtube.com/watch?v={video_id}",
+                    "shorts_url": f"https://www.youtube.com/shorts/{video_id}",
+                }
+
+        if not allow_watch_fallback:
+            raise last_exc or RuntimeError(f"InnerTube HTTP {getattr(r_next, 'status_code', 'err')} for {video_id}")
+
+        # 2. Fallback to fast single-shot /watch HTML only for unknown cold videos
+        live = _fetch_watch_metrics(video_id, session=sess)
+        if live.get("published_at") or live.get("duration_sec") is not None:
+            _yt_static_meta[video_id] = {
+                "published_at": live.get("published_at") or published_at,
+                "duration_sec": live.get("duration_sec") if live.get("duration_sec") is not None else duration_sec,
+            }
+        return live
+    finally:
+        for es in created_ephemeral:
+            try:
+                es.close()
+            except Exception:
+                pass
+
+
+def _discover_channel_videos(
+    session: Optional[requests.Session] = None,
+    force: bool = False,
+    batch_id: Optional[str] = None,
+    batch_sessions: Optional[List[requests.Session]] = None,
+) -> Tuple[set[str], List[str], Optional[str], Optional[str]]:
+    global _yt_disc_in_flight
+    now = time.time()
+    with _yt_lock:
+        age = now - _yt_discovery_cache["timestamp"]
+        if not force and _yt_discovery_cache["timestamp"] > 0 and age < YT_DISCOVERY_TTL_SEC:
+            return (
+                set(_yt_discovery_cache["shorts"]),
+                list(_yt_discovery_cache["extra_ids"]),
+                _yt_discovery_cache.get("subscribers"),
+                None,
+            )
+
+    t0 = time.time()
+    created_ephemeral: List[requests.Session] = []
+    if session is not None:
+        getter = session
+    elif batch_id:
+        getter, _ = _get_batch_yt_session(batch_id=batch_id, batch_sessions=batch_sessions)
+    else:
+        getter = _new_yt_session()
+        created_ephemeral.append(getter)
+
+    shorts_ids: set[str] = set()
+    extra_ids: List[str] = []
+    subs_val: Optional[str] = None
+    err: Optional[str] = None
+    try:
+        for idx, ep_url in enumerate((
+            "https://www.youtube.com/youtubei/v1/browse?prettyPrint=false",
+            "https://youtubei.googleapis.com/youtubei/v1/browse?prettyPrint=false",
+        )):
+            if idx > 0 and (time.time() - t0) > 3.2:
+                break
+            try:
+                rb = getter.post(
+                    ep_url,
+                    json={"context": _INNERTUBE_WEB_CTX, "browseId": YOUTUBE_CHANNEL_ID, "params": "EgZzaG9ydHPyBgQKAjoA"},
+                    timeout=(3.0, 3.5),
+                )
+                if rb.status_code == 200:
+                    txt = rb.text
+                    sub_m = re.search(r"([\d.,]+[KMB]?)\s+subscribers?", txt, re.I)
+                    if sub_m:
+                        subs_val = sub_m.group(1)
+                    for vid in re.findall(r'"(?:videoId|entityId)":"([a-zA-Z0-9_-]{11})"', txt):
+                        shorts_ids.add(vid)
+                        if vid not in extra_ids:
+                            extra_ids.append(vid)
+                    err = None
+                    break
+                else:
+                    err = f"browse HTTP {rb.status_code}"
+            except Exception as exc:
+                err = str(exc)
+    finally:
+        with _yt_lock:
+            _yt_disc_in_flight = False
+        for es in created_ephemeral:
+            try:
+                es.close()
+            except Exception:
+                pass
+
+    if shorts_ids or subs_val:
+        with _yt_lock:
+            _yt_discovery_cache["timestamp"] = time.time()
+            if shorts_ids:
+                _yt_discovery_cache["shorts"].update(shorts_ids)
+                _yt_discovery_cache["extra_ids"] = extra_ids
+            if subs_val:
+                _yt_discovery_cache["subscribers"] = subs_val
+        return set(_yt_discovery_cache["shorts"]), extra_ids, subs_val, err
+
+    with _yt_lock:
+        return (
+            set(_yt_discovery_cache["shorts"]),
+            list(_yt_discovery_cache["extra_ids"]),
+            _yt_discovery_cache.get("subscribers"),
+            err,
+        )
+
+
+def _trigger_bg_discovery_if_stale() -> None:
+    global _yt_disc_in_flight
+    with _yt_lock:
+        age = time.time() - _yt_discovery_cache["timestamp"] if _yt_discovery_cache["timestamp"] > 0 else 999999.0
+        if _yt_disc_in_flight or age < YT_DISCOVERY_TTL_SEC:
+            return
+        _yt_disc_in_flight = True
+
+    def _run_disc() -> None:
+        try:
+            _discover_channel_videos(session=None, force=True)
+        except Exception:
+            with _yt_lock:
+                global _yt_disc_in_flight
+                _yt_disc_in_flight = False
+
+    threading.Thread(target=_run_disc, daemon=True, name="yt-bg-discover").start()
+
+
+def _merged_baseline_meta(
+    runs_data: Optional[Dict[str, Any]] = None,
+    studio_snap: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Dict[str, Any]]:
     merged: Dict[str, Dict[str, Any]] = {vid: dict(meta) for vid, meta in BASELINE_VIDEO_META.items()}
+    snap = studio_snap if studio_snap is not None else _load_studio_snapshot()
+    studio_videos = snap.get("videos", {}) if isinstance(snap, dict) else {}
+    if isinstance(studio_videos, dict):
+        for vid, sv in studio_videos.items():
+            if not isinstance(sv, dict) or not vid:
+                continue
+            cur = merged.get(vid, {})
+            sv_views = int(sv.get("views") or 0)
+            cur_views = int(cur.get("views") or 0)
+            merged[vid] = {
+                "title": sv.get("title") or cur.get("title") or vid,
+                "publishedAt": sv.get("published_at") or cur.get("publishedAt"),
+                "duration": sv.get("duration") or cur.get("duration") or "0:45",
+                "duration_sec": sv.get("duration_sec") if sv.get("duration_sec") is not None else cur.get("duration_sec"),
+                "is_short": bool(sv.get("is_short", cur.get("is_short", True))),
+                "views": max(sv_views, cur_views),
+                "likes": int(sv.get("likes") if sv.get("likes") is not None else cur.get("likes", 0)),
+                "comments": int(sv.get("comments") if sv.get("comments") is not None else cur.get("comments", 0)),
+                "analytics_views": sv.get("analytics_views"),
+                "analytics_minutes_watched": sv.get("analytics_minutes_watched"),
+                "analytics_avg_view_duration": sv.get("analytics_avg_view_duration"),
+            }
+
     data = runs_data if runs_data is not None else _read_json(RUNS_JSON_PATH, {"runs": []})
     for r in data.get("runs", []):
         yid = r.get("youtube_id")
@@ -641,6 +1797,7 @@ def _merged_baseline_meta(runs_data: Optional[Dict[str, Any]] = None) -> Dict[st
                 "title": r.get("youtube_title") or r.get("title") or yid,
                 "publishedAt": r.get("published_at") or r.get("created_at"),
                 "duration": dur_str,
+                "duration_sec": int(round(dur_s)) if isinstance(dur_s, (int, float)) and dur_s > 0 else None,
                 "is_short": True,
                 "views": 0,
                 "likes": 0,
@@ -650,31 +1807,39 @@ def _merged_baseline_meta(runs_data: Optional[Dict[str, Any]] = None) -> Dict[st
 
 
 def _build_baseline_yt() -> Dict[str, Any]:
-    baseline_map = _merged_baseline_meta()
+    studio_snap = _load_studio_snapshot()
+    mon_snap = _read_json(MONETIZATION_JSON_PATH, {}) or {}
+    baseline_map = _merged_baseline_meta(studio_snap=studio_snap)
     videos_list = []
     for vid, base in baseline_map.items():
-        views = base.get("views", 0)
-        likes = base.get("likes", 0)
+        views = int(base.get("views") or 0)
+        likes = int(base.get("likes") or 0)
         videos_list.append(
             {
                 "id": vid,
                 "title": base["title"],
                 "views": views,
                 "likes": likes,
-                "comments": base.get("comments", 0),
+                "comments": int(base.get("comments") or 0),
                 "published_at": base.get("publishedAt"),
-                "duration": base.get("duration", "0:40"),
-                "duration_sec": None,
+                "duration": base.get("duration", "0:45"),
+                "duration_sec": base.get("duration_sec"),
                 "is_short": base.get("is_short", True),
+                "analytics_views": base.get("analytics_views"),
+                "analytics_minutes_watched": base.get("analytics_minutes_watched"),
+                "analytics_avg_view_duration": base.get("analytics_avg_view_duration"),
                 "thumbnail": f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg",
                 "play_url": f"https://www.youtube.com/watch?v={vid}",
                 "shorts_url": f"https://www.youtube.com/shorts/{vid}",
+                "studio_url": f"https://studio.youtube.com/video/{vid}/analytics/tab-overview/period-default",
                 "engagement_pct": round((likes / views * 100), 1) if views > 0 else 0.0,
             }
         )
     videos_list.sort(key=lambda x: str(x.get("published_at") or ""), reverse=True)
     total_views = sum(v["views"] for v in videos_list)
     total_likes = sum(v["likes"] for v in videos_list)
+    total_comments = sum(v["comments"] for v in videos_list)
+    subs = str(studio_snap.get("subscribers") or "8")
     return {
         "channel_id": YOUTUBE_CHANNEL_ID,
         "channel_title": YOUTUBE_CHANNEL_TITLE,
@@ -683,35 +1848,56 @@ def _build_baseline_yt() -> Dict[str, Any]:
         "live_fetched": False,
         "fetch_error": None,
         "fetched_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "fetched_epoch": round(time.time(), 3),
+        "age_sec": None,
+        "cache_ttl_sec": YT_CACHE_TTL_SEC,
         "summary": {
             "total_videos": len(videos_list),
             "shorts_count": sum(1 for v in videos_list if v["is_short"]),
             "long_count": sum(1 for v in videos_list if not v["is_short"]),
-            "subscribers": "7",
+            "subscribers": subs,
             "total_views": total_views,
             "total_likes": total_likes,
+            "total_comments": total_comments,
             "avg_views": round(total_views / len(videos_list), 1) if videos_list else 0.0,
             "engagement_rate": round((total_likes / total_views * 100), 2) if total_views > 0 else 0.0,
         },
+        "studio_analytics": _build_studio_summary(videos_list, studio_snap, mon_snap=mon_snap),
         "top_video": max(videos_list, key=lambda x: x["views"]) if videos_list else None,
         "videos": videos_list,
     }
 
 
-def _refresh_youtube_analytics_sync() -> Dict[str, Any]:
-    global _yt_in_flight
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-        "Accept-Language": "en-US,en;q=0.9",
-    }
-
+def _refresh_youtube_analytics_sync(force_discovery: bool = False) -> Dict[str, Any]:
+    global _yt_in_flight, _yt_live_in_ram
+    t_start = time.time()
     videos_map: Dict[str, Dict[str, Any]] = {}
     fetch_error: Optional[str] = None
     live_online = False
 
     runs_data = _read_json(RUNS_JSON_PATH, {"runs": []})
-    baseline_map = _merged_baseline_meta(runs_data)
+    studio_snap = _load_studio_snapshot()
+    studio_videos = studio_snap.get("videos", {}) if isinstance(studio_snap.get("videos"), dict) else {}
+    mon_snap = _read_json(MONETIZATION_JSON_PATH, {}) or {}
+    baseline_map = _merged_baseline_meta(runs_data, studio_snap=studio_snap)
+
+    with _yt_lock:
+        prev_snapshot = _yt_cache["data"] or _load_disk_yt_cache()
+        disc_age = time.time() - _yt_discovery_cache["timestamp"] if _yt_discovery_cache["timestamp"] > 0 else 999999.0
+        cached_shorts = set(_yt_discovery_cache["shorts"])
+        cached_subs = _yt_discovery_cache.get("subscribers")
+    prev_by_id = {v["id"]: v for v in (prev_snapshot or {}).get("videos", []) if isinstance(v, dict) and v.get("id")}
+    prev_epoch = float((prev_snapshot or {}).get("fetched_epoch") or 0.0)
+    studio_epoch = float(studio_snap.get("synced_epoch") or 0.0)
+    prev_subs = (prev_snapshot or {}).get("summary", {}).get("subscribers") or studio_snap.get("subscribers") or cached_subs or "8"
+
     seed_ids: List[str] = list(baseline_map.keys())
+    for vid_st in studio_videos:
+        if vid_st not in seed_ids:
+            seed_ids.append(vid_st)
+    for vid_prev in prev_by_id:
+        if vid_prev not in seed_ids:
+            seed_ids.append(vid_prev)
     for r in runs_data.get("runs", []):
         yid = r.get("youtube_id")
         if yid and yid not in seed_ids:
@@ -722,107 +1908,226 @@ def _refresh_youtube_analytics_sync() -> Dict[str, Any]:
         if j_yid and j_yid not in seed_ids:
             seed_ids.append(j_yid)
 
-    discovered_shorts: set[str] = set()
-    subscribers_display: str = "7"
-    session = requests.Session()
-    adapter = requests.adapters.HTTPAdapter(pool_connections=16, pool_maxsize=16)
-    session.mount("https://", adapter)
-    session.mount("http://", adapter)
-    session.headers.update(headers)
-    session.cookies.update({"CONSENT": "PENDING+987", "SOCS": "CAESHAgBEhJnd3NfMjAyMzA4MTAtMF9SQzIaAmVuIAEaBgiA_LyaBg"})
+    discovered_shorts: set[str] = set(cached_shorts)
+    subscribers_display: str = str(prev_subs or "8")
+    v3_data: Optional[Dict[str, Any]] = None
+    batch_id = f"{t_start:.6f}-{threading.get_ident()}"
+    batch_sessions: List[requests.Session] = []
 
     try:
-        def _fetch_tab(tab_url: str) -> str:
-            return session.get(tab_url, timeout=(4.5, 6.5)).text
+        # Path A: Official YouTube Studio Data API v3 / OAuth (<0.4s batch call when configured)
+        try:
+            v3_data = _fetch_via_youtube_data_api_v3(seed_ids, force_discovery=force_discovery)
+        except Exception as exc:
+            v3_data = None
+            fetch_error = f"API v3 fallback: {exc}"
 
-        def _load_one(vid: str):
-            base = baseline_map.get(vid, {})
-            try:
-                live = _fetch_watch_metrics(vid, session=session)
-                if live.get("unavailable"):
-                    return None, True
-                views = max(live["views"], base.get("views", 0)) if live["views"] == 0 and base else live["views"]
-                likes = max(live["likes"], base.get("likes", 0)) if live["likes"] == 0 and base else live["likes"]
-                dur_sec = live.get("duration_sec")
-                dur_text = (
-                    f"{dur_sec // 60}:{dur_sec % 60:02d}"
-                    if dur_sec is not None
-                    else base.get("duration", "0:40")
-                )
-                return (
-                    {
-                        "id": vid,
-                        "title": live["title"] or base.get("title", vid),
-                        "views": views,
-                        "likes": likes,
-                        "comments": base.get("comments", 0),
-                        "published_at": live.get("published_at") or base.get("publishedAt"),
-                        "duration": dur_text,
-                        "duration_sec": dur_sec,
-                        "is_short": (vid in discovered_shorts) or (dur_sec is not None and dur_sec <= 62) or base.get("is_short", True),
-                        "thumbnail": live["thumbnail"],
-                        "play_url": live["play_url"],
-                        "shorts_url": live["shorts_url"],
-                        "engagement_pct": round((likes / views * 100), 1) if views > 0 else 0.0,
-                    },
-                    True,
-                )
-            except Exception:
-                if base:
-                    views = base.get("views", 0)
-                    likes = base.get("likes", 0)
+        if v3_data and isinstance(v3_data.get("videos"), dict) and v3_data["videos"]:
+            for vid, item in v3_data["videos"].items():
+                st_v = studio_videos.get(vid, {}) if isinstance(studio_videos.get(vid), dict) else {}
+                item["analytics_views"] = st_v.get("analytics_views")
+                item["analytics_minutes_watched"] = st_v.get("analytics_minutes_watched")
+                item["analytics_avg_view_duration"] = st_v.get("analytics_avg_view_duration")
+                item["studio_url"] = f"https://studio.youtube.com/video/{vid}/analytics/tab-overview/period-default"
+                videos_map[vid] = item
+            if v3_data.get("subscribers"):
+                subscribers_display = str(v3_data["subscribers"])
+            live_online = True
+        else:
+            # Path B: Persistent keep-alive InnerTube workers ($fields=~3.3KB) + Studio merge + strict budget
+            pool = _get_yt_executor()
+            need_discovery = bool(force_discovery)
+
+            def _fallback_video_item(vid: str, err_msg: Optional[str] = None) -> Optional[Dict[str, Any]]:
+                base = baseline_map.get(vid, {})
+                prev_v = prev_by_id.get(vid, {})
+                st_v = studio_videos.get(vid, {}) if isinstance(studio_videos.get(vid), dict) else {}
+                fallback_source = st_v if (studio_epoch > prev_epoch and st_v) else (prev_v or st_v or base)
+                if not fallback_source:
+                    return None
+                views = int(fallback_source.get("views", 0))
+                likes = int(fallback_source.get("likes", 0))
+                out: Dict[str, Any] = {
+                    "id": vid,
+                    "title": fallback_source.get("title", vid),
+                    "views": views,
+                    "likes": likes,
+                    "comments": int(st_v.get("comments") if st_v.get("comments") is not None else fallback_source.get("comments", 0)),
+                    "published_at": fallback_source.get("published_at") or fallback_source.get("publishedAt"),
+                    "duration": fallback_source.get("duration", "0:45"),
+                    "duration_sec": fallback_source.get("duration_sec"),
+                    "is_short": (vid in discovered_shorts) or fallback_source.get("is_short", True),
+                    "analytics_views": st_v.get("analytics_views", fallback_source.get("analytics_views")),
+                    "analytics_minutes_watched": st_v.get("analytics_minutes_watched", fallback_source.get("analytics_minutes_watched")),
+                    "analytics_avg_view_duration": st_v.get("analytics_avg_view_duration", fallback_source.get("analytics_avg_view_duration")),
+                    "thumbnail": f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg",
+                    "play_url": f"https://www.youtube.com/watch?v={vid}",
+                    "shorts_url": f"https://www.youtube.com/shorts/{vid}",
+                    "studio_url": f"https://studio.youtube.com/video/{vid}/analytics/tab-overview/period-default",
+                    "engagement_pct": round((likes / views * 100), 1) if views > 0 else 0.0,
+                }
+                if err_msg:
+                    out["_err"] = err_msg
+                return out
+
+            def _load_one(vid: str):
+                base = baseline_map.get(vid, {})
+                prev_v = prev_by_id.get(vid, {})
+                st_v = studio_videos.get(vid, {}) if isinstance(studio_videos.get(vid), dict) else {}
+                needs_static = not (base.get("publishedAt") or prev_v.get("published_at") or st_v.get("published_at"))
+                allow_watch = not bool(prev_v or base or st_v)
+                try:
+                    live = _fetch_video_live_metrics(
+                        vid,
+                        session=None,
+                        needs_static_meta=needs_static,
+                        allow_watch_fallback=allow_watch,
+                    )
+                    if live.get("unavailable"):
+                        return None, True
+                    fallback_src = st_v if (studio_epoch > prev_epoch and st_v) else (prev_v or st_v or base)
+                    fallback_views = int(fallback_src.get("views") or 0)
+                    fallback_likes = int(fallback_src.get("likes") or 0)
+
+                    raw_views = live.get("views")
+                    if raw_views is None:
+                        views = fallback_views
+                    elif raw_views == 0 and fallback_views > 5:
+                        views = fallback_views
+                    else:
+                        views = int(raw_views)
+                        if st_v and studio_epoch > (time.time() - 120) and int(st_v.get("views") or 0) > views:
+                            views = int(st_v["views"])
+
+                    raw_likes = live.get("likes")
+                    likes = fallback_likes if raw_likes is None else int(raw_likes)
+
+                    dur_sec = live.get("duration_sec")
+                    if dur_sec is None:
+                        dur_sec = (
+                            st_v.get("duration_sec")
+                            if st_v.get("duration_sec") is not None
+                            else (prev_v.get("duration_sec") if prev_v.get("duration_sec") is not None else base.get("duration_sec"))
+                        )
+                    dur_text = (
+                        f"{dur_sec // 60}:{dur_sec % 60:02d}"
+                        if dur_sec is not None
+                        else (st_v.get("duration") or prev_v.get("duration") or base.get("duration") or "0:45")
+                    )
+                    comments_val = int(
+                        st_v.get("comments")
+                        if st_v.get("comments") is not None
+                        else (prev_v.get("comments") if prev_v.get("comments") is not None else base.get("comments", 0))
+                    )
                     return (
                         {
                             "id": vid,
-                            "title": base["title"],
+                            "title": live.get("title") or st_v.get("title") or prev_v.get("title") or base.get("title", vid),
                             "views": views,
                             "likes": likes,
-                            "comments": base.get("comments", 0),
-                            "published_at": base.get("publishedAt"),
-                            "duration": base.get("duration", "0:40"),
-                            "duration_sec": None,
-                            "is_short": base.get("is_short", True),
-                            "thumbnail": f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg",
-                            "play_url": f"https://www.youtube.com/watch?v={vid}",
-                            "shorts_url": f"https://www.youtube.com/shorts/{vid}",
+                            "comments": comments_val,
+                            "published_at": live.get("published_at") or st_v.get("published_at") or prev_v.get("published_at") or base.get("publishedAt"),
+                            "duration": dur_text,
+                            "duration_sec": dur_sec,
+                            "is_short": (vid in discovered_shorts)
+                            or (dur_sec is not None and dur_sec <= 65)
+                            or prev_v.get("is_short", st_v.get("is_short", base.get("is_short", True))),
+                            "analytics_views": st_v.get("analytics_views", prev_v.get("analytics_views")),
+                            "analytics_minutes_watched": st_v.get("analytics_minutes_watched", prev_v.get("analytics_minutes_watched")),
+                            "analytics_avg_view_duration": st_v.get("analytics_avg_view_duration", prev_v.get("analytics_avg_view_duration")),
+                            "thumbnail": live["thumbnail"],
+                            "play_url": live["play_url"],
+                            "shorts_url": live["shorts_url"],
+                            "studio_url": f"https://studio.youtube.com/video/{vid}/analytics/tab-overview/period-default",
                             "engagement_pct": round((likes / views * 100), 1) if views > 0 else 0.0,
+                            "_subs": live.get("subs"),
                         },
-                        False,
+                        raw_views is not None,
                     )
-                return None, False
+                except Exception as exc:
+                    return _fallback_video_item(vid, str(exc)), False
 
-        extra_ids: List[str] = []
-        with ThreadPoolExecutor(max_workers=10) as pool:
-            f_shorts = pool.submit(_fetch_tab, f"https://www.youtube.com/channel/{YOUTUBE_CHANNEL_ID}/shorts")
-            f_videos = pool.submit(_fetch_tab, f"https://www.youtube.com/channel/{YOUTUBE_CHANNEL_ID}/videos")
-            seed_futs = {pool.submit(_load_one, vid): vid for vid in seed_ids[:15]}
+            def _ingest_result(item: Optional[Dict[str, Any]], was_live: bool) -> None:
+                nonlocal subscribers_display, fetch_error, live_online
+                if not item:
+                    return
+                item_subs = item.pop("_subs", None)
+                item_err = item.pop("_err", None)
+                if item_subs and was_live:
+                    subscribers_display = item_subs
+                if item_err and not fetch_error:
+                    fetch_error = item_err
+                if item["id"] in discovered_shorts:
+                    item["is_short"] = True
+                videos_map[item["id"]] = item
+                if was_live:
+                    live_online = True
 
-            try:
-                html_s = f_shorts.result()
-                html_v = f_videos.result()
-                live_online = True
-                sub_m = re.search(r"([\d.,]+[KMB]?)\s+subscribers?", html_s or html_v, re.I)
-                if sub_m:
-                    subscribers_display = sub_m.group(1)
-                for vid in re.findall(r"/shorts/([a-zA-Z0-9_-]{11})", html_s):
-                    discovered_shorts.add(vid)
-                    if vid not in seed_ids and vid not in extra_ids:
-                        extra_ids.append(vid)
-                for vid in re.findall(r'"videoId":"([a-zA-Z0-9_-]{11})"', html_v):
-                    if vid not in seed_ids and vid not in extra_ids:
-                        extra_ids.append(vid)
-            except Exception as e:
-                fetch_error = str(e)
+            def _collect_futures(futs_map: Dict[Any, str], budget_sec: float) -> None:
+                nonlocal fetch_error
+                try:
+                    for fut in as_completed(futs_map.keys(), timeout=max(0.5, budget_sec)):
+                        try:
+                            item, was_live = fut.result()
+                        except Exception as exc:
+                            vid_f = futs_map[fut]
+                            item, was_live = _fallback_video_item(vid_f, str(exc)), False
+                        _ingest_result(item, was_live)
+                except FuturesTimeoutError:
+                    if not fetch_error:
+                        fetch_error = f"partial batch timeout (>{budget_sec:.1f}s)"
+                for fut, vid in futs_map.items():
+                    if vid in videos_map:
+                        continue
+                    if fut.done() and not fut.cancelled():
+                        try:
+                            item, was_live = fut.result(timeout=0.02)
+                            _ingest_result(item, was_live)
+                            continue
+                        except Exception:
+                            pass
+                    else:
+                        fut.cancel()
+                    fb = _fallback_video_item(vid, "timed out waiting for YouTube socket")
+                    _ingest_result(fb, False)
 
-            extra_futs = {pool.submit(_load_one, vid): vid for vid in extra_ids[:max(0, 15 - len(seed_futs))]}
-            for fut in as_completed(list(seed_futs.keys()) + list(extra_futs.keys())):
-                item, was_live = fut.result()
-                if item:
-                    if item["id"] in discovered_shorts:
-                        item["is_short"] = True
-                    videos_map[item["id"]] = item
-                    if was_live:
+            extra_ids: List[str] = []
+            seed_futs = {pool.submit(_load_one, vid): vid for vid in seed_ids[:20]}
+            f_disc = (
+                pool.submit(_discover_channel_videos, None, force_discovery, batch_id, batch_sessions)
+                if need_discovery
+                else None
+            )
+
+            batch_budget = 13.0 if not _yt_live_in_ram else 7.6
+            _collect_futures(seed_futs, budget_sec=batch_budget)
+            if not need_discovery and live_online:
+                _trigger_bg_discovery_if_stale()
+
+            if f_disc is not None:
+                try:
+                    rem_disc = max(0.8, 7.8 - (time.time() - t_start))
+                    d_shorts, d_extra, d_subs, d_err = f_disc.result(timeout=rem_disc)
+                    discovered_shorts.update(d_shorts)
+                    for vid in discovered_shorts:
+                        if vid in videos_map:
+                            videos_map[vid]["is_short"] = True
+                    if d_subs:
+                        subscribers_display = d_subs
                         live_online = True
+                    if d_err and not fetch_error:
+                        fetch_error = d_err
+                    for vid in d_extra:
+                        if vid not in seed_ids and vid not in extra_ids:
+                            extra_ids.append(vid)
+                except Exception as exc:
+                    if not fetch_error:
+                        fetch_error = f"discovery timeout: {exc}"
+
+            if extra_ids:
+                extra_futs = {pool.submit(_load_one, vid): vid for vid in extra_ids[: max(0, 20 - len(seed_futs))]}
+                if extra_futs:
+                    _collect_futures(extra_futs, budget_sec=max(1.0, 7.2 - (time.time() - t_start)))
 
         videos_list = sorted(
             videos_map.values(),
@@ -832,18 +2137,25 @@ def _refresh_youtube_analytics_sync() -> Dict[str, Any]:
 
         total_views = sum(v["views"] for v in videos_list)
         total_likes = sum(v["likes"] for v in videos_list)
+        total_comments = sum(int(v.get("comments") or 0) for v in videos_list)
         avg_views = round(total_views / len(videos_list), 1) if videos_list else 0.0
         engagement_rate = round((total_likes / total_views * 100), 2) if total_views > 0 else 0.0
         top_video = max(videos_list, key=lambda x: x["views"]) if videos_list else None
+        now_ts = time.time()
 
+        studio_summary = _build_studio_summary(videos_list, studio_snap, api_v3_meta=v3_data, mon_snap=mon_snap)
         result = {
             "channel_id": YOUTUBE_CHANNEL_ID,
             "channel_title": YOUTUBE_CHANNEL_TITLE,
             "channel_url": f"https://www.youtube.com/channel/{YOUTUBE_CHANNEL_ID}",
             "zapier_connected": True,
             "live_fetched": live_online,
-            "fetch_error": fetch_error,
+            "fetch_error": None if live_online else fetch_error,
             "fetched_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+            "fetched_epoch": round(now_ts, 3),
+            "fetch_ms": round((now_ts - t_start) * 1000),
+            "age_sec": 0.0,
+            "cache_ttl_sec": YT_CACHE_TTL_SEC,
             "summary": {
                 "total_videos": len(videos_list),
                 "shorts_count": sum(1 for v in videos_list if v["is_short"]),
@@ -851,45 +2163,124 @@ def _refresh_youtube_analytics_sync() -> Dict[str, Any]:
                 "subscribers": subscribers_display,
                 "total_views": total_views,
                 "total_likes": total_likes,
+                "total_comments": total_comments,
                 "avg_views": avg_views,
                 "engagement_rate": engagement_rate,
             },
+            "studio_analytics": studio_summary,
             "top_video": top_video,
             "videos": videos_list,
         }
 
+        if live_online and not CLOUD_MODE and videos_list:
+            try:
+                _write_json_atomic(YT_LIVE_CACHE_PATH, result)
+            except Exception:
+                pass
+
         with _yt_lock:
-            _yt_cache["timestamp"] = time.time()
-            _yt_cache["data"] = result
-        return result
+            if live_online:
+                _yt_live_in_ram = True
+            prev_cached = _yt_cache["data"]
+            prev_ts = float(_yt_cache["timestamp"] or 0.0)
+            keep_prev_live = (
+                not live_online
+                and prev_cached is not None
+                and prev_cached.get("live_fetched")
+                and prev_ts > 0.0
+                and (now_ts - prev_ts) < 30.0
+            )
+            if keep_prev_live:
+                result_out = _with_yt_meta(prev_cached, prev_ts)
+            else:
+                _yt_cache["timestamp"] = now_ts if (live_online or prev_ts == 0.0) else prev_ts
+                _yt_cache["data"] = result
+                result_out = result
+        return result_out
     finally:
-        session.close()
         with _yt_lock:
+            sessions_to_close = list(batch_sessions)
+            batch_sessions.clear()
             _yt_in_flight = False
+            _yt_done_cond.notify_all()
+        for bs in sessions_to_close:
+            try:
+                bs.close()
+            except Exception:
+                pass
 
 
-def fetch_youtube_analytics(force: bool = False) -> Dict[str, Any]:
+def fetch_youtube_analytics(force: bool = False, manual: bool = False, discover: bool = False) -> Dict[str, Any]:
     global _yt_in_flight
     now = time.time()
+    run_sync = False
+
     with _yt_lock:
+        if _yt_cache["data"] is None:
+            disk_seed = _load_disk_yt_cache()
+            if disk_seed is not None:
+                _yt_cache["data"] = {**disk_seed, "live_fetched": False}
+                _yt_cache["timestamp"] = 0.0
+
         cached = _yt_cache["data"]
-        stale = (now - _yt_cache["timestamp"]) >= YT_CACHE_TTL_SEC
-        if not force:
-            if cached is not None:
-                if stale and not IS_VERCEL and not _yt_in_flight:
-                    _yt_in_flight = True
-                    threading.Thread(target=_refresh_youtube_analytics_sync, daemon=True).start()
-                return cached
-            if not IS_VERCEL and not _yt_in_flight:
+        ts = _yt_cache["timestamp"]
+        age = (now - ts) if ts > 0 else 999999.0
+        stale = age >= YT_CACHE_TTL_SEC
+        is_cached_live = bool(cached is not None and cached.get("live_fetched"))
+        fresh_enough = is_cached_live and (age < (1.0 if manual else YT_CACHE_TTL_SEC))
+
+        if force and fresh_enough and not discover:
+            return _with_yt_meta(cached, ts)
+        if not force and cached is not None and not stale:
+            return _with_yt_meta(cached, ts)
+
+        if not force and not IS_VERCEL:
+            if not _yt_in_flight:
                 _yt_in_flight = True
-                threading.Thread(target=_refresh_youtube_analytics_sync, daemon=True).start()
+                threading.Thread(
+                    target=_refresh_youtube_analytics_sync,
+                    kwargs={"force_discovery": bool(discover)},
+                    daemon=True,
+                ).start()
+            return _with_yt_meta(cached, ts) if cached is not None else _build_baseline_yt()
+
+        if IS_VERCEL:
+            if _yt_in_flight:
+                deadline = time.time() + 14.0
+                while _yt_in_flight:
+                    rem = deadline - time.time()
+                    if rem <= 0:
+                        break
+                    _yt_done_cond.wait(timeout=rem)
+                latest = _yt_cache["data"]
+                latest_ts = _yt_cache["timestamp"]
+                return _with_yt_meta(latest, latest_ts) if latest is not None else _build_baseline_yt()
+            _yt_in_flight = True
+            run_sync = True
+        else:
+            if not _yt_in_flight:
+                _yt_in_flight = True
+                threading.Thread(
+                    target=_refresh_youtube_analytics_sync,
+                    kwargs={"force_discovery": bool(discover)},
+                    daemon=True,
+                ).start()
+            wait_sec = 13.5 if (not is_cached_live or not _yt_live_in_ram) else (8.0 if (manual or age >= 25.0) else 7.8)
+            deadline = time.time() + wait_sec
+            while _yt_in_flight:
+                rem = deadline - time.time()
+                if rem <= 0:
+                    break
+                _yt_done_cond.wait(timeout=rem)
+            latest = _yt_cache["data"]
+            latest_ts = _yt_cache["timestamp"]
+            if latest is not None:
+                return _with_yt_meta(latest, latest_ts)
             return _build_baseline_yt()
 
-        if _yt_in_flight:
-            return cached if cached is not None else _build_baseline_yt()
-        _yt_in_flight = True
-
-    return _refresh_youtube_analytics_sync()
+    if run_sync:
+        return _refresh_youtube_analytics_sync(force_discovery=bool(discover))
+    return _build_baseline_yt()
 
 
 def get_projects_pipeline(yt_data: Dict[str, Any], active_project: Optional[str] = None) -> List[Dict[str, Any]]:
@@ -1708,10 +3099,16 @@ def _run_manual_upload_worker(job_id: str, local_mp4_path: Path, reuse_staged_ur
 
 
 def get_system_health() -> List[Dict[str, Any]]:
+    studio_snap = _load_studio_snapshot()
+    studio_synced_at = studio_snap.get("synced_at")
+    cfg = _get_studio_config()
+    has_direct_api = bool((cfg.get("youtube_api_key") or "").strip() or (cfg.get("oauth_access_token") or "").strip())
+
     if CLOUD_MODE:
         runs_ok = RUNS_JSON_PATH.exists()
         snap = _read_json(CLOUD_DATA_DIR / "automation_snapshot.json", {})
         queued_n = len([r for r in _read_json(RUNS_JSON_PATH, {"runs": []}).get("runs", []) if r.get("status") == "queued"])
+        studio_ok = STUDIO_ANALYTICS_PATH.exists() or has_direct_api
         return [
             {
                 "name": "Vercel Cloud Runtime",
@@ -1721,7 +3118,12 @@ def get_system_health() -> List[Dict[str, Any]]:
             {
                 "name": "Live YouTube Sync",
                 "ok": True,
-                "detail": f"Real-time views & subs ({YOUTUBE_CHANNEL_TITLE})",
+                "detail": f"Data API v3 direct ({YOUTUBE_CHANNEL_TITLE})" if has_direct_api else f"Real-time views & subs ({YOUTUBE_CHANNEL_TITLE})",
+            },
+            {
+                "name": "YouTube Studio Analytics",
+                "ok": studio_ok,
+                "detail": f"Synced {studio_synced_at}" if studio_synced_at else "Connect Data API v3 or sync via local Studio OAuth",
             },
             {
                 "name": "Queue & Script Snapshot",
@@ -1737,11 +3139,6 @@ def get_system_health() -> List[Dict[str, Any]]:
                 "name": "YouTube Zapier Connection",
                 "ok": True,
                 "detail": f"Connected ({YOUTUBE_CHANNEL_TITLE})",
-            },
-            {
-                "name": "Workstation Render Engine",
-                "ok": True,
-                "detail": "Kokoro TTS + Whisper + Three.js on local PC",
             },
         ]
 
@@ -1781,14 +3178,16 @@ def get_system_health() -> List[Dict[str, Any]]:
             "detail": "Node v24 + headless Chrome capture" if node_bin.exists() else "Node missing",
         },
         {
-            "name": "YouTube Zapier Connection",
-            "ok": True,
-            "detail": f"Connected ({YOUTUBE_CHANNEL_TITLE})",
+            "name": "YouTube Studio & Zapier OAuth",
+            "ok": STUDIO_ANALYTICS_PATH.exists() or FINALIZE_STUDIO_SYNC_PY.exists(),
+            "detail": f"Connected ({YOUTUBE_CHANNEL_TITLE}) · Synced {studio_synced_at or 'ready'}"
+            if has_direct_api or STUDIO_ANALYTICS_PATH.exists()
+            else f"Connected ({YOUTUBE_CHANNEL_TITLE})",
         },
         {
             "name": "FIFO Queue & Manual Upload",
             "ok": (PROJECTS_ROOT / "AUTO_PROMPT.md").exists() and (PROJECTS_ROOT / "UPLOAD_PROMPT.md").exists() and UPLOAD_MEDIA_PY.exists(),
-            "detail": "AUTO_PROMPT.md (1/day FIFO) + UPLOAD_PROMPT.md ready",
+            "detail": "AUTO_PROMPT.md (1/day FIFO) + UPLOAD_PROMPT.md + STUDIO_SYNC ready",
         },
     ]
 
@@ -1827,7 +3226,13 @@ def _parse_iso_dt(ts: Optional[str]) -> Optional[datetime]:
 
 def get_monetization_overview(yt_data: Dict[str, Any]) -> Dict[str, Any]:
     snap = _read_json(MONETIZATION_JSON_PATH, {}) or {}
-    ypp_enabled = bool(snap.get("ypp_enabled", False))
+    studio_snap = _load_studio_snapshot()
+    studio_summary = yt_data.get("studio_analytics") if isinstance(yt_data.get("studio_analytics"), dict) else {}
+    ypp_enabled = bool(
+        studio_summary.get("ypp_enabled")
+        if studio_summary.get("ypp_enabled") is not None
+        else snap.get("ypp_enabled", studio_snap.get("ypp_enabled", False))
+    )
     currency = str(snap.get("default_currency") or "USD").upper()
     if currency not in ("USD", "INR"):
         currency = "USD"
@@ -1907,6 +3312,22 @@ def get_monetization_overview(yt_data: Dict[str, Any]) -> Dict[str, Any]:
     t2_watch_goal = 4_000.0
     watch_hours_365d = float(snap.get("long_form_watch_hours_365d") or 0.0)
 
+    mins_watched_settled = int(
+        studio_snap.get("analytics_minutes_watched")
+        if studio_snap.get("analytics_minutes_watched") is not None
+        else (snap.get("analytics_minutes_watched") or 0)
+    )
+    views_settled = int(
+        studio_snap.get("analytics_views_settled")
+        if studio_snap.get("analytics_views_settled") is not None
+        else (snap.get("analytics_views_settled") or 0)
+    )
+    subs_gained_settled = int(
+        studio_snap.get("analytics_subscribers_gained")
+        if studio_snap.get("analytics_subscribers_gained") is not None
+        else (snap.get("analytics_subscribers_gained") or 0)
+    )
+
     return {
         "channel_id": YOUTUBE_CHANNEL_ID,
         "channel_title": YOUTUBE_CHANNEL_TITLE,
@@ -1916,11 +3337,14 @@ def get_monetization_overview(yt_data: Dict[str, Any]) -> Dict[str, Any]:
         "official_revenue_usd": round(official_total_usd, 2),
         "official_ad_revenue_usd": round(float(snap.get("official_ad_revenue_usd") or 0.0) if ypp_enabled else 0.0, 2),
         "monetized_playbacks": int(snap.get("monetized_playbacks") or 0) if ypp_enabled else 0,
-        "analytics_minutes_watched": int(snap.get("analytics_minutes_watched") or 0),
-        "analytics_views_settled": int(snap.get("analytics_views_settled") or 0),
-        "analytics_subscribers_gained": int(snap.get("analytics_subscribers_gained") or 0),
-        "api_source": snap.get("api_source", "YouTube Data API v3 + YouTube Analytics API v2"),
-        "api_checked_at": snap.get("api_checked_at"),
+        "analytics_minutes_watched": mins_watched_settled,
+        "analytics_avg_view_duration_sec": int(studio_snap.get("analytics_avg_view_duration_sec") or 0),
+        "analytics_views_settled": views_settled,
+        "analytics_subscribers_gained": subs_gained_settled,
+        "channel_views_settled": studio_summary.get("channel_views_settled") or studio_snap.get("channel_views_settled"),
+        "studio_synced_at": studio_snap.get("synced_at") or snap.get("api_checked_at"),
+        "api_source": studio_summary.get("source") or snap.get("api_source", "YouTube Data API v3 + YouTube Analytics API v2"),
+        "api_checked_at": snap.get("api_checked_at") or studio_snap.get("synced_at"),
         "studio_earn_url": f"https://studio.youtube.com/channel/{YOUTUBE_CHANNEL_ID}/monetization",
         "default_currency": currency,
         "usd_to_inr_rate": usd_to_inr,
@@ -1993,6 +3417,12 @@ def api_health():
     return JSONResponse({"ok": True, "cloud_mode": CLOUD_MODE, "is_vercel": IS_VERCEL})
 
 
+_NO_CACHE_HEADERS = {
+    "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+    "Pragma": "no-cache",
+}
+
+
 @app.get("/api/overview")
 def api_overview(refresh_yt: bool = Query(False)):
     yt_data = fetch_youtube_analytics(force=refresh_yt)
@@ -2026,19 +3456,536 @@ def api_overview(refresh_yt: bool = Query(False)):
             "youtube": yt_data,
             "monetization": monetization,
             "system_health": health,
-        }
+        },
+        headers=_NO_CACHE_HEADERS,
     )
 
 
 @app.get("/api/youtube")
-def api_youtube(refresh: int = Query(0)):
-    return JSONResponse(fetch_youtube_analytics(force=bool(refresh)))
+def api_youtube(refresh: int = Query(0), with_mon: int = Query(0), manual: int = Query(0), discover: int = Query(0)):
+    yt_data = fetch_youtube_analytics(force=bool(refresh), manual=bool(manual), discover=bool(discover))
+    if with_mon:
+        payload = {**yt_data, "monetization": get_monetization_overview(yt_data)}
+        return JSONResponse(payload, headers=_NO_CACHE_HEADERS)
+    return JSONResponse(yt_data, headers=_NO_CACHE_HEADERS)
+
+
+def _mask_secret(val: str) -> str:
+    s = str(val or "").strip()
+    if not s:
+        return ""
+    if len(s) <= 8:
+        return "••••"
+    return f"{s[:4]}••••{s[-4:]}"
+
+
+def _studio_config_status() -> Dict[str, Any]:
+    cfg = _get_studio_config()
+    snap = _load_studio_snapshot()
+    api_key = (cfg.get("youtube_api_key") or "").strip()
+    oauth_tok = (cfg.get("oauth_access_token") or "").strip()
+    oauth_rt = (cfg.get("oauth_refresh_token") or "").strip()
+    oauth_cid = (cfg.get("oauth_client_id") or "").strip()
+    oauth_csec = (cfg.get("oauth_client_secret") or "").strip()
+    return {
+        "cloud_mode": CLOUD_MODE,
+        "api_key_configured": bool(api_key),
+        "api_key_masked": _mask_secret(api_key),
+        "oauth_connected": bool(oauth_tok or (oauth_rt and oauth_cid and oauth_csec)),
+        "oauth_client_configured": bool(oauth_cid and oauth_csec),
+        "zapier_oauth_connected": True,
+        "studio_synced_at": snap.get("synced_at"),
+        "studio_source": snap.get("source"),
+        "studio_channel_url": f"https://studio.youtube.com/channel/{YOUTUBE_CHANNEL_ID}/analytics/tab-overview/period-default",
+    }
+
+
+def _update_studio_sync_job(updates: Dict[str, Any], expected_job_id: Optional[str] = None) -> Dict[str, Any]:
+    with _studio_sync_lock:
+        cur = _read_json(STUDIO_SYNC_JOB_PATH, None)
+        if expected_job_id and isinstance(cur, dict) and cur.get("job_id") and cur.get("job_id") != expected_job_id:
+            return cur
+        job = dict(cur) if isinstance(cur, dict) else {}
+        job.update(updates)
+        job["updated_at"] = datetime.now().astimezone().isoformat(timespec="seconds")
+        if not CLOUD_MODE:
+            _write_json_atomic(STUDIO_SYNC_JOB_PATH, job)
+        return job
+
+
+def _inspect_studio_sync_job() -> Dict[str, Any]:
+    if CLOUD_MODE:
+        snap = _load_studio_snapshot()
+        return {
+            "active": False,
+            "status": "snapshot" if snap else "idle",
+            "cloud_mode": True,
+            "synced_at": snap.get("synced_at"),
+            "step": "Cloud Monitor mode — run Zapier Studio Sync from local http://127.0.0.1:8765 or set YOUTUBE_API_KEY env var.",
+        }
+    job = _read_json(STUDIO_SYNC_JOB_PATH, None)
+    if not isinstance(job, dict) or not job.get("job_id"):
+        snap = _load_studio_snapshot()
+        return {
+            "active": False,
+            "status": "idle",
+            "synced_at": snap.get("synced_at"),
+            "step": "Ready to sync live YouTube Studio & Analytics v2.",
+        }
+    status = str(job.get("status") or "idle")
+    job_id = str(job.get("job_id"))
+    is_active = status in ("starting", "dispatching_agent", "syncing")
+    if is_active:
+        started_at = job.get("started_at")
+        worker_alive = job_id in _active_studio_sync_jobs
+        try:
+            age = (datetime.now().astimezone() - datetime.fromisoformat(str(started_at))).total_seconds() if started_at else 0.0
+        except Exception:
+            age = 0.0
+        if not worker_alive and age > 15:
+            job["status"] = "error"
+            job["step"] = "Studio sync interrupted by server restart"
+            job["error"] = "Previous Studio sync stopped before completion. Click Sync YouTube Studio to retry."
+            _update_studio_sync_job(job, expected_job_id=job_id)
+            is_active = False
+        elif age > 360:
+            is_active = False
+    out = dict(job)
+    out["active"] = is_active
+    return out
+
+
+def _run_oauth_direct_studio_sync(cfg: Dict[str, Any], job_id: str) -> Dict[str, Any]:
+    with _new_yt_session() as sess:
+        tok = _refresh_oauth_token_if_needed(cfg, sess, force=False)
+        if not tok:
+            raise RuntimeError("OAuth access token missing or expired.")
+        hdrs = {"Authorization": f"Bearer {tok}"}
+
+        r_ch = sess.get(
+            "https://www.googleapis.com/youtube/v3/channels",
+            params={"mine": "true", "part": "snippet,statistics,contentDetails,status"},
+            headers=hdrs,
+            timeout=(3.0, 5.0),
+        )
+        if r_ch.status_code == 401:
+            tok = _refresh_oauth_token_if_needed(cfg, sess, force=True)
+            if not tok:
+                raise RuntimeError("OAuth token rejected by Google.")
+            hdrs = {"Authorization": f"Bearer {tok}"}
+            r_ch = sess.get(
+                "https://www.googleapis.com/youtube/v3/channels",
+                params={"mine": "true", "part": "snippet,statistics,contentDetails,status"},
+                headers=hdrs,
+                timeout=(3.0, 5.0),
+            )
+        if r_ch.status_code != 200:
+            raise RuntimeError(f"Channels API HTTP {r_ch.status_code}: {r_ch.text[:220]}")
+        ch_js = r_ch.json()
+        ch_item = (ch_js.get("items") or [{}])[0]
+        uploads_pid = ch_item.get("contentDetails", {}).get("relatedPlaylists", {}).get("uploads") or (
+            "UU" + YOUTUBE_CHANNEL_ID[2:]
+        )
+
+        r_pl = sess.get(
+            "https://www.googleapis.com/youtube/v3/playlistItems",
+            params={"playlistId": uploads_pid, "part": "contentDetails", "maxResults": "25"},
+            headers=hdrs,
+            timeout=(3.0, 5.0),
+        )
+        vids_ids: List[str] = []
+        if r_pl.status_code == 200:
+            vids_ids = [
+                str(it.get("contentDetails", {}).get("videoId") or "")
+                for it in r_pl.json().get("items", [])
+                if isinstance(it, dict)
+            ]
+            vids_ids = [v for v in vids_ids if v]
+        if not vids_ids:
+            vids_ids = list(BASELINE_VIDEO_META.keys())
+
+        r_vids = sess.get(
+            "https://www.googleapis.com/youtube/v3/videos",
+            params={"id": ",".join(vids_ids[:50]), "part": "snippet,statistics,contentDetails,status"},
+            headers=hdrs,
+            timeout=(3.0, 5.0),
+        )
+        if r_vids.status_code != 200:
+            raise RuntimeError(f"Videos API HTTP {r_vids.status_code}: {r_vids.text[:220]}")
+        vids_js = r_vids.json()
+
+        today_str = datetime.now().astimezone().strftime("%Y-%m-%d")
+        an_ch_js: Dict[str, Any] = {}
+        an_v_js: Dict[str, Any] = {}
+        try:
+            r_ac = sess.get(
+                "https://youtubeanalytics.googleapis.com/v2/reports",
+                params={
+                    "ids": "channel==MINE",
+                    "startDate": "2026-06-01",
+                    "endDate": today_str,
+                    "metrics": "views,likes,comments,estimatedMinutesWatched,averageViewDuration,subscribersGained",
+                },
+                headers=hdrs,
+                timeout=(3.0, 5.0),
+            )
+            if r_ac.status_code == 200:
+                an_ch_js = r_ac.json()
+            r_av = sess.get(
+                "https://youtubeanalytics.googleapis.com/v2/reports",
+                params={
+                    "ids": "channel==MINE",
+                    "startDate": "2026-06-01",
+                    "endDate": today_str,
+                    "dimensions": "video",
+                    "metrics": "views,likes,comments,estimatedMinutesWatched,averageViewDuration",
+                    "sort": "-views",
+                    "maxResults": "25",
+                },
+                headers=hdrs,
+                timeout=(3.0, 5.0),
+            )
+            if r_av.status_code == 200:
+                an_v_js = r_av.json()
+        except Exception:
+            pass
+
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("finalize_studio_sync", str(FINALIZE_STUDIO_SYNC_PY))
+    mod = importlib.util.module_from_spec(spec)
+    assert spec and spec.loader
+    spec.loader.exec_module(mod)
+    snap = mod.build_studio_snapshot(
+        ch_js,
+        vids_js,
+        an_ch_js,
+        an_v_js,
+        source_label="YouTube Studio Direct OAuth (Data API v3 + Analytics v2)",
+    )
+    return mod.apply_studio_snapshot(snap, job_id=job_id)
+
+
+def _run_studio_sync_worker(job_id: str) -> None:
+    dispatch_proc: Optional[subprocess.Popen] = None
+    try:
+        _update_studio_sync_job(
+            {"status": "dispatching_agent", "step": "Connecting to Zapier YouTube Studio OAuth agent..."},
+            expected_job_id=job_id,
+        )
+        prompt = (
+            f"StudioSync {job_id}: Read C:\\Users\\DELL\\faceless-shorts\\STUDIO_SYNC_PROMPT.md and immediately "
+            f"execute every step using Zapier YouTubeV4CLIAPI and finalize_studio_sync.py for job_id {job_id} without asking."
+        )
+        if LANGUAGE_SERVER_EXE.exists():
+            cmd = [
+                str(LANGUAGE_SERVER_EXE),
+                "agentapi",
+                "new-conversation",
+                "--model=flash",
+                "--title=StudioSync",
+                "--",
+                prompt,
+            ]
+        else:
+            cmd = [
+                "cmd",
+                "/c",
+                str(AGENTAPI_BAT),
+                "new-conversation",
+                "--model=flash",
+                "--title=StudioSync",
+                "--",
+                prompt,
+            ]
+        dispatch_epoch = time.time()
+        dispatch_proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            cwd=str(LOCAL_PROJECTS_ROOT if LOCAL_PROJECTS_ROOT.exists() else BASE_DIR.parent),
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        d_out: List[str] = []
+        d_err: List[str] = []
+        td_out = threading.Thread(target=lambda: d_out.append(dispatch_proc.stdout.read()) if dispatch_proc.stdout else None, daemon=True)
+        td_err = threading.Thread(target=lambda: d_err.append(dispatch_proc.stderr.read()) if dispatch_proc.stderr else None, daemon=True)
+        td_out.start()
+        td_err.start()
+
+        conv_id: Optional[str] = None
+        d_start = time.time()
+        while (time.time() - d_start) < 120:
+            conv_id = _find_matching_brain_conv(job_id, dispatch_epoch)
+            if dispatch_proc.poll() is not None:
+                td_out.join(timeout=2)
+                td_err.join(timeout=2)
+                combined = "".join(d_out) + "\n" + "".join(d_err)
+                m_uuid = re.search(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", combined, re.IGNORECASE)
+                if m_uuid:
+                    conv_id = m_uuid.group(0)
+                break
+            if conv_id:
+                break
+            elapsed = int(time.time() - d_start)
+            if elapsed >= 4 and elapsed % 4 == 0:
+                _update_studio_sync_job({"step": f"Starting Zapier Studio sync ({elapsed}s)..."}, expected_job_id=job_id)
+            time.sleep(1.0)
+
+        if not conv_id:
+            conv_id = _find_matching_brain_conv(job_id, dispatch_epoch)
+        if not conv_id:
+            combined_err = ("".join(d_out) + " " + "".join(d_err)).strip()
+            _update_studio_sync_job(
+                {
+                    "status": "error",
+                    "step": "Studio sync agent failed to start",
+                    "error": combined_err[:380] or "Timed out starting Zapier Studio sync agent.",
+                },
+                expected_job_id=job_id,
+            )
+            return
+
+        _update_studio_sync_job(
+            {
+                "conversation_id": conv_id,
+                "status": "syncing",
+                "step": "Fetching channels, videos & Analytics API v2 via Zapier YouTube OAuth...",
+            },
+            expected_job_id=job_id,
+        )
+
+        wait_start = time.time()
+        while (time.time() - wait_start) < 240:
+            time.sleep(2.0)
+            cur = _read_json(STUDIO_SYNC_JOB_PATH, None)
+            if isinstance(cur, dict) and cur.get("job_id") == job_id:
+                if cur.get("status") == "completed":
+                    with _yt_lock:
+                        _yt_cache["timestamp"] = 0.0
+                    fetch_youtube_analytics(force=True, manual=True, discover=True)
+                    return
+                if cur.get("status") == "error":
+                    return
+
+            scan = _scan_transcript_for_upload(conv_id)
+            if scan.get("exists") and scan.get("finished"):
+                cur2 = _read_json(STUDIO_SYNC_JOB_PATH, None)
+                if isinstance(cur2, dict) and cur2.get("job_id") == job_id and cur2.get("status") == "completed":
+                    with _yt_lock:
+                        _yt_cache["timestamp"] = 0.0
+                    fetch_youtube_analytics(force=True, manual=True, discover=True)
+                    return
+                err_txt = scan.get("last_error") or scan.get("last_text") or "Zapier Studio sync finished without writing studio_analytics.json."
+                _update_studio_sync_job(
+                    {"status": "error", "step": "Studio sync did not complete", "error": str(err_txt)[:400]},
+                    expected_job_id=job_id,
+                )
+                return
+
+            el = int(time.time() - wait_start)
+            if el >= 6 and el % 4 == 0:
+                tool_hint = f" [{scan.get('last_tool')}]" if scan.get("exists") and scan.get("last_tool") else ""
+                _update_studio_sync_job(
+                    {"step": f"Syncing YouTube Studio Analytics v2{tool_hint} ({el}s)..."},
+                    expected_job_id=job_id,
+                )
+
+        _update_studio_sync_job(
+            {"status": "error", "step": "Studio sync timed out after 4 minutes", "error": f"Check conversation {conv_id}"},
+            expected_job_id=job_id,
+        )
+    except Exception as exc:
+        _update_studio_sync_job({"status": "error", "step": "Studio sync failed", "error": str(exc)}, expected_job_id=job_id)
+    finally:
+        _active_studio_sync_jobs.discard(job_id)
+
+
+@app.get("/api/youtube/studio-config")
+def api_get_studio_config():
+    return JSONResponse(_studio_config_status(), headers=_NO_CACHE_HEADERS)
+
+
+@app.post("/api/youtube/studio-config")
+def api_post_studio_config(payload: Dict[str, Any] = Body(...)):
+    _require_local_write("saving YouTube Studio API configuration")
+    if payload.get("clear"):
+        if STUDIO_CONFIG_PATH.exists():
+            try:
+                STUDIO_CONFIG_PATH.unlink()
+            except Exception:
+                pass
+        with _yt_lock:
+            _yt_cache["timestamp"] = 0.0
+            _yt_discovery_cache["timestamp"] = 0.0
+        yt = fetch_youtube_analytics(force=True, manual=True, discover=True)
+        return JSONResponse({"ok": True, "config": _studio_config_status(), "youtube": yt})
+
+    cfg = _get_studio_config()
+    with _new_yt_session() as sess:
+        if "youtube_api_key" in payload:
+            key_val = str(payload.get("youtube_api_key") or "").strip()
+            if key_val:
+                test_r = None
+                last_net_exc: Optional[Exception] = None
+                for ch_ep in (
+                    "https://www.googleapis.com/youtube/v3/channels",
+                    "https://youtube.googleapis.com/youtube/v3/channels",
+                ):
+                    try:
+                        test_r = sess.get(
+                            ch_ep,
+                            params={"part": "snippet,statistics", "id": YOUTUBE_CHANNEL_ID, "key": key_val},
+                            timeout=(4.2, 4.0),
+                        )
+                        break
+                    except requests.RequestException as exc:
+                        last_net_exc = exc
+                if test_r is None:
+                    raise HTTPException(
+                        status_code=502,
+                        detail=f"Could not reach Google YouTube Data API v3 to validate key: {last_net_exc}",
+                    )
+                if test_r.status_code != 200:
+                    try:
+                        msg = test_r.json().get("error", {}).get("message") or test_r.text[:200]
+                    except Exception:
+                        msg = test_r.text[:200]
+                    raise HTTPException(status_code=400, detail=f"YouTube Data API v3 key rejected ({test_r.status_code}): {msg}")
+                cfg["youtube_api_key"] = key_val
+            else:
+                cfg.pop("youtube_api_key", None)
+
+        for k in ("oauth_access_token", "oauth_refresh_token", "oauth_client_id", "oauth_client_secret", "zapier_webhook_url"):
+            if k in payload:
+                val = str(payload.get(k) or "").strip()
+                if val:
+                    cfg[k] = val
+                else:
+                    cfg.pop(k, None)
+
+        has_oauth_creds = bool(
+            (cfg.get("oauth_access_token") or "").strip()
+            or (
+                (cfg.get("oauth_refresh_token") or "").strip()
+                and (cfg.get("oauth_client_id") or "").strip()
+                and (cfg.get("oauth_client_secret") or "").strip()
+            )
+        )
+        if has_oauth_creds and any(k in payload for k in ("oauth_access_token", "oauth_refresh_token", "oauth_client_id", "oauth_client_secret")):
+            tok = _refresh_oauth_token_if_needed(cfg, sess, force=False)
+            if not tok:
+                raise HTTPException(status_code=400, detail="Could not obtain valid YouTube OAuth access token from provided credentials.")
+            r_test = None
+            last_oauth_exc: Optional[Exception] = None
+            for ch_ep in (
+                "https://www.googleapis.com/youtube/v3/channels",
+                "https://youtube.googleapis.com/youtube/v3/channels",
+            ):
+                try:
+                    r_test = sess.get(
+                        ch_ep,
+                        params={"part": "snippet,statistics,status", "mine": "true"},
+                        headers={"Authorization": f"Bearer {tok}"},
+                        timeout=(4.2, 4.0),
+                    )
+                    break
+                except requests.RequestException as exc:
+                    last_oauth_exc = exc
+            if r_test is None:
+                raise HTTPException(
+                    status_code=502,
+                    detail=f"Could not reach Google YouTube API to verify OAuth token: {last_oauth_exc}",
+                )
+            if r_test.status_code != 200:
+                raise HTTPException(status_code=400, detail=f"YouTube OAuth token rejected ({r_test.status_code}): {r_test.text[:200]}")
+
+    cfg["updated_at"] = datetime.now().astimezone().isoformat(timespec="seconds")
+    _write_json_atomic(STUDIO_CONFIG_PATH, cfg)
+
+    with _yt_lock:
+        _yt_cache["timestamp"] = 0.0
+        _yt_discovery_cache["timestamp"] = 0.0
+    yt = fetch_youtube_analytics(force=True, manual=True, discover=True)
+    return JSONResponse({"ok": True, "config": _studio_config_status(), "youtube": yt})
+
+
+@app.get("/api/youtube/studio-sync/status")
+def api_studio_sync_status():
+    return JSONResponse(_inspect_studio_sync_job(), headers=_NO_CACHE_HEADERS)
+
+
+@app.post("/api/youtube/studio-sync")
+def api_studio_sync():
+    _require_local_write("YouTube Studio live sync")
+    cur_job = _inspect_studio_sync_job()
+    if cur_job.get("active"):
+        return JSONResponse({"ok": True, "already_running": True, "job": cur_job})
+
+    job_id = f"ss_{uuid.uuid4().hex[:8]}"
+    now_iso = datetime.now().astimezone().isoformat(timespec="seconds")
+    cfg = _get_studio_config()
+    has_direct_oauth = bool(
+        (cfg.get("oauth_access_token") or "").strip()
+        or (
+            (cfg.get("oauth_refresh_token") or "").strip()
+            and (cfg.get("oauth_client_id") or "").strip()
+            and (cfg.get("oauth_client_secret") or "").strip()
+        )
+    )
+
+    if has_direct_oauth:
+        _update_studio_sync_job(
+            {
+                "job_id": job_id,
+                "status": "syncing",
+                "step": "Querying Google YouTube Studio & Analytics API v2 directly...",
+                "started_at": now_iso,
+                "error": None,
+            }
+        )
+        try:
+            snap = _run_oauth_direct_studio_sync(cfg, job_id)
+            with _yt_lock:
+                _yt_cache["timestamp"] = 0.0
+            yt = fetch_youtube_analytics(force=True, manual=True, discover=True)
+            return JSONResponse(
+                {
+                    "ok": True,
+                    "mode": "direct_oauth",
+                    "job": _inspect_studio_sync_job(),
+                    "studio_analytics": snap,
+                    "youtube": yt,
+                },
+                headers=_NO_CACHE_HEADERS,
+            )
+        except Exception as exc:
+            _update_studio_sync_job(
+                {"status": "error", "step": "Direct OAuth sync failed", "error": str(exc)},
+                expected_job_id=job_id,
+            )
+            raise HTTPException(status_code=500, detail=str(exc))
+
+    job = {
+        "job_id": job_id,
+        "status": "starting",
+        "step": "Starting YouTube Studio OAuth sync via Zapier...",
+        "conversation_id": None,
+        "started_at": now_iso,
+        "updated_at": now_iso,
+        "error": None,
+    }
+    _write_json_atomic(STUDIO_SYNC_JOB_PATH, job)
+    _active_studio_sync_jobs.add(job_id)
+    threading.Thread(target=_run_studio_sync_worker, args=(job_id,), daemon=True).start()
+    return JSONResponse({"ok": True, "mode": "zapier_oauth", "job": {**job, "active": True}}, headers=_NO_CACHE_HEADERS)
 
 
 @app.get("/api/monetization")
 def api_monetization(refresh: int = Query(0)):
     yt_data = fetch_youtube_analytics(force=bool(refresh))
-    return JSONResponse(get_monetization_overview(yt_data))
+    return JSONResponse(get_monetization_overview(yt_data), headers=_NO_CACHE_HEADERS)
 
 
 @app.post("/api/monetization/settings")
@@ -2232,7 +4179,7 @@ def api_queue_metadata(payload: Dict[str, Any] = Body(...)):
 
 @app.get("/api/upload/status")
 def api_upload_status():
-    return JSONResponse(_inspect_upload_job())
+    return JSONResponse(_inspect_upload_job(), headers=_NO_CACHE_HEADERS)
 
 
 @app.post("/api/upload/clear")
@@ -2436,8 +4383,46 @@ async def api_upload_manual(request: Request):
     return JSONResponse({"ok": True, "job": {**job, "active": True}})
 
 
+def _prewarm_dns_host(host: str) -> None:
+    try:
+        _yt_get_ipv4s(host, 443)
+    except Exception:
+        pass
+
+
+def _yt_live_poller_loop() -> None:
+    global _yt_in_flight
+    if not CLOUD_MODE and os.name == "nt":
+        threading.Thread(target=_refresh_proc_tools_bg, daemon=True).start()
+        for h in ("www.youtube.com", "youtubei.googleapis.com", "www.googleapis.com", "oauth2.googleapis.com"):
+            threading.Thread(target=_prewarm_dns_host, args=(h,), daemon=True, name="yt-dns-prewarm").start()
+    try:
+        fetch_youtube_analytics(force=True, manual=False, discover=False)
+    except Exception:
+        pass
+    _trigger_bg_discovery_if_stale()
+    while True:
+        time.sleep(4.2)
+        try:
+            run_now = False
+            with _yt_lock:
+                ts = float(_yt_cache["timestamp"] or 0.0)
+                if not _yt_in_flight and (ts == 0.0 or (time.time() - ts) >= 4.0):
+                    _yt_in_flight = True
+                    run_now = True
+            if run_now:
+                _refresh_youtube_analytics_sync(force_discovery=False)
+        except Exception:
+            pass
+
+
+@app.on_event("startup")
+def _warmup_local_yt_pool() -> None:
+    if not IS_VERCEL:
+        threading.Thread(target=_yt_live_poller_loop, daemon=True, name="yt-live-poller").start()
+
+
 if __name__ == "__main__":
     import uvicorn
 
-    threading.Thread(target=fetch_youtube_analytics, kwargs={"force": True}, daemon=True).start()
     uvicorn.run(app, host="127.0.0.1", port=8765, log_level="info")

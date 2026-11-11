@@ -5,8 +5,6 @@
   "cron_str": "CRON_TZ=Asia/Kolkata 0 19 * * *",
   "latest_conversation_note": "Workstation daemon armed · FIFO queue uploads 1 Short/day at 7:00 PM IST.",
   "log_tail": [
-    "2026-11-09 19:44:18 [schedule] Next execution scheduled in 21h15m41s (at 2026-11-10 17:00:00 UTC), will run by 2026-11-10 17:01:23 UTC",
-    "=== sidecar \"daily-viral-shorts\" started at 2026-11-10T06:08:48+02:00 ===",
     "2026-11-10 04:08:51 [schedule] Scheduler started for schedule: \"CRON_TZ=Africa/Khartoum 0 19 * * *\"",
     "2026-11-10 04:08:51 [schedule] Next execution scheduled in 12h51m8s (at 2026-11-10 17:00:00 UTC), will run by 2026-11-10 17:01:53 UTC",
     "=== sidecar \"daily-viral-shorts\" started at 2026-11-10T06:37:58+02:00 ===",
@@ -15,7 +13,10 @@
     "=== sidecar \"daily-viral-shorts\" started at 2026-11-10T06:40:48+02:00 ===",
     "2026-11-10 04:40:49 [schedule] Scheduler started for schedule: \"CRON_TZ=Asia/Kolkata 0 19 * * *\"",
     "2026-11-10 04:40:49 [schedule] Next execution scheduled in 8h49m10s (at 2026-11-10 13:30:00 UTC), will run by 2026-11-10 13:31:53 UTC",
-    "2026-11-10 13:30:53 [schedule] Next execution scheduled in 23h59m7s (at 2026-11-11 13:30:00 UTC), will run by 2026-11-11 13:31:53 UTC"
+    "2026-11-10 13:30:53 [schedule] Next execution scheduled in 23h59m7s (at 2026-11-11 13:30:00 UTC), will run by 2026-11-11 13:31:53 UTC",
+    "=== sidecar \"daily-viral-shorts\" started at 2026-11-11T18:09:20+05:30 ===",
+    "2026-11-11 12:39:25 [schedule] Scheduler started for schedule: \"CRON_TZ=Asia/Kolkata 0 19 * * *\"",
+    "2026-11-11 12:39:25 [schedule] Next execution scheduled in 50m35s (at 2026-11-11 13:30:00 UTC), will run by 2026-11-11 13:31:53 UTC"
   ],
-  "synced_at": "2026-11-11T11:32:25+05:30"
+  "synced_at": "2026-11-11T18:14:50+05:30"
 }
