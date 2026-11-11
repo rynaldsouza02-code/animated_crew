@@ -1,0 +1,71 @@
+{
+  "title": "The Man Who Flew Ten Thousand Times On One Ticket",
+  "voice": "am_michael",
+  "speed": 1.07,
+  "lead": 0.28,
+  "outro": 1.0,
+  "gap": 0.16,
+  "music": "bounce",
+  "sources": [
+    "Los Angeles Times / The Guardian / Wikipedia — American Airlines sold unlimited lifetime first-class AAirpasses for $250,000 in the 1980s (plus $150,000 companion option).",
+    "Forbes / Business Insider — Steve Rothstein bought an AAirpass in 1987, took over 10,000 flights (30+ million miles) including trips to other cities just for lunch, costing the airline an estimated $21 million before revocation in 2008."
+  ],
+  "lines": [
+    {
+      "text": "In 1987, one man bought an unlimited lifetime plane ticket —",
+      "caps": "In 1987, | one man | bought an | unlimited | lifetime | plane ticket —",
+      "gap": 0.18
+    },
+    {
+      "text": "and flew ten thousand times on the airline's dime.",
+      "gap": 0.22
+    },
+    {
+      "text": "See, American Airlines badly needed cash in the eighties,"
+    },
+    {
+      "text": "so they offered a wild golden pass for two hundred fifty thousand dollars.",
+      "gap": 0.18
+    },
+    {
+      "text": "Unlimited first class, anywhere on Earth, forever."
+    },
+    {
+      "text": "Investor Steve Rothstein happily paid up,",
+      "caps": "Investor | Steve Rothstein | happily | paid up,"
+    },
+    {
+      "text": "then turned airports into his personal subway."
+    },
+    {
+      "text": "He flew to London just for lunch,",
+      "gap": 0.16
+    },
+    {
+      "text": "hopped to Tokyo for dinner,"
+    },
+    {
+      "text": "and even booked an empty companion seat under the name Bag Rothstein.",
+      "gap": 0.2
+    },
+    {
+      "text": "Over twenty years he racked up thirty million miles,"
+    },
+    {
+      "text": "costing the airline twenty-one million dollars in free seats.",
+      "gap": 0.18
+    },
+    {
+      "text": "Eventually an airport agent walked up, confiscated his golden card,",
+      "caps": "Eventually | an airport agent | walked up, | confiscated | his golden card,"
+    },
+    {
+      "text": "and banned him for exploiting their own promise.",
+      "gap": 0.18
+    },
+    {
+      "text": "Only sixty-six people bought the pass — and Steve won the record.",
+      "gap": 0.3
+    }
+  ]
+}

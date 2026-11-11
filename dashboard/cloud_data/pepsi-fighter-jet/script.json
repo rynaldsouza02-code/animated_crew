@@ -1,0 +1,70 @@
+{
+  "title": "The Student Who Sued Pepsi For A Fighter Jet",
+  "voice": "am_michael",
+  "speed": 1.07,
+  "lead": 0.28,
+  "outro": 1.0,
+  "gap": 0.16,
+  "music": "bounce",
+  "sources": [
+    "Leonard v. PepsiCo, Inc., 88 F. Supp. 2d 116 (S.D.N.Y. 1999) — 1995/1996 Pepsi Stuff commercial joked a Harrier fighter jet cost 7,000,000 Pepsi Points.",
+    "Wikipedia / CBS News — Business student John Leonard collected 15 Pepsi Points, raised funds to mail a $700,008.50 check at 10 cents per extra point, and demanded the ~$23M-$37M military jet."
+  ],
+  "lines": [
+    {
+      "text": "In 1996, one college student actually tried to buy a real fighter jet from Pepsi.",
+      "caps": "In 1996, | one college student | actually tried | to buy a real | fighter jet | from Pepsi.",
+      "gap": 0.22
+    },
+    {
+      "text": "And he had the check to prove it.",
+      "gap": 0.22
+    },
+    {
+      "text": "See, Pepsi aired a flashy commercial offering prizes for Pepsi Points."
+    },
+    {
+      "text": "At the end, a teenager flew a Harrier jet to school,",
+      "caps": "At the end, | a teenager | flew a | Harrier jet | to school,"
+    },
+    {
+      "text": "with a joke label reading seven million points.",
+      "gap": 0.18
+    },
+    {
+      "text": "Drinking seven million sodas was impossible."
+    },
+    {
+      "text": "Except the fine print let buyers purchase extra points for ten cents each,",
+      "caps": "Except | the fine print | let buyers | purchase | extra points | for ten cents | each,"
+    },
+    {
+      "text": "once they had fifteen.",
+      "gap": 0.18
+    },
+    {
+      "text": "Twenty-one-year-old John Leonard did the math."
+    },
+    {
+      "text": "He raised seven hundred thousand dollars from rich investors,"
+    },
+    {
+      "text": "mailed fifteen bottle points plus a giant check,",
+      "gap": 0.18
+    },
+    {
+      "text": "and demanded his twenty-three-million-dollar military jet."
+    },
+    {
+      "text": "Pepsi panicked, mailed the check back, and ended up in federal court.",
+      "gap": 0.2
+    },
+    {
+      "text": "A judge ruled nobody buys a fighter jet for soda points,"
+    },
+    {
+      "text": "though Pepsi quickly edited the price to seven hundred million.",
+      "gap": 0.3
+    }
+  ]
+}

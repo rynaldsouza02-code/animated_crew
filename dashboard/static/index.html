@@ -1877,8 +1877,8 @@
         ? "Daily 7:00 PM IST Automation Armed"
         : "Daily Automation Paused";
       document.getElementById("autoDesc").textContent = nextUp
-        ? `Next scheduled drop uploads ONLY Queue #1 ("${nextUp.title}"). ${(qSummary?.queued_count || 1) - 1} more queued Short(s) stay ready for upcoming days.`
-        : "Queue replenishes automatically when below 2 prepared videos.";
+        ? `Next scheduled drop uploads ONLY Queue #1 ("${nextUp.title}"). ${(qSummary?.queued_count || 1) - 1} more queued Short(s) stay ready — auto-generates 4 extra videos whenever 2 or fewer remain.`
+        : "Queue auto-replenishes with 4 extra videos whenever 2 or fewer remain.";
 
       document.getElementById("autoBadges").innerHTML = [
         auto.enabled ? `<span class="badge badge-emerald">FIFO 1/Day Armed</span>` : `<span class="badge badge-red">Paused</span>`,
@@ -1887,7 +1887,7 @@
 
       document.getElementById("autoMetaGrid").innerHTML = [
         { k: "Schedule", v: "Daily · 7:00 PM IST (Asia/Kolkata)" },
-        { k: "Queue Rule", v: "Publish #1 only, keep rest queued" },
+        { k: "Queue Rule", v: "Publish #1/day · +4 videos if ≤2 left" },
         { k: "Channel Target", v: "Animated_Crew (Public Shorts)" },
         { k: "Next Scheduled File", v: nextUp ? `${nextUp.slug} (${nextUp.mp4_size_mb || '--'} MB)` : "Auto-generate on run" },
       ].map(m => `

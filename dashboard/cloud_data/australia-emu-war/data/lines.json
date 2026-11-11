@@ -1,0 +1,91 @@
+{
+ "duration": 39.998,
+ "voice": "am_michael",
+ "speed": 1.08,
+ "lines": [
+  {
+   "i": 0,
+   "text": "In 1932, Australia officially declared war on emus.",
+   "start": 0.28,
+   "end": 5.005
+  },
+  {
+   "i": 1,
+   "text": "And lost.",
+   "start": 5.205,
+   "end": 5.851
+  },
+  {
+   "i": 2,
+   "text": "See, twenty thousand emus invaded wheat farms in Western Australia,",
+   "start": 6.101,
+   "end": 10.441
+  },
+  {
+   "i": 3,
+   "text": "so the government sent soldiers with machine guns.",
+   "start": 10.931,
+   "end": 13.744
+  },
+  {
+   "i": 4,
+   "text": "The plan: shoot them all in one week.",
+   "start": 13.904,
+   "end": 15.897
+  },
+  {
+   "i": 5,
+   "text": "Day one: the guns jammed.",
+   "start": 16.078,
+   "end": 17.656
+  },
+  {
+   "i": 6,
+   "text": "Day two: the emus ran into the bush in tiny groups,",
+   "start": 17.816,
+   "end": 21.146
+  },
+  {
+   "i": 7,
+   "text": "making it impossible to aim.",
+   "start": 21.486,
+   "end": 23.091
+  },
+  {
+   "i": 8,
+   "text": "Soldiers fired two thousand five hundred rounds",
+   "start": 23.271,
+   "end": 25.851
+  },
+  {
+   "i": 9,
+   "text": "and killed fewer than fifty birds.",
+   "start": 25.951,
+   "end": 28.139
+  },
+  {
+   "i": 10,
+   "text": "The commanding major said the emus could withstand an entire army division.",
+   "start": 28.339,
+   "end": 32.7
+  },
+  {
+   "i": 11,
+   "text": "Parliament recalled the troops in humiliation.",
+   "start": 32.86,
+   "end": 35.287
+  },
+  {
+   "i": 12,
+   "text": "Australia tried again the next year.",
+   "start": 35.487,
+   "end": 37.372
+  },
+  {
+   "i": 13,
+   "text": "The emus won again.",
+   "start": 37.522,
+   "end": 38.698
+  }
+ ]
+}

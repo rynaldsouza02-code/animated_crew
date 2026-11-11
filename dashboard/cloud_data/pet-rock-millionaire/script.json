@@ -1,0 +1,69 @@
+{
+  "title": "The Man Who Made Millions Selling Literal Rocks",
+  "voice": "am_michael",
+  "speed": 1.07,
+  "lead": 0.28,
+  "outro": 1.0,
+  "gap": 0.16,
+  "music": "bounce",
+  "sources": [
+    "Wikipedia / Britannica / Entrepreneur — In 1975, advertising copywriter Gary Dahl sold smooth Mexican beach stones for $3.95 in cardboard carriers with straw and a humorous 32-page Pet Rock training manual.",
+    "The New York Times / Smithsonian — Roughly 1.5 million Pet Rocks sold over six months leading up to Christmas 1975, making Dahl roughly 95 cents profit per rock and turning him into a millionaire."
+  ],
+  "lines": [
+    {
+      "text": "In 1975, one guy sold ordinary beach stones as pets —",
+      "caps": "In 1975, | one guy | sold | ordinary | beach stones | as pets —",
+      "gap": 0.18
+    },
+    {
+      "text": "and became a millionaire in six months.",
+      "gap": 0.22
+    },
+    {
+      "text": "See, copywriter Gary Dahl got tired of friends complaining about walking dogs,"
+    },
+    {
+      "text": "so he joked the perfect pet wouldn't need food, baths, or vet bills.",
+      "gap": 0.18
+    },
+    {
+      "text": "A rock."
+    },
+    {
+      "text": "So he bought plain stones for a penny each,",
+      "caps": "So he bought | plain stones | for a penny | each,"
+    },
+    {
+      "text": "tucked them onto straw inside tiny cardboard pet carriers,"
+    },
+    {
+      "text": "complete with air holes so they could breathe.",
+      "gap": 0.18
+    },
+    {
+      "text": "Even better, he wrote a funny thirty-two-page care manual,"
+    },
+    {
+      "text": "explaining how to teach your stone to sit and stay.",
+      "gap": 0.18
+    },
+    {
+      "text": "Then he slapped a four-dollar price tag on every box."
+    },
+    {
+      "text": "Shoppers went completely wild before Christmas,"
+    },
+    {
+      "text": "buying one point five million literal rocks.",
+      "gap": 0.2
+    },
+    {
+      "text": "People laughed at the gimmick all the way to the register,"
+    },
+    {
+      "text": "while Gary Dahl laughed all the way to the bank.",
+      "gap": 0.3
+    }
+  ]
+}

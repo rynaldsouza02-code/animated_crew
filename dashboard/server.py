@@ -51,23 +51,32 @@ EXCLUDED_DIRS = {"manual-uploads", "__pycache__", "renders", "review", "tmp", "t
 
 # Fallback analytics baseline (from verified Zapier / YouTube API snapshots)
 BASELINE_VIDEO_META: Dict[str, Dict[str, Any]] = {
+    "ACCzOdTOvMM": {
+        "title": "The Con Artist Who Sold The Eiffel Tower TWICE! 🗼💸 #Shorts",
+        "publishedAt": "2026-11-10T13:35:00Z",
+        "duration": "0:52",
+        "is_short": True,
+        "views": 1344,
+        "likes": 46,
+        "comments": 4,
+    },
     "GM2VoeHNEV4": {
         "title": "Parents Legally Mailed Their 5-Year-Old Daughter For 53¢! 📦🤯 #Shorts",
         "publishedAt": "2026-11-10T09:09:54Z",
         "duration": "0:52",
         "is_short": True,
-        "views": 52,
-        "likes": 19,
-        "comments": 0,
+        "views": 1439,
+        "likes": 88,
+        "comments": 6,
     },
     "U2JI4OeNHP4": {
         "title": "He bought the Queen’s bank for $1… 🤯 #Shorts #animation #funny #memes #animationmeme #joker",
         "publishedAt": "2026-11-09T13:52:52Z",
         "duration": "0:39",
         "is_short": True,
-        "views": 1324,
+        "views": 1328,
         "likes": 41,
-        "comments": 0,
+        "comments": 4,
     },
     "GR6kYF3zbTo": {
         "title": "France Football Facts! 🇫🇷⚽️ World Cup Glory! #Shorts #France #WorldCupFacts",
@@ -527,9 +536,30 @@ def _fetch_watch_metrics(video_id: str, session: Optional[requests.Session] = No
     }
 
 
+def _merged_baseline_meta(runs_data: Optional[Dict[str, Any]] = None) -> Dict[str, Dict[str, Any]]:
+    merged: Dict[str, Dict[str, Any]] = {vid: dict(meta) for vid, meta in BASELINE_VIDEO_META.items()}
+    data = runs_data if runs_data is not None else _read_json(RUNS_JSON_PATH, {"runs": []})
+    for r in data.get("runs", []):
+        yid = r.get("youtube_id")
+        if yid and (r.get("status") == "published" or r.get("published_at")) and yid not in merged:
+            dur_s = r.get("rendered_duration_sec")
+            dur_str = f"{int(dur_s) // 60}:{int(round(dur_s)) % 60:02d}" if isinstance(dur_s, (int, float)) and dur_s > 0 else "0:45"
+            merged[yid] = {
+                "title": r.get("youtube_title") or r.get("title") or yid,
+                "publishedAt": r.get("published_at") or r.get("created_at"),
+                "duration": dur_str,
+                "is_short": True,
+                "views": 0,
+                "likes": 0,
+                "comments": 0,
+            }
+    return merged
+
+
 def _build_baseline_yt() -> Dict[str, Any]:
+    baseline_map = _merged_baseline_meta()
     videos_list = []
-    for vid, base in BASELINE_VIDEO_META.items():
+    for vid, base in baseline_map.items():
         views = base.get("views", 0)
         likes = base.get("likes", 0)
         videos_list.append(
@@ -587,7 +617,8 @@ def _refresh_youtube_analytics_sync() -> Dict[str, Any]:
     live_online = False
 
     runs_data = _read_json(RUNS_JSON_PATH, {"runs": []})
-    seed_ids: List[str] = list(BASELINE_VIDEO_META.keys())
+    baseline_map = _merged_baseline_meta(runs_data)
+    seed_ids: List[str] = list(baseline_map.keys())
     for r in runs_data.get("runs", []):
         yid = r.get("youtube_id")
         if yid and yid not in seed_ids:
@@ -626,7 +657,7 @@ def _refresh_youtube_analytics_sync() -> Dict[str, Any]:
             fetch_error = str(e)
 
         def _load_one(vid: str):
-            base = BASELINE_VIDEO_META.get(vid, {})
+            base = baseline_map.get(vid, {})
             try:
                 live = _fetch_watch_metrics(vid, session=session)
                 if live.get("unavailable"):
