@@ -3500,6 +3500,9 @@ def get_longform_overview() -> Dict[str, Any]:
         if rev_ch1.exists():
             all_frames = [f"/media-longform/{slug}/review/ch1/{im.name}" for im in sorted(rev_ch1.glob("*.jpg"))]
 
+        ch1_wav = p / "chapters" / "ch1_narration.wav"
+        ch1_dur = round(ch1_wav.stat().st_size / (24000 * 2), 2) if ch1_wav.exists() else 78.38
+
         stories.append({
             "slug": slug,
             "title": ch_meta.get("title", slug),
@@ -3512,7 +3515,7 @@ def get_longform_overview() -> Dict[str, Any]:
             "mp4_url": f"/media-longform/{slug}/renders/ch1.mp4" if has_mp4 else None,
             "mp4_name": "ch1.mp4" if has_mp4 else None,
             "mp4_size_mb": round(rendered_ch1.stat().st_size / (1024 * 1024), 2) if has_mp4 else 0,
-            "duration_sec": 78.38 if has_mp4 else 0,
+            "duration_sec": ch1_dur if has_mp4 else 0,
             "preview_frames": all_frames,
             "thumb_url": all_frames[0] if all_frames else None,
             "chapters": chapters_detail,

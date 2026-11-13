@@ -1,0 +1,70 @@
+{
+  "title": "The Guy Who Flew A Lawnchair Three Miles High",
+  "voice": "am_michael",
+  "speed": 1.11,
+  "lead": 0.25,
+  "outro": 0.75,
+  "gap": 0.14,
+  "music": "bounce",
+  "sources": [
+    "Wikipedia / Smithsonian Magazine — On July 2, 1982, Larry Walters ('Lawnchair Larry') tied ~42-45 helium-filled weather balloons to a Sears aluminum patio chair in San Pedro, California, ascending accidentally to ~16,000 feet into controlled LAX airspace.",
+    "Los Angeles Times / Guinness World Records — Equipped with a pellet gun, CB radio, sandwiches, and soda, Walters popped balloons to descend, tangled in Long Beach power lines, landed safely, was fined by the FAA, and told reporters 'A man can't just sit around.'"
+  ],
+  "lines": [
+    {
+      "text": "In nineteen eighty-two, one man tied forty-five weather balloons to a lawnchair —",
+      "caps": "In 1982, | one man | tied | forty-five | weather | balloons | to a | lawnchair —",
+      "gap": 0.16
+    },
+    {
+      "text": "and accidentally soared three miles above Los Angeles.",
+      "gap": 0.18
+    },
+    {
+      "text": "See, truck driver Larry Walters always dreamed of flying planes,"
+    },
+    {
+      "text": "so he strapped helium balloons onto a patio chair.",
+      "gap": 0.15
+    },
+    {
+      "text": "He packed sandwiches, soda, a radio, and a pellet gun for later."
+    },
+    {
+      "text": "Larry planned to float thirty feet up for lunch.",
+      "gap": 0.16
+    },
+    {
+      "text": "Then his tether snapped."
+    },
+    {
+      "text": "The chair blasted skyward like a rocket,",
+      "gap": 0.14
+    },
+    {
+      "text": "climbing to sixteen thousand feet right beside commercial jets.",
+      "gap": 0.16
+    },
+    {
+      "text": "Shocked pilots radioed the airport tower,"
+    },
+    {
+      "text": "reporting a guy in a lawnchair holding a gun.",
+      "gap": 0.16
+    },
+    {
+      "text": "Shivering, Larry carefully popped a few balloons to drift down,"
+    },
+    {
+      "text": "landing safely after snagging on Long Beach power lines.",
+      "gap": 0.15
+    },
+    {
+      "text": "Aviation officers slapped him with fines on the spot,"
+    },
+    {
+      "text": "and Larry shrugged, saying a man can't just sit around.",
+      "gap": 0.25
+    }
+  ]
+}

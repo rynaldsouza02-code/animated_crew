@@ -1,0 +1,71 @@
+{
+  "title": "The Man Who Flew Around The World On Pudding",
+  "voice": "am_michael",
+  "speed": 1.11,
+  "lead": 0.25,
+  "outro": 0.75,
+  "gap": 0.14,
+  "music": "bounce",
+  "sources": [
+    "Wikipedia / Time / Los Angeles Times — In May 1999, civil engineer David Phillips ('The Pudding Guy') spotted a Healthy Choice mail-in promo offering 500 frequent-flyer miles per 10 UPC barcodes, doubled to 1,000 miles for mail-ins during May 1999.",
+    "Snopes / Foodista — Phillips bought 12,150 individual 25-cent chocolate pudding cups at Grocery Outlet stores around Sacramento for about $3,140, donated the pudding to Salvation Army in exchange for help peeling barcodes, and earned 1,253,000 miles plus lifetime AAdvantage Gold status."
+  ],
+  "lines": [
+    {
+      "text": "In nineteen ninety-nine, one guy bought twelve thousand cups of pudding —",
+      "caps": "In 1999, | one guy | bought | twelve thousand | cups of | pudding —",
+      "gap": 0.16
+    },
+    {
+      "text": "and flew around the world for life.",
+      "gap": 0.18
+    },
+    {
+      "text": "See, engineer David Phillips spotted twenty-five-cent pudding cups,"
+    },
+    {
+      "text": "stamped with a wild airline promo.",
+      "gap": 0.15
+    },
+    {
+      "text": "Mail ten barcodes, get five hundred flight miles."
+    },
+    {
+      "text": "Mail them in May, and the bonus doubled to a thousand.",
+      "gap": 0.15
+    },
+    {
+      "text": "David pulled out a calculator and grinned."
+    },
+    {
+      "text": "Ten cups cost two-fifty — meaning flight miles cost pennies.",
+      "gap": 0.15
+    },
+    {
+      "text": "So he raided ten grocery stores for twelve thousand one hundred fifty cups,",
+      "caps": "So he | raided ten | grocery stores | for | twelve thousand | one hundred | fifty cups,"
+    },
+    {
+      "text": "spending just three thousand one hundred dollars.",
+      "gap": 0.16
+    },
+    {
+      "text": "He donated every single pudding to charity"
+    },
+    {
+      "text": "so volunteers peeled labels all week.",
+      "gap": 0.15
+    },
+    {
+      "text": "Soon, one point two five million miles hit his account,"
+    },
+    {
+      "text": "paying for Europe trips plus lifetime VIP status.",
+      "gap": 0.15
+    },
+    {
+      "text": "Plus an eight-hundred-dollar tax write-off, just for dessert.",
+      "gap": 0.25
+    }
+  ]
+}

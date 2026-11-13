@@ -985,12 +985,21 @@
         </div>
       </div>
 
+      <!-- Story Selector Chips -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+        <div style="font-size:0.86rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span>Active Story:</span>
+          <div class="filter-pills" id="lfStorySelector" style="display:inline-flex;gap:6px;flex-wrap:wrap;"></div>
+        </div>
+        <div style="font-size:0.75rem;color:var(--text-muted);" id="lfStoryCountHint">2 Long-Form Stories Available</div>
+      </div>
+
       <!-- Featured Master Video Player -->
       <div class="panel">
         <div class="panel-head">
           <div>
-            <div class="panel-title">Master Video Player: Act 1 — The Emergency in the Korean Strait</div>
-            <div class="panel-sub">1920×1080 16:9 Widescreen · Three.js 3D Sickbay Scene · Kokoro AI Voice · Synchronized Word Captions</div>
+            <div class="panel-title" id="lfPlayerTitle">Master Video Player: The Great Imposter (Act 1)</div>
+            <div class="panel-sub" id="lfPlayerSub">1920×1080 16:9 Widescreen · Three.js 3D Scene · Kokoro AI Voice · Synchronized Word Captions</div>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
             <span class="badge badge-emerald">1080p Master Ready</span>
@@ -1008,8 +1017,8 @@
       <div class="panel">
         <div class="panel-head">
           <div>
-            <div class="panel-title">Multi-Act Storyline Breakdown (5 Chapters · ~15 Minutes)</div>
-            <div class="panel-sub">The Fake Surgeon Who Performed Operations on Warships (Ferdinand Waldo Demara)</div>
+            <div class="panel-title" id="lfChaptersTitle">Multi-Act Storyline Breakdown (5 Chapters · ~15 Minutes)</div>
+            <div class="panel-sub" id="lfChaptersSub">The Fake Surgeon Who Performed Operations on Warships (Ferdinand Waldo Demara)</div>
           </div>
           <div style="display:flex;gap:8px;align-items:center;">
             <span class="badge badge-cyan" id="lfChaptersBadge">5 Acts Total</span>
@@ -2877,6 +2886,12 @@
     /* ============================================================ */
     let currentLongformData = null;
     let expandedChapters = {};
+    let selectedStoryIndex = 0;
+
+    function selectLongformStory(idx) {
+      selectedStoryIndex = idx;
+      if (currentLongformData) renderLongform(currentLongformData);
+    }
 
     function toggleChapterDetails(chNum) {
       expandedChapters[chNum] = !expandedChapters[chNum];
@@ -2891,7 +2906,21 @@
       const stories = lf?.stories || [];
       const queue = lf?.queue || [];
       const sched = lf?.schedule || {};
-      const activeStory = stories[0] || (queue[0] ? { title: queue[0].title, slug: queue[0].slug } : null);
+
+      // Story Selector Chips
+      const selContainer = document.getElementById("lfStorySelector");
+      const countHint = document.getElementById("lfStoryCountHint");
+      if (selContainer && stories.length > 0) {
+        if (selectedStoryIndex >= stories.length) selectedStoryIndex = 0;
+        selContainer.innerHTML = stories.map((s, idx) => `
+          <button class="filter-pill ${idx === selectedStoryIndex ? 'active' : ''}" onclick="selectLongformStory(${idx})">
+            ${escapeHtml(s.title || s.slug)}
+          </button>
+        `).join("");
+        if (countHint) countHint.textContent = `${stories.length} Long-Form Stories In Library`;
+      }
+
+      const activeStory = stories[selectedStoryIndex] || stories[0] || (queue[0] ? { title: queue[0].title, slug: queue[0].slug } : null);
 
       // Badge in Navigation Tab
       const tabBadge = document.getElementById("tabLongformBadge");
@@ -2910,12 +2939,30 @@
         stBadge.textContent = `${sched.storage_location}`;
       }
 
+      // Titles & Subtitles for active story
+      const pTitle = document.getElementById("lfPlayerTitle");
+      if (pTitle && activeStory) {
+        pTitle.textContent = `Master Video Player: ${activeStory.title} (Act 1)`;
+      }
+      const pSub = document.getElementById("lfPlayerSub");
+      if (pSub && activeStory) {
+        pSub.textContent = `1920×1080 16:9 Widescreen · Three.js 3D Scene · Kokoro AI Voice · Synchronized Word Captions`;
+      }
+      const chTitle = document.getElementById("lfChaptersTitle");
+      if (chTitle && activeStory) {
+        chTitle.textContent = `Multi-Act Storyline Breakdown (${activeStory.total_chapters || 5} Chapters · ~15 Minutes)`;
+      }
+      const chSub = document.getElementById("lfChaptersSub");
+      if (chSub && activeStory) {
+        chSub.textContent = activeStory.topic || activeStory.title;
+      }
+
       // KPIs
       if (activeStory) {
         const titleEl = document.getElementById("lfStoryTitle");
         if (titleEl) titleEl.textContent = activeStory.title || "The Great Imposter";
         const subEl = document.getElementById("lfStorySub");
-        if (subEl) subEl.textContent = `Ferdinand Waldo Demara · ${activeStory.total_chapters || 5} Acts`;
+        if (subEl) subEl.textContent = `${activeStory.topic || activeStory.title} · ${activeStory.total_chapters || 5} Acts`;
       }
 
       const rendVal = document.getElementById("lfRenderedVal");
@@ -2952,6 +2999,10 @@
           dlBtn.download = activeStory.mp4_name || `${activeStory.slug}-ch1.mp4`;
           dlBtn.style.display = "inline-flex";
         }
+      } else if (vidEl) {
+        vidEl.removeAttribute("src");
+        if (activeStory && activeStory.thumb_url) vidEl.poster = activeStory.thumb_url;
+        if (dlBtn) dlBtn.style.display = "none";
       }
 
       // Chapters List
@@ -3025,14 +3076,23 @@
           ? activeStory.preview_frames
           : [];
         if (frames.length > 0) {
-          const frameLabels = [
-            "Scene 01: Korean Strait Sickbay",
-            "Scene 02: Demara Studying Manual",
-            "Scene 03: Surgical Ward Prep",
-            "Scene 04: Operating Under Pressure",
-            "Scene 05: The Miracle Extraction",
-            "Scene 06: Con Artist Resolution"
-          ];
+          const frameLabels = activeStory.slug.includes("victor-lustig")
+            ? [
+                "Scene 01: Paris 1925 Hotel Suite",
+                "Scene 02: 7,000 Tons Scrap Order",
+                "Scene 03: The Tycoons Summoned",
+                "Scene 04: The Debonair Host",
+                "Scene 05: Forged Wax Seals",
+                "Scene 06: A King's Ransom"
+              ]
+            : [
+                "Scene 01: Korean Strait Sickbay",
+                "Scene 02: Demara Studying Manual",
+                "Scene 03: Surgical Ward Prep",
+                "Scene 04: Operating Under Pressure",
+                "Scene 05: The Miracle Extraction",
+                "Scene 06: Con Artist Resolution"
+              ];
           sbGrid.innerHTML = frames.map((fUrl, idx) => {
             const label = frameLabels[idx] || `Keyframe ${idx + 1}`;
             return `
@@ -3068,30 +3128,32 @@
     }
 
     function openLongformUploadModal() {
-      const q = currentLongformData?.queue?.[0] || {};
+      const activeStory = currentLongformData?.stories?.[selectedStoryIndex] || currentLongformData?.stories?.[0];
+      const q = (currentLongformData?.queue || []).find(item => item.slug === activeStory?.slug) || currentLongformData?.queue?.[0] || {};
       const meta = q.youtube_metadata || {
-        title: "The Fake Surgeon Who Performed Operations on Warships | Ferdinand Demara Story (1951)",
-        description: "The unbelievable true story of Ferdinand Waldo Demara — 'The Great Imposter' — who boarded the Canadian destroyer HMCS Cayuga during the Korean War posing as surgeon Dr. Joseph Cyr.\\n\\nWith no medical degree, he performed 16 major operations, including extracting a bullet from near a soldier's heart, and saved every single patient.\\n\\nChapter Breakdown:\\n0:00 Chapter 1: The Emergency in the Korean Strait\\n1:18 Chapter 2: The Mask of Dr. Joseph Cyr\\n3:12 Chapter 3: Sixteen Hours in the Sickbay\\n5:06 Chapter 4: The Hero Unmasked\\n7:06 Chapter 5: The Chameleon's Legacy\\n\\nSubscribe to Animated_Crew for twice-weekly high-graphics historical documentaries!\\n\\n#History #TheGreatImposter #FerdinandDemara #Documentary #Warship #TrueStory",
-        tags: ["Ferdinand Demara", "The Great Imposter", "True Story", "History Documentary", "Con Artist", "Royal Canadian Navy", "HMCS Cayuga", "Korean War", "Animation Documentary"],
-        privacy_status: "public",
-        category_id: "27",
+        title: q.youtube_title || activeStory?.title || "Long-Form Video Documentary",
+        description: q.youtube_description || "Twice-weekly documentary story on Animated_Crew.",
+        tags: q.youtube_tags || ["Documentary", "TrueStory", "History"],
+        privacy_status: q.privacy_status || "public",
+        category_id: q.category_id || "27",
       };
 
-      const title = meta.title || "The Fake Surgeon Who Performed Operations on Warships";
+      const title = meta.title || "Long-Form Video";
       const desc = typeof meta.description === "string" ? meta.description.replace(/\\n/g, "\n") : "";
       const tags = Array.isArray(meta.tags) ? meta.tags.join(", ") : (meta.tags || "");
-      const mp4Url = q.mp4_url || "/media-longform/ferdinand-demara-great-imposter/renders/ch1.mp4";
+      const mp4Url = activeStory?.mp4_url || q.mp4_url || "";
+      const mp4Size = activeStory?.mp4_size_mb || q.size_mb || "--";
 
-      document.getElementById("modalTitle").textContent = "Long-Form Video Package — YouTube Upload Kit";
+      document.getElementById("modalTitle").textContent = `${activeStory?.title || "Long-Form Video"} — YouTube Upload Kit`;
       document.getElementById("modalBody").innerHTML = `
         <div class="script-modal-grid">
           <div>
             <div style="font-size:0.86rem;font-weight:700;color:#fff;margin-bottom:8px;">16:9 Widescreen Master Preview</div>
             <div style="background:#000;border:1px solid var(--border);border-radius:10px;overflow:hidden;aspect-ratio:16/9;margin-bottom:12px;">
-              <video src="${escapeHtml(mp4Url)}" controls playsinline style="width:100%;height:100%;object-fit:contain;"></video>
+              ${mp4Url ? `<video src="${escapeHtml(mp4Url)}" controls playsinline style="width:100%;height:100%;object-fit:contain;"></video>` : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);">Video rendering...</div>`}
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <a class="btn btn-sm" href="${escapeHtml(mp4Url)}" download="ferdinand-demara-ch1-1080p.mp4">Download Master MP4 (25.5 MB)</a>
+              ${mp4Url ? `<a class="btn btn-sm" href="${escapeHtml(mp4Url)}" download="${escapeHtml(activeStory?.slug || 'video')}-ch1-1080p.mp4">Download Master MP4 (${mp4Size} MB)</a>` : ""}
               <span class="badge badge-emerald" style="display:inline-flex;align-items:center;">1920×1080 @ 24 fps</span>
             </div>
           </div>

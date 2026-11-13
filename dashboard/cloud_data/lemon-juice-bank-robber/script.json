@@ -1,0 +1,70 @@
+{
+  "title": "The Bank Robber Who Used Lemon Juice As Disguise",
+  "voice": "am_michael",
+  "speed": 1.11,
+  "lead": 0.25,
+  "outro": 0.75,
+  "gap": 0.14,
+  "music": "bounce",
+  "sources": [
+    "Wikipedia / Quartz — On January 6, 1995, McArthur Wheeler robbed two Pittsburgh banks in broad daylight with no mask, smiling at security cameras because he believed lemon juice smeared on his face would make him invisible.",
+    "Cornell University (Kruger & Dunning, 1999) — Wheeler had tested lemon juice on his face with a Polaroid camera and saw a blank photo (due to bad film or misaiming), muttering 'But I wore the juice!' upon arrest, inspiring the Dunning-Kruger effect study."
+  ],
+  "lines": [
+    {
+      "text": "In nineteen ninety-five, a robber walked in with zero mask —",
+      "caps": "In 1995, | a robber | walked in | with | zero mask —",
+      "gap": 0.16
+    },
+    {
+      "text": "and smiled straight at every security camera.",
+      "gap": 0.18
+    },
+    {
+      "text": "See, McArthur Wheeler genuinely thought he was completely invisible."
+    },
+    {
+      "text": "He knew lemon juice worked as invisible ink on paper,"
+    },
+    {
+      "text": "so rubbing it on his face must hide him from lenses.",
+      "gap": 0.16
+    },
+    {
+      "text": "First, he even ran a scientific test."
+    },
+    {
+      "text": "He rubbed lemon juice on his cheeks and snapped a Polaroid selfie."
+    },
+    {
+      "text": "Shockingly, the photo came out totally blank —",
+      "gap": 0.14
+    },
+    {
+      "text": "because he aimed sideways or grabbed bad film.",
+      "gap": 0.16
+    },
+    {
+      "text": "Still, Wheeler felt like a genius."
+    },
+    {
+      "text": "He strolled into two banks squinting through stinging juice,",
+      "gap": 0.14
+    },
+    {
+      "text": "and robbed both tellers while waving at the lens.",
+      "gap": 0.16
+    },
+    {
+      "text": "Police aired his crystal-clear mugshot on TV and caught him in hours."
+    },
+    {
+      "text": "When cuffed, he gasped, but I wore the juice!",
+      "gap": 0.15
+    },
+    {
+      "text": "His blunder literally inspired the famous Dunning-Kruger effect.",
+      "gap": 0.25
+    }
+  ]
+}

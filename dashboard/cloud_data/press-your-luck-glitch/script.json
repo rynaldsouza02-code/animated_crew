@@ -1,0 +1,70 @@
+{
+  "title": "The Man Who Hacked A Game Show Without Cheating",
+  "voice": "am_michael",
+  "speed": 1.11,
+  "lead": 0.25,
+  "outro": 0.75,
+  "gap": 0.14,
+  "music": "bounce",
+  "sources": [
+    "Wikipedia / Mental Floss / Priceonomics — In May 1984, Ohio ice cream truck driver Michael Larson recorded episodes of CBS's 'Press Your Luck' on VCRs and discovered its 18-square 'random' board actually used only five repeating light patterns.",
+    "CBS / Press Your Luck records — Knowing Squares 4 and 8 always gave cash/prizes plus an extra spin and never held a 'Whammy', Larson spun 45 consecutive times on May 19, 1984, winning $110,237 in cash and prizes, forcing CBS to pay out and reprogram the game."
+  ],
+  "lines": [
+    {
+      "text": "In nineteen eighty-four, an ice cream driver cracked a TV game show —",
+      "caps": "In 1984, | an ice cream | driver | cracked a | TV game show —",
+      "gap": 0.16
+    },
+    {
+      "text": "and won a hundred ten thousand dollars without cheating once.",
+      "gap": 0.18
+    },
+    {
+      "text": "See, Press Your Luck flashed an eighteen-square light board."
+    },
+    {
+      "text": "Contestants slammed buzzers avoiding cartoon Whammies that wiped them out.",
+      "gap": 0.15
+    },
+    {
+      "text": "Everyone thought the lights bounced randomly."
+    },
+    {
+      "text": "Except Michael Larson paused home tapes frame by frame,"
+    },
+    {
+      "text": "and noticed the computer only looped five fixed patterns.",
+      "gap": 0.16
+    },
+    {
+      "text": "Even better, squares four and eight had zero Whammies —"
+    },
+    {
+      "text": "and always paid cash plus an extra spin.",
+      "gap": 0.16
+    },
+    {
+      "text": "Michael memorized the rhythm until his timing locked in."
+    },
+    {
+      "text": "On live TV, he hit spin after spin — forty-five straight turns —",
+      "gap": 0.14
+    },
+    {
+      "text": "while network bosses panicked and yelled cut the cameras.",
+      "gap": 0.16
+    },
+    {
+      "text": "Lawyers searched the rulebook, found zero rules broken,"
+    },
+    {
+      "text": "and had to pay him every single penny.",
+      "gap": 0.15
+    },
+    {
+      "text": "CBS quietly reprogrammed the board the very next week.",
+      "gap": 0.25
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "title": "The Man Who Sold the Eiffel Tower (Twice!)",
+  "topic": "Victor Lustig - The King of Con Artists",
+  "format": "16:9 Widescreen (1920x1080)",
+  "total_target_duration_mins": 15,
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "The Audacious Proposition",
+      "target_duration_sec": 180,
+      "summary": "Paris, May 1925. Post-war France is broke, and the Eiffel Tower is rusting away. A debonair con artist posing as the Deputy Director-General of Posts and Telegraphs checks into a luxury suite at the Hôtel de Crillon and summons five scrap metal tycoons to secretly buy 7,000 tons of national iron."
+    },
+    {
+      "chapter": 2,
+      "title": "The Perfect Mark",
+      "target_duration_sec": 180,
+      "summary": "Lustig targets André Poisson, a vulnerable provincial businessman eager for Parisian prestige. When Poisson grows nervous, Lustig pulls off the ultimate psychological masterstroke: he asks for a bribe, convincing Poisson that the corrupt deal must be 100% genuine."
+    },
+    {
+      "chapter": 3,
+      "title": "The Vienna Escape and The Second Sale",
+      "target_duration_sec": 180,
+      "summary": "With a suitcase stuffed with 70,000 francs, Lustig boards the Orient Express to Vienna. When weeks pass with zero police sirens because Poisson is too humiliated to report it, Lustig returns to Paris and does the unthinkable: he sells the Eiffel Tower all over again."
+    },
+    {
+      "chapter": 4,
+      "title": "Conning Al Capone",
+      "target_duration_sec": 200,
+      "summary": "In Prohibition Chicago, Lustig brazenly walks into Al Capone's headquarters and asks for $50,000 to double on Wall Street. He leaves the money untouched in a safe deposit box for 60 days, returns every dollar claiming failure, and is rewarded with a $5,000 tip by an amazed Capone."
+    },
+    {
+      "chapter": 5,
+      "title": "The Rumanian Box and The Alcatraz Finale",
+      "target_duration_sec": 180,
+      "summary": "Lustig's legendary 'Rumanian Box' con—a mahogany device supposedly duplicating $100 bills—rakes in hundreds of thousands until a massive Secret Service counterfeit ring investigation triggers a dramatic Manhattan bedsheet jailbreak and his final descent on Alcatraz."
+    }
+  ]
+}

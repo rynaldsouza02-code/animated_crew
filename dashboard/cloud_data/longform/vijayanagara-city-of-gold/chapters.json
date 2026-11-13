@@ -1,0 +1,39 @@
+{
+  "topic": "The Forgotten City of Gold: The Rise & Fall of the Vijayanagara Empire",
+  "title": "The Forgotten City of Gold: The Empire That Sold Diamonds by the Cup",
+  "format": "16:9 Widescreen (1920x1080)",
+  "total_target_duration_mins": 15,
+  "style": "History Twenty animated documentary (witty, epic, fast-paced, real history)",
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "The Sultan's Captives and The Courageous Hare",
+      "summary": "1336 CE. Two captured brothers sent by the Delhi Sultan to govern the rebellious South encounter an ascetic sage on the banks of the Tungabhadra River. They witness a bizarre omen: a wild hare fearlessly chasing a hunting dog. Convinced that the very soil breeds unconquerable spirits, they cast off Delhi and found the City of Victory.",
+      "target_duration_sec": 120
+    },
+    {
+      "chapter": 2,
+      "title": "The Metropolis of Gems and Gold",
+      "summary": "By the 15th century, Hampi grew into a sprawling metropolis of 500,000 citizens—larger than Rome, Paris, or London. Astonished Persian and European travelers wrote home in disbelief: diamonds, rubies, and pearls were sold in open street markets by the measuring cup, with gold coins flowing through miles of granite aqueducts.",
+      "target_duration_sec": 140
+    },
+    {
+      "chapter": 3,
+      "title": "Steel Tusks, Rice Wine, and Arabian Horses",
+      "summary": "How Vijayanagara built medieval India's most terrifying war machine: 3,000 war elephants fed fermented rice wine and fitted with curved steel tusk-blades, paired with an absolute monopoly on Portuguese Arabian horse shipments out of Goa that starved northern rivals of cavalry.",
+      "target_duration_sec": 140
+    },
+    {
+      "chapter": 4,
+      "title": "The Golden Age of Krishnadevaraya",
+      "summary": "Enter Emperor Krishnadevaraya—a warrior-scholar who woke at 4 AM to wrestle champion athletes, conquered the impregnable fortress of Raichur, wrote masterpiece epic poetry, patronized witty trickster-philosopher Tenali Rama, and sculpted musical granite pillars that sing when tapped.",
+      "target_duration_sec": 150
+    },
+    {
+      "chapter": 5,
+      "title": "The Clash of Empires and The City of Victory",
+      "summary": "January 1565. An alliance of five rival Sultanates marshals one million men at the Battle of Talikota. A treacherous betrayal turns the tide in a single afternoon, leading to the dramatic sack of Hampi—and how its breathtaking ruins along the river became an eternal UNESCO monument to human ambition.",
+      "target_duration_sec": 150
+    }
+  ]
+}
