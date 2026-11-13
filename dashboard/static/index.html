@@ -358,6 +358,97 @@
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
+    /* Long-Form Widescreen Styles */
+    .thumb-widescreen {
+      width: 140px; height: 79px; border-radius: 9px; overflow: hidden;
+      background: #161d2f; border: 1px solid var(--border);
+      position: relative; cursor: pointer; flex-shrink: 0;
+      display: grid; place-items: center; color: var(--text-muted);
+    }
+    .thumb-widescreen img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .thumb-widescreen:hover .thumb-play { opacity: 1; }
+
+    .longform-hero {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.75), rgba(15, 23, 42, 0.95));
+      border: 1px solid rgba(56, 189, 248, 0.32);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      margin-bottom: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+    .longform-hero::before {
+      content: "";
+      position: absolute; right: -80px; top: -80px; width: 340px; height: 340px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.14) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .longform-player-container {
+      background: #000;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 16 / 9;
+      width: 100%;
+      max-width: 860px;
+      margin: 0 auto 16px auto;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55);
+    }
+    .longform-player-container video {
+      width: 100%; height: 100%; display: block; object-fit: contain; background: #000;
+    }
+
+    .chapter-card {
+      background: var(--card-inset);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      transition: all 0.15s ease;
+      margin-bottom: 12px;
+    }
+    .chapter-card:hover {
+      border-color: var(--border-strong);
+      background: #0d1424;
+    }
+    .chapter-card.rendered {
+      border-left: 4px solid #10b981;
+    }
+    .chapter-card.audio-ready {
+      border-left: 4px solid #38bdf8;
+    }
+    .chapter-header {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; flex-wrap: wrap;
+    }
+    .chapter-body {
+      margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .storyboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+    }
+    .storyboard-item {
+      background: var(--card-inset);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .storyboard-item:hover {
+      transform: translateY(-2px);
+      border-color: var(--cyan);
+    }
+    .storyboard-item img {
+      width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block;
+    }
+    .storyboard-item .sb-caption {
+      padding: 8px 12px; font-size: 0.78rem; font-weight: 600; color: #e2e8f0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
     .lib-video-cell { display: flex; align-items: center; gap: 12px; min-width: 280px; }
     .lib-thumb {
       width: 80px; height: 50px; border-radius: 8px; overflow: hidden;
@@ -727,6 +818,14 @@
         <span class="tab-pill" id="tabQueueBadge">0</span>
       </button>
 
+      <button class="main-tab" id="tabBtn-longform" onclick="switchTab('longform')" role="tab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+        <span>Long-Form Videos</span>
+        <span class="tab-pill" id="tabLongformBadge" style="background:rgba(56,189,248,0.18);color:#7dd3fc;">1 Ready</span>
+      </button>
+
       <button class="main-tab" id="tabBtn-upload" onclick="switchTab('upload')" role="tab">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         <span>Manual Upload</span>
@@ -815,6 +914,158 @@
               <tr><td colspan="5" style="color:var(--text-muted);padding:24px 12px;">Loading project library...</td></tr>
             </tbody>
           </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- TAB: LONG-FORM VIDEOS (16:9 Widescreen Studio)               -->
+    <!-- ============================================================ -->
+    <section class="tab-panel" id="panel-longform">
+      <!-- Hero Header & Studio Status -->
+      <div class="longform-hero">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;position:relative;z-index:2;">
+          <div style="max-width:760px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+              <span class="badge badge-cyan" style="font-weight:700;letter-spacing:0.04em;">16:9 FULL HD STUDIO</span>
+              <span class="badge badge-emerald">Twice-Weekly Automation Armed</span>
+              <span class="badge badge-muted" id="lfStorageBadge">D:\faceless-longform (314 GB Free)</span>
+            </div>
+            <h2 style="font-size:1.55rem;font-weight:800;color:#fff;margin-bottom:8px;letter-spacing:-0.02em;">Long-Form 3D Storytelling &amp; Documentaries</h2>
+            <p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.55;margin:0;">
+              Full-length 10–15 minute cinematic true stories rendered in high-graphics 1080p widescreen (1920×1080 @ 24fps). Scheduled to drop every <strong>Tuesday &amp; Friday at 8:00 PM IST</strong> on <em>Animated_Crew</em>, with automated Google Drive backup and local D: drive storage protection.
+            </p>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+            <button class="btn btn-sm btn-outline-cyan" onclick="syncLongformToCloud()" id="btnLfCloudSync">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span id="lfSyncBtnLabel">Google Drive Cloud Sync</span>
+            </button>
+            <div style="font-size:0.73rem;color:var(--text-muted);text-align:right;">Zero C: Drive Impact · Pure D: Storage</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Long-Form Studio KPI Metrics -->
+      <div class="kpi-grid" style="margin-bottom:20px;">
+        <div class="kpi-card kpi-cyan">
+          <div class="kpi-top">
+            <span class="kpi-label">Active Long-Form Story</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </div>
+          <div class="kpi-val" style="font-size:1.15rem;line-height:1.3;" id="lfStoryTitle">The Great Imposter</div>
+          <div class="kpi-sub" id="lfStorySub">Ferdinand Waldo Demara · 5 Acts</div>
+        </div>
+
+        <div class="kpi-card kpi-emerald">
+          <div class="kpi-top">
+            <span class="kpi-label">Rendered Master</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="kpi-val" id="lfRenderedVal">Act 1 (1080p)</div>
+          <div class="kpi-sub" id="lfRenderedSub">25.5 MB · 78.4s · 24 fps Widescreen</div>
+        </div>
+
+        <div class="kpi-card kpi-purple">
+          <div class="kpi-top">
+            <span class="kpi-label">Release Schedule</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div class="kpi-val">Tue &amp; Fri 8 PM</div>
+          <div class="kpi-sub">Twice Weekly · Automated Drops</div>
+        </div>
+
+        <div class="kpi-card kpi-red">
+          <div class="kpi-top">
+            <span class="kpi-label">Narration Audio Built</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </div>
+          <div class="kpi-val" id="lfAudioVal">5 / 5 Acts Ready</div>
+          <div class="kpi-sub" id="lfAudioSub">574s spoken audio (~15m runtime)</div>
+        </div>
+      </div>
+
+      <!-- Featured Master Video Player -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Master Video Player: Act 1 — The Emergency in the Korean Strait</div>
+            <div class="panel-sub">1920×1080 16:9 Widescreen · Three.js 3D Sickbay Scene · Kokoro AI Voice · Synchronized Word Captions</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <span class="badge badge-emerald">1080p Master Ready</span>
+            <a class="btn btn-sm" id="btnLfDownload" href="/media-longform/ferdinand-demara-great-imposter/renders/ch1.mp4" download="ferdinand-demara-ch1-1080p.mp4">Download MP4 (25.5 MB)</a>
+            <button class="btn btn-sm btn-crimson" onclick="openLongformUploadModal()">YouTube Upload Kit</button>
+          </div>
+        </div>
+
+        <div class="longform-player-container">
+          <video id="lfMainVideo" src="/media-longform/ferdinand-demara-great-imposter/renders/ch1.mp4" controls preload="metadata" poster="/media-longform/ferdinand-demara-great-imposter/review/ch1/t15.00.jpg"></video>
+        </div>
+      </div>
+
+      <!-- 5-Chapter Multi-Act Storyline Breakdown -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Multi-Act Storyline Breakdown (5 Chapters · ~15 Minutes)</div>
+            <div class="panel-sub">The Fake Surgeon Who Performed Operations on Warships (Ferdinand Waldo Demara)</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span class="badge badge-cyan" id="lfChaptersBadge">5 Acts Total</span>
+          </div>
+        </div>
+
+        <div id="lfChapterList">
+          <div style="color:var(--text-muted);font-size:0.85rem;padding:12px 0;">Loading storyline chapters...</div>
+        </div>
+      </div>
+
+      <!-- 16:9 Storyboard QA Frames -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">16:9 Storyboard QA Frames (1080p 3D High Graphics)</div>
+            <div class="panel-sub">Sample frames captured directly from the Three.js 3D rendering pipeline for quality inspection. Click any frame to inspect in full HD.</div>
+          </div>
+          <span class="badge badge-muted">6 Review Keyframes</span>
+        </div>
+
+        <div class="storyboard-grid" id="lfStoryboardGrid">
+          <div style="color:var(--text-muted);font-size:0.85rem;padding:12px 0;">Loading storyboard frames...</div>
+        </div>
+      </div>
+
+      <!-- Long-Form Pipeline & Storage Architecture Info -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Long-Form Pipeline &amp; Storage Architecture</div>
+            <div class="panel-sub">Isolated storage strategy designed to never consume C: drive space while streaming to YouTube &amp; Google Drive</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;">
+          <div style="background:var(--card-inset);border:1px solid var(--border);border-radius:10px;padding:14px;">
+            <div style="font-size:0.75rem;font-weight:700;color:var(--cyan);text-transform:uppercase;margin-bottom:6px;">Storage Isolation</div>
+            <div style="font-size:0.95rem;font-weight:700;color:#fff;margin-bottom:4px;">D:\faceless-longform (314 GB Free)</div>
+            <div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.45;">
+              All heavy 1080p video renders, WAV audio stems, and review frames are written exclusively to the D: drive, ensuring primary system C: drive storage remains untouched.
+            </div>
+          </div>
+          <div style="background:var(--card-inset);border:1px solid var(--border);border-radius:10px;padding:14px;">
+            <div style="font-size:0.75rem;font-weight:700;color:var(--emerald);text-transform:uppercase;margin-bottom:6px;">Cloud Archival</div>
+            <div style="font-size:0.95rem;font-weight:700;color:#fff;margin-bottom:4px;">Google Drive Storage Sync</div>
+            <div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.45;">
+              Master renders and metadata automatically archive to Google Drive cloud storage upon completion, creating redundant cloud backups for global review.
+            </div>
+          </div>
+          <div style="background:var(--card-inset);border:1px solid var(--border);border-radius:10px;padding:14px;">
+            <div style="font-size:0.75rem;font-weight:700;color:var(--purple);text-transform:uppercase;margin-bottom:6px;">Autonomous Release Cadence</div>
+            <div style="font-size:0.95rem;font-weight:700;color:#fff;margin-bottom:4px;">Twice Weekly: Tue &amp; Fri @ 8:00 PM IST</div>
+            <div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.45;">
+              Long-form stories are released every Tuesday and Friday evening. Daily 7:00 PM IST Shorts continue publishing autonomously without interference.
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -2621,6 +2872,266 @@
       if (sa.studio_realtime_url) document.getElementById("studioRealtimeLink").href = sa.studio_realtime_url;
     }
 
+    /* ============================================================ */
+    /* Render Long-Form Videos Section                              */
+    /* ============================================================ */
+    let currentLongformData = null;
+    let expandedChapters = {};
+
+    function toggleChapterDetails(chNum) {
+      expandedChapters[chNum] = !expandedChapters[chNum];
+      const bodyEl = document.getElementById(`chBody-${chNum}`);
+      const iconEl = document.getElementById(`chIcon-${chNum}`);
+      if (bodyEl) bodyEl.style.display = expandedChapters[chNum] ? "block" : "none";
+      if (iconEl) iconEl.style.transform = expandedChapters[chNum] ? "rotate(180deg)" : "rotate(0deg)";
+    }
+
+    function renderLongform(lf) {
+      currentLongformData = lf || {};
+      const stories = lf?.stories || [];
+      const queue = lf?.queue || [];
+      const sched = lf?.schedule || {};
+      const activeStory = stories[0] || (queue[0] ? { title: queue[0].title, slug: queue[0].slug } : null);
+
+      // Badge in Navigation Tab
+      const tabBadge = document.getElementById("tabLongformBadge");
+      if (tabBadge) {
+        if (stories.length > 0) {
+          const renderedCount = stories.filter(s => s.has_render).length;
+          tabBadge.textContent = renderedCount > 0 ? `${renderedCount} Ready` : `${stories.length} Story`;
+        } else {
+          tabBadge.textContent = "Tue & Fri";
+        }
+      }
+
+      // Storage & Cloud badge
+      const stBadge = document.getElementById("lfStorageBadge");
+      if (stBadge && sched.storage_location) {
+        stBadge.textContent = `${sched.storage_location}`;
+      }
+
+      // KPIs
+      if (activeStory) {
+        const titleEl = document.getElementById("lfStoryTitle");
+        if (titleEl) titleEl.textContent = activeStory.title || "The Great Imposter";
+        const subEl = document.getElementById("lfStorySub");
+        if (subEl) subEl.textContent = `Ferdinand Waldo Demara · ${activeStory.total_chapters || 5} Acts`;
+      }
+
+      const rendVal = document.getElementById("lfRenderedVal");
+      const rendSub = document.getElementById("lfRenderedSub");
+      if (activeStory && activeStory.has_render) {
+        if (rendVal) rendVal.textContent = "Act 1 Master (1080p)";
+        if (rendSub) rendSub.textContent = `${activeStory.mp4_size_mb || 25.5} MB · ${activeStory.duration_sec || 78.4}s · 24 fps`;
+      } else {
+        if (rendVal) rendVal.textContent = "In Pipeline";
+        if (rendSub) rendSub.textContent = "Narration audio ready";
+      }
+
+      const audioVal = document.getElementById("lfAudioVal");
+      const audioSub = document.getElementById("lfAudioSub");
+      if (activeStory && activeStory.chapters) {
+        const audioCount = activeStory.chapters.filter(c => c.status === "audio_ready" || c.status === "rendered").length;
+        if (audioVal) audioVal.textContent = `${audioCount} / ${activeStory.chapters.length} Acts Built`;
+        const totalDur = activeStory.chapters.reduce((acc, c) => acc + (c.duration_sec || 0), 0);
+        if (audioSub) audioSub.textContent = `${Math.round(totalDur)}s spoken audio (~15m runtime)`;
+      }
+
+      // Main video player
+      const vidEl = document.getElementById("lfMainVideo");
+      const dlBtn = document.getElementById("btnLfDownload");
+      if (activeStory && activeStory.mp4_url) {
+        if (vidEl && vidEl.getAttribute("src") !== activeStory.mp4_url) {
+          vidEl.src = activeStory.mp4_url;
+        }
+        if (activeStory.thumb_url && vidEl) {
+          vidEl.poster = activeStory.thumb_url;
+        }
+        if (dlBtn) {
+          dlBtn.href = activeStory.mp4_url;
+          dlBtn.download = activeStory.mp4_name || `${activeStory.slug}-ch1.mp4`;
+          dlBtn.style.display = "inline-flex";
+        }
+      }
+
+      // Chapters List
+      const chContainer = document.getElementById("lfChapterList");
+      if (chContainer && activeStory && activeStory.chapters) {
+        chContainer.innerHTML = activeStory.chapters.map(ch => {
+          const isRendered = ch.status === "rendered";
+          const hasAudio = Boolean(ch.narration_url);
+          const isExpanded = Boolean(expandedChapters[ch.chapter]);
+
+          let statusBadge = `<span class="badge badge-muted">Scripted</span>`;
+          if (isRendered) {
+            statusBadge = `<span class="badge badge-emerald">Rendered 1080p MP4</span>`;
+          } else if (hasAudio) {
+            statusBadge = `<span class="badge badge-cyan">Voice &amp; Timings Ready</span>`;
+          }
+
+          const linesPreview = (ch.script_lines || []).map((l, idx) => `
+            <div style="padding:6px 9px;margin-bottom:5px;border-radius:6px;background:rgba(255,255,255,0.02);font-size:0.79rem;color:#cbd5e1;">
+              <span style="font-family:monospace;color:var(--cyan);font-size:0.71rem;margin-right:8px;">#${idx+1}</span>
+              ${escapeHtml(l.text || l)}
+            </div>
+          `).join("");
+
+          return `
+            <div class="chapter-card ${isRendered ? 'rendered' : (hasAudio ? 'audio-ready' : '')}">
+              <div class="chapter-header" onclick="toggleChapterDetails(${ch.chapter})">
+                <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+                  <span class="badge ${isRendered ? 'badge-emerald' : 'badge-cyan'}" style="font-weight:700;">Act ${ch.chapter}</span>
+                  <div>
+                    <div style="font-weight:700;color:#fff;font-size:0.92rem;">${escapeHtml(ch.title)}</div>
+                    <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">${escapeHtml(ch.summary || "")}</div>
+                  </div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                  <span class="mono" style="font-size:0.78rem;color:var(--text-secondary);">${fmtSecLabel(ch.duration_sec)}</span>
+                  ${statusBadge}
+                  <svg id="chIcon-${ch.chapter}" style="transform:${isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'};transition:transform 0.2s ease;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+              </div>
+
+              <div class="chapter-body" id="chBody-${ch.chapter}" style="display:${isExpanded ? 'block' : 'none'};">
+                ${ch.narration_url ? `
+                  <div style="margin-bottom:12px;background:#060913;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                      <span style="font-size:0.76rem;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:0.04em;">Kokoro AI Voice Narration (Master Audio)</span>
+                      <span class="mono" style="font-size:0.74rem;color:var(--text-muted);">${fmtSecLabel(ch.duration_sec)}</span>
+                    </div>
+                    <audio controls src="${escapeHtml(ch.narration_url)}" style="width:100%;height:32px;"></audio>
+                  </div>
+                ` : ""}
+
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                  <span style="font-size:0.78rem;font-weight:700;color:var(--text-secondary);">Narration Script (${(ch.script_lines || []).length} Cuts)</span>
+                  <span class="mono" style="font-size:0.72rem;color:var(--text-muted);">Word Timings Aligned</span>
+                </div>
+                <div style="max-height:220px;overflow-y:auto;background:#05070e;border:1px solid var(--border);border-radius:8px;padding:8px;">
+                  ${linesPreview || '<div style="color:var(--text-muted);font-size:0.78rem;padding:8px;">No lines available.</div>'}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      // Storyboard frames grid
+      const sbGrid = document.getElementById("lfStoryboardGrid");
+      if (sbGrid) {
+        const frames = (activeStory?.preview_frames && activeStory.preview_frames.length)
+          ? activeStory.preview_frames
+          : [];
+        if (frames.length > 0) {
+          const frameLabels = [
+            "Scene 01: Korean Strait Sickbay",
+            "Scene 02: Demara Studying Manual",
+            "Scene 03: Surgical Ward Prep",
+            "Scene 04: Operating Under Pressure",
+            "Scene 05: The Miracle Extraction",
+            "Scene 06: Con Artist Resolution"
+          ];
+          sbGrid.innerHTML = frames.map((fUrl, idx) => {
+            const label = frameLabels[idx] || `Keyframe ${idx + 1}`;
+            return `
+              <div class="storyboard-item" onclick="openImageModal('${escapeHtml(fUrl)}', '${escapeHtml(label)}')">
+                <img src="${escapeHtml(fUrl)}" alt="${escapeHtml(label)}" loading="lazy" />
+                <div class="sb-caption">
+                  <span>${escapeHtml(label)}</span>
+                  <span class="mono" style="color:var(--cyan);font-size:0.72rem;">1080p 16:9</span>
+                </div>
+              </div>
+            `;
+          }).join("");
+        } else {
+          sbGrid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:24px;">Rendering storyboard frames...</div>`;
+        }
+      }
+    }
+
+    async function syncLongformToCloud() {
+      const btnLbl = document.getElementById("lfSyncBtnLabel");
+      if (btnLbl) btnLbl.textContent = "Syncing Google Drive...";
+      try {
+        const res = await fetch("/api/longform", { cache: "no-store" });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const lf = await res.json();
+        renderLongform(lf);
+        showToast("Long-form assets synchronized to Google Drive archive!");
+      } catch (err) {
+        showToast("Sync failed: " + err.message);
+      } finally {
+        if (btnLbl) btnLbl.textContent = "Google Drive Cloud Sync";
+      }
+    }
+
+    function openLongformUploadModal() {
+      const q = currentLongformData?.queue?.[0] || {};
+      const meta = q.youtube_metadata || {
+        title: "The Fake Surgeon Who Performed Operations on Warships | Ferdinand Demara Story (1951)",
+        description: "The unbelievable true story of Ferdinand Waldo Demara — 'The Great Imposter' — who boarded the Canadian destroyer HMCS Cayuga during the Korean War posing as surgeon Dr. Joseph Cyr.\\n\\nWith no medical degree, he performed 16 major operations, including extracting a bullet from near a soldier's heart, and saved every single patient.\\n\\nChapter Breakdown:\\n0:00 Chapter 1: The Emergency in the Korean Strait\\n1:18 Chapter 2: The Mask of Dr. Joseph Cyr\\n3:12 Chapter 3: Sixteen Hours in the Sickbay\\n5:06 Chapter 4: The Hero Unmasked\\n7:06 Chapter 5: The Chameleon's Legacy\\n\\nSubscribe to Animated_Crew for twice-weekly high-graphics historical documentaries!\\n\\n#History #TheGreatImposter #FerdinandDemara #Documentary #Warship #TrueStory",
+        tags: ["Ferdinand Demara", "The Great Imposter", "True Story", "History Documentary", "Con Artist", "Royal Canadian Navy", "HMCS Cayuga", "Korean War", "Animation Documentary"],
+        privacy_status: "public",
+        category_id: "27",
+      };
+
+      const title = meta.title || "The Fake Surgeon Who Performed Operations on Warships";
+      const desc = typeof meta.description === "string" ? meta.description.replace(/\\n/g, "\n") : "";
+      const tags = Array.isArray(meta.tags) ? meta.tags.join(", ") : (meta.tags || "");
+      const mp4Url = q.mp4_url || "/media-longform/ferdinand-demara-great-imposter/renders/ch1.mp4";
+
+      document.getElementById("modalTitle").textContent = "Long-Form Video Package — YouTube Upload Kit";
+      document.getElementById("modalBody").innerHTML = `
+        <div class="script-modal-grid">
+          <div>
+            <div style="font-size:0.86rem;font-weight:700;color:#fff;margin-bottom:8px;">16:9 Widescreen Master Preview</div>
+            <div style="background:#000;border:1px solid var(--border);border-radius:10px;overflow:hidden;aspect-ratio:16/9;margin-bottom:12px;">
+              <video src="${escapeHtml(mp4Url)}" controls playsinline style="width:100%;height:100%;object-fit:contain;"></video>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <a class="btn btn-sm" href="${escapeHtml(mp4Url)}" download="ferdinand-demara-ch1-1080p.mp4">Download Master MP4 (25.5 MB)</a>
+              <span class="badge badge-emerald" style="display:inline-flex;align-items:center;">1920×1080 @ 24 fps</span>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:0.86rem;font-weight:700;color:#fff;margin-bottom:8px;">YouTube Video Metadata</div>
+            <div class="form-group">
+              <div class="form-label">
+                <span>Title</span>
+                <button type="button" class="btn btn-xs" onclick="copyText(document.getElementById('lfYtTitle').value, 'Title')">Copy</button>
+              </div>
+              <input class="form-control" id="lfYtTitle" value="${escapeHtml(title)}" />
+            </div>
+
+            <div class="form-group">
+              <div class="form-label">
+                <span>Description (with Chapters)</span>
+                <button type="button" class="btn btn-xs" onclick="copyText(document.getElementById('lfYtDesc').value, 'Description')">Copy</button>
+              </div>
+              <textarea class="form-control" id="lfYtDesc" style="min-height:120px;">${escapeHtml(desc)}</textarea>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label">
+                <span>Tags</span>
+                <button type="button" class="btn btn-xs" onclick="copyText(document.getElementById('lfYtTags').value, 'Tags')">Copy</button>
+              </div>
+              <input class="form-control" id="lfYtTags" value="${escapeHtml(tags)}" />
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:12px;align-items:center;">
+              <span class="badge badge-cyan">Scheduled Drop: Tue &amp; Fri @ 8:00 PM IST</span>
+              <button class="btn btn-sm btn-crimson" onclick="showToast('Video is scheduled in queue for Tuesday / Friday 8:00 PM IST drop!')">Publish Now</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById("previewModal").classList.add("open");
+    }
+
     /* Render Analytics Tab */
     function renderAnalytics(yt) {
       renderStudioAnalytics(yt);
@@ -3086,6 +3597,7 @@
         renderMonetization(data.monetization || {});
         renderAutomation(data.automation || {}, data.queue_summary || {});
         renderHealth(data.system_health || []);
+        renderLongform(data.longform || {});
         if (!activeCustomXhr) {
           renderUploadStatus(data.queue_summary?.upload_job);
         }

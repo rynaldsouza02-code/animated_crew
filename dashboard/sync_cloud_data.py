@@ -3,9 +3,14 @@ from __future__ import annotations
 
 import json
 import shutil
+import sys
 import wave
 from datetime import datetime
 from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 PROJECTS_ROOT = Path(r"C:\Users\DELL\faceless-shorts")
 CLOUD_DATA_DIR = Path(__file__).resolve().parent / "cloud_data"
@@ -131,6 +136,35 @@ def sync() -> None:
     (CLOUD_DATA_DIR / "automation_snapshot.json").write_text(
         json.dumps(auto_snapshot, indent=2, ensure_ascii=False), encoding="utf-8"
     )
+
+    # Long-form snapshots & review assets
+    local_longform_root = Path(r"D:\faceless-longform")
+    if local_longform_root.exists():
+        try:
+            from dashboard.server import get_longform_overview
+            lf_data = get_longform_overview()
+            cloud_lf_dir = CLOUD_DATA_DIR / "longform"
+            cloud_lf_dir.mkdir(parents=True, exist_ok=True)
+            (CLOUD_DATA_DIR / "longform.json").write_text(
+                json.dumps(lf_data, indent=2, ensure_ascii=False), encoding="utf-8"
+            )
+            for story in lf_data.get("stories", []):
+                s_slug = story.get("slug")
+                if not s_slug:
+                    continue
+                dest_story = cloud_lf_dir / s_slug
+                dest_story.mkdir(parents=True, exist_ok=True)
+                src_story = local_longform_root / s_slug
+                if (src_story / "chapters.json").exists():
+                    shutil.copy2(src_story / "chapters.json", dest_story / "chapters.json")
+                src_rev = src_story / "review" / "ch1"
+                if src_rev.exists():
+                    dest_rev = dest_story / "review" / "ch1"
+                    dest_rev.mkdir(parents=True, exist_ok=True)
+                    for img in src_rev.glob("*.jpg"):
+                        shutil.copy2(img, dest_rev / img.name)
+        except Exception as e:
+            print("Warning: longform sync exception:", e)
 
     total_kb = sum(f.stat().st_size for f in CLOUD_DATA_DIR.rglob("*") if f.is_file()) / 1024
     print(f"Synced cloud_data cleanly ({total_kb:.1f} KB total across {len(runs_out.get('runs', []))} runs).")

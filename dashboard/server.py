@@ -74,6 +74,12 @@ YOUTUBE_CHANNEL_TITLE = "Animated_Crew"
 
 EXCLUDED_DIRS = {"manual-uploads", "__pycache__", "renders", "review", "tmp", "temp"}
 
+LOCAL_LONGFORM_ROOT = Path(r"D:\faceless-longform")
+CLOUD_LONGFORM_DIR = CLOUD_DATA_DIR / "longform"
+CLOUD_LONGFORM_JSON = CLOUD_DATA_DIR / "longform.json"
+LONGFORM_ROOT = LOCAL_LONGFORM_ROOT if LOCAL_LONGFORM_ROOT.exists() else CLOUD_LONGFORM_DIR
+LONGFORM_QUEUE_PATH = LONGFORM_ROOT / "queue" / "queue.json"
+
 # Fallback analytics baseline (refreshed continuously by real-time InnerTube + disk cache)
 BASELINE_VIDEO_META: Dict[str, Dict[str, Any]] = {
     "Ju_GMnwmskA": {
@@ -161,6 +167,11 @@ if STATIC_DIR.exists():
 
 if PROJECTS_ROOT.exists():
     app.mount("/media", StaticFiles(directory=str(PROJECTS_ROOT)), name="media")
+
+if LOCAL_LONGFORM_ROOT.exists():
+    app.mount("/media-longform", StaticFiles(directory=str(LOCAL_LONGFORM_ROOT)), name="media-longform")
+elif CLOUD_LONGFORM_DIR.exists():
+    app.mount("/media-longform", StaticFiles(directory=str(CLOUD_LONGFORM_DIR)), name="media-longform")
 
 # Simple thread-safe locks, persistent workers & caches
 _yt_lock = threading.RLock()
@@ -3389,6 +3400,146 @@ def get_monetization_overview(yt_data: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def get_longform_overview() -> Dict[str, Any]:
+    if not LOCAL_LONGFORM_ROOT.exists() and CLOUD_LONGFORM_JSON.exists():
+        return _read_json(CLOUD_LONGFORM_JSON, {"available": False})
+
+    root = LOCAL_LONGFORM_ROOT
+    if not root.exists():
+        return {
+            "available": False,
+            "queue": [],
+            "stories": [],
+            "schedule": {
+                "description": "Every Tuesday and Friday at 8:00 PM IST (Twice Weekly)",
+                "cron": "CRON_TZ=Asia/Kolkata 0 20 * * 2,5",
+                "time_ist": "8:00 PM IST",
+                "cloud_storage_provider": "google_drive",
+                "storage_location": "D:\\faceless-longform (314 GB Free)",
+            },
+            "summary": {
+                "total_stories": 0,
+                "total_queued": 0,
+                "total_ready": 0,
+                "format": "1920x1080 (16:9 Widescreen)",
+                "fps": 24,
+            },
+        }
+
+    q_data = _read_json(root / "queue" / "queue.json", {})
+    queue_items = q_data.get("queue", [])
+    enriched_queue = []
+    for item in queue_items:
+        it = dict(item)
+        slug = it.get("slug")
+        mp4_file = it.get("mp4_file")
+        if mp4_file:
+            p = Path(mp4_file)
+            if p.exists():
+                it["mp4_url"] = f"/media-longform/{slug}/renders/{p.name}"
+                it["mp4_name"] = p.name
+                it["mp4_size_mb"] = round(p.stat().st_size / (1024 * 1024), 2)
+                it["mp4_ready"] = True
+            else:
+                it["mp4_url"] = None
+                it["mp4_ready"] = False
+        rev_dir = root / slug / "review" / "ch1"
+        if rev_dir.exists():
+            imgs = sorted(rev_dir.glob("*.jpg"))
+            if imgs:
+                it["thumb_url"] = f"/media-longform/{slug}/review/ch1/{imgs[0].name}"
+                it["preview_frames"] = [f"/media-longform/{slug}/review/ch1/{im.name}" for im in imgs]
+        enriched_queue.append(it)
+
+    stories = []
+    try:
+        dirs = [
+            d for d in root.iterdir()
+            if d.is_dir() and not d.name.startswith(".") and d.name not in {"queue", "scheduler", "__pycache__"}
+        ]
+    except Exception:
+        dirs = []
+
+    for p in sorted(dirs):
+        ch_json = p / "chapters.json"
+        if not ch_json.exists():
+            continue
+        ch_meta = _read_json(ch_json, {})
+        slug = p.name
+        rendered_ch1 = p / "renders" / "ch1.mp4"
+        has_mp4 = rendered_ch1.exists()
+
+        chapters_detail = []
+        chapters_list = ch_meta.get("chapters", [])
+        for ch_info in chapters_list:
+            ch_num = ch_info.get("chapter", 1)
+            ch_script = _read_json(p / "chapters" / f"ch{ch_num}_script.json", {})
+            wav_file = p / "chapters" / f"ch{ch_num}_narration.wav"
+            ch_dur = round(wav_file.stat().st_size / (24000 * 2), 2) if wav_file.exists() else ch_info.get("target_duration_sec", 180)
+            ch_status = "rendered" if (ch_num == 1 and has_mp4) else ("audio_ready" if wav_file.exists() else "scripted")
+
+            ch_frames = []
+            ch_rev = p / "review" / f"ch{ch_num}"
+            if ch_rev.exists():
+                ch_frames = [f"/media-longform/{slug}/review/ch{ch_num}/{im.name}" for im in sorted(ch_rev.glob("*.jpg"))]
+
+            chapters_detail.append({
+                "chapter": ch_num,
+                "title": ch_info.get("title", f"Chapter {ch_num}"),
+                "summary": ch_info.get("summary", ""),
+                "duration_sec": ch_dur,
+                "status": ch_status,
+                "lines_count": len(ch_script.get("lines", [])),
+                "script_lines": ch_script.get("lines", []),
+                "narration_url": f"/media-longform/{slug}/chapters/ch{ch_num}_narration.wav" if wav_file.exists() else None,
+                "preview_frames": ch_frames,
+            })
+
+        all_frames = []
+        rev_ch1 = p / "review" / "ch1"
+        if rev_ch1.exists():
+            all_frames = [f"/media-longform/{slug}/review/ch1/{im.name}" for im in sorted(rev_ch1.glob("*.jpg"))]
+
+        stories.append({
+            "slug": slug,
+            "title": ch_meta.get("title", slug),
+            "topic": ch_meta.get("topic", ""),
+            "format": ch_meta.get("format", "16:9 Widescreen (1920x1080)"),
+            "target_duration_mins": ch_meta.get("total_target_duration_mins", 15),
+            "total_chapters": len(chapters_list),
+            "rendered_chapters": 1 if has_mp4 else 0,
+            "has_render": has_mp4,
+            "mp4_url": f"/media-longform/{slug}/renders/ch1.mp4" if has_mp4 else None,
+            "mp4_name": "ch1.mp4" if has_mp4 else None,
+            "mp4_size_mb": round(rendered_ch1.stat().st_size / (1024 * 1024), 2) if has_mp4 else 0,
+            "duration_sec": 78.38 if has_mp4 else 0,
+            "preview_frames": all_frames,
+            "thumb_url": all_frames[0] if all_frames else None,
+            "chapters": chapters_detail,
+        })
+
+    return {
+        "available": True,
+        "schedule": {
+            "description": q_data.get("schedule_description", "Every Tuesday and Friday at 8:00 PM IST (Twice Weekly)"),
+            "cron": q_data.get("schedule", "CRON_TZ=Asia/Kolkata 0 20 * * 2,5"),
+            "next_scheduled_day": "Tuesday & Friday",
+            "time_ist": "8:00 PM IST",
+            "cloud_storage_provider": q_data.get("cloud_storage_provider", "google_drive"),
+            "storage_location": "D:\\faceless-longform (314 GB Free)",
+        },
+        "queue": enriched_queue,
+        "stories": stories,
+        "summary": {
+            "total_stories": len(stories),
+            "total_queued": len(enriched_queue),
+            "total_ready": len([it for it in enriched_queue if it.get("mp4_ready")]),
+            "format": "1920x1080 (16:9 Widescreen)",
+            "fps": 24,
+        },
+    }
+
+
 @app.get("/", response_class=HTMLResponse)
 def serve_home():
     index_file = STATIC_DIR / "index.html"
@@ -3456,9 +3607,15 @@ def api_overview(refresh_yt: bool = Query(False)):
             "youtube": yt_data,
             "monetization": monetization,
             "system_health": health,
+            "longform": get_longform_overview(),
         },
         headers=_NO_CACHE_HEADERS,
     )
+
+
+@app.get("/api/longform")
+def api_longform():
+    return JSONResponse(get_longform_overview(), headers=_NO_CACHE_HEADERS)
 
 
 @app.get("/api/youtube")

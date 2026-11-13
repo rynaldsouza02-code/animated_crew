@@ -1,0 +1,432 @@
+{
+  "available": true,
+  "schedule": {
+    "description": "Every Tuesday and Friday at 8:00 PM IST (Twice Weekly)",
+    "cron": "CRON_TZ=Asia/Kolkata 0 20 * * 2,5",
+    "next_scheduled_day": "Tuesday & Friday",
+    "time_ist": "8:00 PM IST",
+    "cloud_storage_provider": "google_drive",
+    "storage_location": "D:\\faceless-longform (314 GB Free)"
+  },
+  "queue": [
+    {
+      "queue_order": 1,
+      "slug": "ferdinand-demara-great-imposter",
+      "title": "The Fake Surgeon Who Performed Operations on Warships (Ferdinand Waldo Demara)",
+      "youtube_title": "The Fake Surgeon Who Performed 16 Warship Surgeries With NO Training! 🚢🩺 (The Great Imposter)",
+      "youtube_description": "In November 1951, 16 critically wounded soldiers were rushed onto the Canadian destroyer HMCS Cayuga. Chief surgeon 'Dr. Joseph Cyr' performed open-chest bullet extractions, amputations, and complex surgeries for 19 hours straight without losing a single patient. \n\nThe twist? He was Ferdinand Waldo Demara—an eccentric high school dropout and FBI fugitive with zero days of medical training who had stolen a real doctor's identity and memorized surgical handbooks overnight in his cabin!\n\n#Documentary #TrueStory #History #ConArtist #TheGreatImposter #KoreanWar #Aviation #MilitaryHistory #CrazyFacts #Biography",
+      "youtube_tags": [
+        "Documentary",
+        "TrueStory",
+        "History",
+        "ConArtist",
+        "TheGreatImposter",
+        "FerdinandDemara",
+        "MilitaryHistory",
+        "KoreanWar",
+        "CrazyFacts",
+        "Biography"
+      ],
+      "category_id": "27",
+      "privacy_status": "public",
+      "status": "ready_in_queue",
+      "mp4_file": "D:\\faceless-longform\\ferdinand-demara-great-imposter\\renders\\ch1.mp4",
+      "duration_sec": 78.38,
+      "size_mb": 24.34,
+      "resolution": "1920x1080 (16:9 Widescreen)",
+      "fps": 24,
+      "cloud_archived": true,
+      "added_at": "2026-11-13T09:43:00+05:30",
+      "mp4_url": "/media-longform/ferdinand-demara-great-imposter/renders/ch1.mp4",
+      "mp4_name": "ch1.mp4",
+      "mp4_size_mb": 24.34,
+      "mp4_ready": true,
+      "thumb_url": "/media-longform/ferdinand-demara-great-imposter/review/ch1/t1.50.jpg",
+      "preview_frames": [
+        "/media-longform/ferdinand-demara-great-imposter/review/ch1/t1.50.jpg",
+        "/media-longform/ferdinand-demara-great-imposter/review/ch1/t15.00.jpg",
+        "/media-longform/ferdinand-demara-great-imposter/review/ch1/t21.00.jpg",
+        "/media-longform/ferdinand-demara-great-imposter/review/ch1/t36.50.jpg",
+        "/media-longform/ferdinand-demara-great-imposter/review/ch1/t52.00.jpg",
+        "/media-longform/ferdinand-demara-great-imposter/review/ch1/t76.00.jpg"
+      ]
+    }
+  ],
+  "stories": [
+    {
+      "slug": "ferdinand-demara-great-imposter",
+      "title": "The Fake Surgeon Who Performed Operations on Warships",
+      "topic": "Ferdinand Waldo Demara - The Great Imposter",
+      "format": "16:9 Widescreen (1920x1080)",
+      "target_duration_mins": 15,
+      "total_chapters": 5,
+      "rendered_chapters": 1,
+      "has_render": true,
+      "mp4_url": "/media-longform/ferdinand-demara-great-imposter/renders/ch1.mp4",
+      "mp4_name": "ch1.mp4",
+      "mp4_size_mb": 24.34,
+      "duration_sec": 78.38,
+      "preview_frames": [
+        "/media-longform/ferdinand-demara-great-imposter/review/ch1/t1.50.jpg",
+        "/media-longform/ferdinand-demara-great-imposter/review/ch1/t15.00.jpg",
+        "/media-longform/ferdinand-demara-great-imposter/review/ch1/t21.00.jpg",
+        "/media-longform/ferdinand-demara-great-imposter/review/ch1/t36.50.jpg",
+        "/media-longform/ferdinand-demara-great-imposter/review/ch1/t52.00.jpg",
+        "/media-longform/ferdinand-demara-great-imposter/review/ch1/t76.00.jpg"
+      ],
+      "thumb_url": "/media-longform/ferdinand-demara-great-imposter/review/ch1/t1.50.jpg",
+      "chapters": [
+        {
+          "chapter": 1,
+          "title": "The Ghost Surgeon of HMCS Cayuga",
+          "summary": "November 1951, off the freezing coast of Korea. Sixteen critically wounded soldiers arrive on the deck of a Canadian destroyer. Chief medical officer Dr. Joseph Cyr prepares to cut into their chests—without ever having spent a single hour in medical school.",
+          "duration_sec": 78.39,
+          "status": "rendered",
+          "lines_count": 13,
+          "script_lines": [
+            {
+              "text": "In November nineteen fifty-one, off the freezing coast of Korea, sixteen critically wounded soldiers were hauled onto the deck of a Canadian destroyer."
+            },
+            {
+              "text": "Shrapnel tore through their bodies, blood pooled on the metal floor, and the ship rocked violently in sub-zero waters."
+            },
+            {
+              "text": "Every eye turned to the ship's chief medical officer, Doctor Joseph Cyr."
+            },
+            {
+              "text": "He was thirty years old, dressed in crisp naval whites, calm, commanding, and radiating absolute confidence."
+            },
+            {
+              "text": "Nurses stood waiting for his orders. Orderlies handed him sterile scalpels and clamps."
+            },
+            {
+              "text": "There was only one tiny problem."
+            },
+            {
+              "text": "The man holding the scalpel was not Doctor Joseph Cyr."
+            },
+            {
+              "text": "He had never graduated from college."
+            },
+            {
+              "text": "He had never attended medical school."
+            },
+            {
+              "text": "He had never performed a single incision in his entire life."
+            },
+            {
+              "text": "His real name was Ferdinand Waldo Demara — an eccentric high school dropout from Massachusetts, on the run from the FBI, who had stolen another man's identity to live out a fantasy."
+            },
+            {
+              "text": "And now, in the middle of a warzone, with human lives hanging by a thread, he had to cut someone open — or be hanged for treason."
+            },
+            {
+              "text": "This is the true story of history's greatest imposter."
+            }
+          ],
+          "narration_url": "/media-longform/ferdinand-demara-great-imposter/chapters/ch1_narration.wav",
+          "preview_frames": [
+            "/media-longform/ferdinand-demara-great-imposter/review/ch1/t1.50.jpg",
+            "/media-longform/ferdinand-demara-great-imposter/review/ch1/t15.00.jpg",
+            "/media-longform/ferdinand-demara-great-imposter/review/ch1/t21.00.jpg",
+            "/media-longform/ferdinand-demara-great-imposter/review/ch1/t36.50.jpg",
+            "/media-longform/ferdinand-demara-great-imposter/review/ch1/t52.00.jpg",
+            "/media-longform/ferdinand-demara-great-imposter/review/ch1/t76.00.jpg"
+          ]
+        },
+        {
+          "chapter": 2,
+          "title": "The Boy Who Could Memorize Anything",
+          "summary": "Ferdinand Waldo Demara Jr.'s childhood in Massachusetts, his family's sudden bankruptcy in the Great Depression, running away to become a monk, and discovering his uncanny photographic memory and chameleon charm.",
+          "duration_sec": 113.75,
+          "status": "audio_ready",
+          "lines_count": 18,
+          "script_lines": [
+            {
+              "text": "To understand how a man could fake open-heart surgery on a warship, you have to look into his childhood."
+            },
+            {
+              "text": "Ferdinand Demara was born in nineteen twenty-one into an affluent family in Lawrence, Massachusetts."
+            },
+            {
+              "text": "His father was a wealthy theater owner, and young Fred grew up in a massive home surrounded by luxury."
+            },
+            {
+              "text": "He possessed an extraordinary gift — a photographic memory so sharp he could read a page once and repeat every sentence verbatim."
+            },
+            {
+              "text": "Then came the Great Depression."
+            },
+            {
+              "text": "Overnight, his family lost everything. The mansion was sold, the cars vanished, and they moved into a cramped apartment in the poorest neighborhood in town."
+            },
+            {
+              "text": "Ferdinand refused to accept poverty."
+            },
+            {
+              "text": "At age sixteen, he ran away and joined a Cistercian monastery, vowing to live as a silent monk."
+            },
+            {
+              "text": "He stayed several years, learning discipline, theology, and philosophy, but the silence bored him."
+            },
+            {
+              "text": "He craved prestige. He craved authority."
+            },
+            {
+              "text": "When World War Two broke out, Demara enlisted in the United States Army, but he hated taking orders."
+            },
+            {
+              "text": "So he simply stole the identity of an army buddy, went AWOL, and walked straight into the Navy."
+            },
+            {
+              "text": "When he wanted to be an officer and was rejected, he faked his own suicide, leaving clothes on a pier, and vanished into thin air."
+            },
+            {
+              "text": "He spent the next decade reinventing himself over and over again."
+            },
+            {
+              "text": "He became a Trappist monk. Then a college professor teaching psychology using textbooks he read only twenty minutes before class."
+            },
+            {
+              "text": "He even founded a Catholic college in Maine that still exists today."
+            },
+            {
+              "text": "Every time police closed in, Demara smiled, packed a single suitcase, and reinvented himself as someone completely new."
+            },
+            {
+              "text": "Until nineteen fifty-one, when he met a quiet young medical doctor named Joseph Cyr."
+            }
+          ],
+          "narration_url": "/media-longform/ferdinand-demara-great-imposter/chapters/ch2_narration.wav",
+          "preview_frames": []
+        },
+        {
+          "chapter": 3,
+          "title": "The Stolen Identity of Dr. Joseph Cyr",
+          "summary": "How Demara met the real Dr. Cyr in New Brunswick, stole his birth certificate, medical credentials, and recommendations, and forged an immaculate application to the Royal Canadian Navy.",
+          "duration_sec": 114.19,
+          "status": "audio_ready",
+          "lines_count": 18,
+          "script_lines": [
+            {
+              "text": "Doctor Joseph Cyr was a hardworking young physician from New Brunswick, Canada."
+            },
+            {
+              "text": "He desperately wanted a military commission, but he found the Canadian naval bureaucracy confusing and slow."
+            },
+            {
+              "text": "Demara showed up in town wearing a clerical collar, claiming to be a high-ranking church official and legal advisor."
+            },
+            {
+              "text": "He offered to help the young doctor with his application paperwork."
+            },
+            {
+              "text": "Doctor Cyr gratefully handed over his original birth certificate, university transcripts, medical diploma, and letters of recommendation."
+            },
+            {
+              "text": "Demara took the documents, went to his room, and simply mailed the application in his own name with Doctor Cyr's credentials."
+            },
+            {
+              "text": "Within weeks, the Royal Canadian Navy responded enthusiastically."
+            },
+            {
+              "text": "They were in desperate need of medical officers for the Korean War."
+            },
+            {
+              "text": "They commissioned Demara as a Lieutenant Surgeon aboard HMCS Cayuga, a Tribal-class destroyer heading straight into the warzone."
+            },
+            {
+              "text": "Before boarding, Demara rushed to a public bookstore."
+            },
+            {
+              "text": "He bought two medical manuals: a general textbook on internal medicine and a pocket surgical handbook."
+            },
+            {
+              "text": "On the long sea voyage across the Pacific Ocean, while other officers played cards and drank coffee, Demara sat alone in his quarters."
+            },
+            {
+              "text": "Thanks to his photographic memory, he memorized entire chapters on human anatomy, suturing techniques, and infectious diseases."
+            },
+            {
+              "text": "To avoid suspicion on board, he gave a stern order to his medical staff."
+            },
+            {
+              "text": "He ordered his chief nurse and petty officers to handle all routine clinical treatments, claiming he wanted them to build field confidence."
+            },
+            {
+              "text": "The crew admired him for his humility and trust."
+            },
+            {
+              "text": "He was hailed as the finest medical officer the ship had ever seen."
+            },
+            {
+              "text": "Then came the night of November nineteen fifty-one, when live combat shattered the illusion."
+            }
+          ],
+          "narration_url": "/media-longform/ferdinand-demara-great-imposter/chapters/ch3_narration.wav",
+          "preview_frames": []
+        },
+        {
+          "chapter": 4,
+          "title": "Surgery Under Fire: Bullets, Blood, and Textbooks",
+          "summary": "Demara locks himself inside his cabin with a medical textbook for 10 frantic minutes, orders massive penicillin doses, and successfully removes a bullet millimetres from a sailor's heart.",
+          "duration_sec": 119.88,
+          "status": "audio_ready",
+          "lines_count": 20,
+          "script_lines": [
+            {
+              "text": "During an amphibious raid along the Korean coast, a group of Canadian and South Korean commandos were ambushed."
+            },
+            {
+              "text": "Sixteen bleeding men were evacuated onto the HMCS Cayuga."
+            },
+            {
+              "text": "Several had severed limbs, punctured lungs, and severe internal bleeding."
+            },
+            {
+              "text": "The ship's captain barked through the intercom: Doctor Cyr, we need you in the sickbay immediately."
+            },
+            {
+              "text": "Demara stood over the first patient. A young sailor had taken a high-velocity bullet straight into his chest."
+            },
+            {
+              "text": "The bullet had stopped less than half an inch from his heart, and blood was pouring out of the wound."
+            },
+            {
+              "text": "Demara paused. His mind raced."
+            },
+            {
+              "text": "He turned calmly to his surgical assistant and said: Prep the patient and administer maximum local anesthesia. I must consult my detailed surgical notes."
+            },
+            {
+              "text": "Demara sprinted to his private cabin, locked the heavy metal door, pulled open the medical manual, and rapidly scanned the exact diagrams for thoracic surgery."
+            },
+            {
+              "text": "He visualized every artery. He visualized every muscle layer."
+            },
+            {
+              "text": "Ten minutes later, he returned to the operating room, scrubbed his hands, and picked up the scalpel."
+            },
+            {
+              "text": "With steady hands, Demara sliced through the chest tissue."
+            },
+            {
+              "text": "He carefully tied off bleeding blood vessels and located the jagged lead slug."
+            },
+            {
+              "text": "Gently, using surgical forceps, he pulled the bullet out from beside the beating heart."
+            },
+            {
+              "text": "He flooded the cavity with massive doses of penicillin — a miracle drug that had recently become standard — which wiped out any potential bacterial infection."
+            },
+            {
+              "text": "He stitched the incision shut with near-perfect precision."
+            },
+            {
+              "text": "Demara spent the next nineteen consecutive hours operating on soldier after soldier."
+            },
+            {
+              "text": "He amputated a ruined foot, removed shrapnel, set broken bones, and treated severe burns."
+            },
+            {
+              "text": "When dawn broke, all sixteen men were alive, stable, and recovering."
+            },
+            {
+              "text": "Not a single patient died under his care."
+            }
+          ],
+          "narration_url": "/media-longform/ferdinand-demara-great-imposter/chapters/ch4_narration.wav",
+          "preview_frames": []
+        },
+        {
+          "chapter": 5,
+          "title": "A Mother's Shock, The Escape, and The Legend",
+          "summary": "Canadian press headlines turn him into a national hero, but Dr. Cyr's mother spots the fraud. How the Navy quietly let him walk away, his later careers as a prison warden, law student, and parish priest, and his cinematic legacy.",
+          "duration_sec": 148.02,
+          "status": "audio_ready",
+          "lines_count": 23,
+          "script_lines": [
+            {
+              "text": "The miracle on the HMCS Cayuga made international news."
+            },
+            {
+              "text": "Canadian journalists rushed to print the heroic story of Doctor Joseph Cyr, the brave young surgeon who saved sixteen men under fire."
+            },
+            {
+              "text": "Newspapers across North America plastered the story on their front pages, complete with a photograph of the smiling hero in full naval uniform."
+            },
+            {
+              "text": "Thousands of miles away in Quebec, an elderly woman sat down with her morning coffee and opened the daily paper."
+            },
+            {
+              "text": "Her name was Mrs. Cyr."
+            },
+            {
+              "text": "She saw the name Doctor Joseph Cyr, her beloved son."
+            },
+            {
+              "text": "Then she looked closely at the picture."
+            },
+            {
+              "text": "She called out to her husband: This man is a hero, but that is definitely not our son."
+            },
+            {
+              "text": "The real Doctor Joseph Cyr was practicing medicine quietly in a small clinic in New Brunswick, completely unaware he was currently fighting a naval war in Korea."
+            },
+            {
+              "text": "Mrs. Cyr contacted the Canadian government."
+            },
+            {
+              "text": "The Royal Canadian Navy was humiliated beyond belief."
+            },
+            {
+              "text": "They had put a high school dropout in charge of an entire warship's medical bay — and celebrated him publicly across the country."
+            },
+            {
+              "text": "To prevent an international military scandal, the Navy decided not to press criminal charges."
+            },
+            {
+              "text": "They quietly discharged him, paid him his naval salary, escorted him to the Canadian border, and begged him never to return."
+            },
+            {
+              "text": "Did Ferdinand Demara stop his con games?"
+            },
+            {
+              "text": "Not even close."
+            },
+            {
+              "text": "Over the following years, he forged credentials to become an assistant prison warden in Texas, where he introduced humane reforms that drastically reduced violence."
+            },
+            {
+              "text": "He became a cancer researcher. A civil engineer. A lawyer. And eventually, an ordained Baptist parish priest."
+            },
+            {
+              "text": "Hollywood turned his biography into a hit movie in nineteen sixty-one starring Tony Curtis, titled The Great Imposter."
+            },
+            {
+              "text": "When asked why he lived dozens of completely different lives, Demara famously replied: Every time I took on a role, a part of me became that person."
+            },
+            {
+              "text": "Ferdinand Waldo Demara passed away in nineteen eighty-two at the age of sixty."
+            },
+            {
+              "text": "He never held a medical license, never earned a college degree, and never followed the rules of society."
+            },
+            {
+              "text": "Yet across warzones, prisons, and universities, he remains the only fake surgeon in history who saved every single life he touched."
+            }
+          ],
+          "narration_url": "/media-longform/ferdinand-demara-great-imposter/chapters/ch5_narration.wav",
+          "preview_frames": []
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_stories": 1,
+    "total_queued": 1,
+    "total_ready": 1,
+    "format": "1920x1080 (16:9 Widescreen)",
+    "fps": 24
+  }
+}

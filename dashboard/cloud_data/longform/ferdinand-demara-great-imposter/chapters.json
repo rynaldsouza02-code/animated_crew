@@ -1,0 +1,38 @@
+{
+  "title": "The Fake Surgeon Who Performed Operations on Warships",
+  "topic": "Ferdinand Waldo Demara - The Great Imposter",
+  "format": "16:9 Widescreen (1920x1080)",
+  "total_target_duration_mins": 15,
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "The Ghost Surgeon of HMCS Cayuga",
+      "target_duration_sec": 180,
+      "summary": "November 1951, off the freezing coast of Korea. Sixteen critically wounded soldiers arrive on the deck of a Canadian destroyer. Chief medical officer Dr. Joseph Cyr prepares to cut into their chests—without ever having spent a single hour in medical school."
+    },
+    {
+      "chapter": 2,
+      "title": "The Boy Who Could Memorize Anything",
+      "target_duration_sec": 180,
+      "summary": "Ferdinand Waldo Demara Jr.'s childhood in Massachusetts, his family's sudden bankruptcy in the Great Depression, running away to become a monk, and discovering his uncanny photographic memory and chameleon charm."
+    },
+    {
+      "chapter": 3,
+      "title": "The Stolen Identity of Dr. Joseph Cyr",
+      "target_duration_sec": 180,
+      "summary": "How Demara met the real Dr. Cyr in New Brunswick, stole his birth certificate, medical credentials, and recommendations, and forged an immaculate application to the Royal Canadian Navy."
+    },
+    {
+      "chapter": 4,
+      "title": "Surgery Under Fire: Bullets, Blood, and Textbooks",
+      "target_duration_sec": 200,
+      "summary": "Demara locks himself inside his cabin with a medical textbook for 10 frantic minutes, orders massive penicillin doses, and successfully removes a bullet millimetres from a sailor's heart."
+    },
+    {
+      "chapter": 5,
+      "title": "A Mother's Shock, The Escape, and The Legend",
+      "target_duration_sec": 180,
+      "summary": "Canadian press headlines turn him into a national hero, but Dr. Cyr's mother spots the fraud. How the Navy quietly let him walk away, his later careers as a prison warden, law student, and parish priest, and his cinematic legacy."
+    }
+  ]
+}
