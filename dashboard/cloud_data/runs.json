@@ -431,7 +431,7 @@
       "category_id": "23",
       "notes": "Queued #5: Stored on D: drive for scheduled or manual upload.",
       "rendered_mp4_name": "red-paperclip-house.mp4",
-      "rendered_size_mb": 26.25,
+      "rendered_size_mb": 28.78,
       "mp4_ready_snapshot": true,
       "rendered_duration_sec": 61.15
     },
@@ -463,6 +463,9 @@
       "privacy_status": "public",
       "category_id": "23",
       "notes": "Queued #6: Stored on D: drive for scheduled or manual upload.",
+      "rendered_mp4_name": "nuclear-boy-scout.mp4",
+      "rendered_size_mb": 30.75,
+      "mp4_ready_snapshot": true,
       "rendered_duration_sec": 70.94
     },
     {
@@ -493,6 +496,9 @@
       "privacy_status": "public",
       "category_id": "23",
       "notes": "Queued #7: Stored on D: drive for scheduled or manual upload.",
+      "rendered_mp4_name": "mona-lisa-broom-closet.mp4",
+      "rendered_size_mb": 22.98,
+      "mp4_ready_snapshot": true,
       "rendered_duration_sec": 62.2
     },
     {
@@ -523,6 +529,9 @@
       "privacy_status": "public",
       "category_id": "23",
       "notes": "Queued #8: Stored on D: drive for scheduled or manual upload.",
+      "rendered_mp4_name": "fake-country-poyais.mp4",
+      "rendered_size_mb": 30.68,
+      "mp4_ready_snapshot": true,
       "rendered_duration_sec": 65.4
     }
   ]
