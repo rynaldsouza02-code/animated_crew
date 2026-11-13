@@ -394,9 +394,170 @@
       max-width: 860px;
       margin: 0 auto 16px auto;
       box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55);
+      transition: max-width 0.25s ease, box-shadow 0.25s ease;
+    }
+    .longform-player-container.theater-mode {
+      max-width: 100% !important;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85);
     }
     .longform-player-container video {
       width: 100%; height: 100%; display: block; object-fit: contain; background: #000;
+    }
+
+    /* Story Showcase Cards Grid */
+    .lf-story-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    .lf-story-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .lf-story-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(56, 189, 248, 0.5);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+    }
+    .lf-story-card.active {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.35), 0 14px 34px rgba(56, 189, 248, 0.15);
+      background: linear-gradient(180deg, rgba(14, 165, 233, 0.08) 0%, var(--card-bg) 100%);
+    }
+    .lf-card-thumb-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #090d16;
+      overflow: hidden;
+    }
+    .lf-card-thumb-wrap img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    .lf-story-card:hover .lf-card-thumb-wrap img {
+      transform: scale(1.04);
+    }
+    .lf-card-play-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(0deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.45) 100%);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0.85; transition: opacity 0.2s ease;
+    }
+    .lf-story-card:hover .lf-card-play-overlay {
+      opacity: 1;
+    }
+    .lf-card-play-btn {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: rgba(56, 189, 248, 0.95);
+      color: #030712; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .lf-story-card:hover .lf-card-play-btn {
+      transform: scale(1.1);
+      background: #38bdf8;
+    }
+    .lf-card-badge-top {
+      position: absolute; top: 10px; left: 10px;
+      background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; color: #fff;
+    }
+    .lf-card-badge-dur {
+      position: absolute; bottom: 8px; right: 8px;
+      background: rgba(0, 0, 0, 0.85);
+      padding: 3px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; color: #e2e8f0; font-family: monospace;
+    }
+    .lf-card-body {
+      padding: 14px 16px;
+      display: flex; flex-direction: column; flex-grow: 1;
+    }
+    .lf-card-title {
+      font-size: 0.95rem; font-weight: 800; color: #fff; line-height: 1.35; margin-bottom: 6px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .lf-card-desc {
+      font-size: 0.78rem; color: var(--text-muted); line-height: 1.45; margin-bottom: 12px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .lf-card-footer {
+      margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;
+    }
+
+    /* Cinema Bar & Controls */
+    .lf-cinema-bar {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+      padding: 10px 14px; background: #070a12; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 14px;
+    }
+    .lf-cinema-controls {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .lf-speed-btn {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      color: var(--text-secondary); padding: 4px 9px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .lf-speed-btn.active, .lf-speed-btn:hover {
+      background: var(--cyan); color: #000; border-color: var(--cyan);
+    }
+    .lf-ctrl-btn {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      color: #fff; padding: 5px 11px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s ease;
+    }
+    .lf-ctrl-btn:hover {
+      background: rgba(56, 189, 248, 0.15); border-color: var(--cyan); color: var(--cyan);
+    }
+
+    /* Interactive Chapter Timeline Bar */
+    .lf-chapter-timeline {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 6px;
+      margin: 12px auto 16px auto;
+      max-width: 860px;
+      transition: max-width 0.25s ease;
+    }
+    .longform-player-container.theater-mode ~ .lf-chapter-timeline {
+      max-width: 100% !important;
+    }
+    .lf-timeline-seg {
+      background: #0b101c;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 9px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      text-align: left;
+    }
+    .lf-timeline-seg:hover {
+      background: #111a2e;
+      border-color: var(--cyan);
+      transform: translateY(-2px);
+    }
+    .lf-timeline-seg.active {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(16, 185, 129, 0.12));
+      border-color: var(--cyan);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+    }
+    .lf-seg-num {
+      font-size: 0.68rem; font-weight: 800; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .lf-seg-title {
+      font-size: 0.75rem; font-weight: 700; color: #fff; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .lf-seg-time {
+      font-size: 0.67rem; color: var(--text-muted); font-family: monospace; margin-top: 2px;
     }
 
     .chapter-card {
@@ -985,31 +1146,79 @@
         </div>
       </div>
 
-      <!-- Story Selector Chips -->
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
-        <div style="font-size:0.86rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <span>Active Story:</span>
+      <!-- Interactive Story Cards Showcase -->
+      <div style="margin-bottom:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:1.05rem;font-weight:800;color:#fff;display:flex;align-items:center;gap:8px;">
+              <span>Select Documentary Story</span>
+              <span class="badge badge-cyan" id="lfStoryCountHint">3 Stories in Library</span>
+            </div>
+            <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">Click any card to play the master video, inspect chapter scripts, and listen to voice tracks.</div>
+          </div>
           <div class="filter-pills" id="lfStorySelector" style="display:inline-flex;gap:6px;flex-wrap:wrap;"></div>
         </div>
-        <div style="font-size:0.75rem;color:var(--text-muted);" id="lfStoryCountHint">2 Long-Form Stories Available</div>
+
+        <div class="lf-story-cards-grid" id="lfStoryCardsGrid">
+          <div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:24px;">Loading story cards...</div>
+        </div>
       </div>
 
-      <!-- Featured Master Video Player -->
+      <!-- Featured Master Cinema Player -->
       <div class="panel">
-        <div class="panel-head">
+        <div class="panel-head" style="margin-bottom:12px;">
           <div>
             <div class="panel-title" id="lfPlayerTitle">Master Video Player: The Great Imposter (Act 1)</div>
             <div class="panel-sub" id="lfPlayerSub">1920×1080 16:9 Widescreen · Three.js 3D Scene · Kokoro AI Voice · Synchronized Word Captions</div>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            <span class="badge badge-emerald">1080p Master Ready</span>
-            <a class="btn btn-sm" id="btnLfDownload" href="/media-longform/ferdinand-demara-great-imposter/renders/ch1.mp4" download="ferdinand-demara-ch1-1080p.mp4">Download MP4 (25.5 MB)</a>
-            <button class="btn btn-sm btn-crimson" onclick="openLongformUploadModal()">YouTube Upload Kit</button>
+            <button class="lf-ctrl-btn" onclick="toggleTheaterMode()" id="btnTheaterToggle" title="Toggle Theater Full-Width Mode">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              <span id="theaterToggleLabel">Theater Mode</span>
+            </button>
+            <a class="btn btn-sm btn-emerald" id="btnLfDownload" href="/media-longform/ferdinand-demara-great-imposter/renders/ch1.mp4" download="ferdinand-demara-ch1-1080p.mp4">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span id="btnLfDownloadLabel">Download MP4 (1080p)</span>
+            </a>
+            <button class="btn btn-sm btn-crimson" onclick="openLongformUploadModal()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
+              <span>YouTube Upload Kit</span>
+            </button>
           </div>
         </div>
 
-        <div class="longform-player-container">
+        <!-- Cinema Bar Controls -->
+        <div class="lf-cinema-bar">
+          <div class="lf-cinema-controls">
+            <span style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-right:4px;">Speed:</span>
+            <button class="lf-speed-btn" onclick="setPlaybackSpeed(0.75, this)">0.75x</button>
+            <button class="lf-speed-btn active" onclick="setPlaybackSpeed(1.0, this)">1.0x</button>
+            <button class="lf-speed-btn" onclick="setPlaybackSpeed(1.25, this)">1.25x</button>
+            <button class="lf-speed-btn" onclick="setPlaybackSpeed(1.5, this)">1.5x</button>
+            <button class="lf-speed-btn" onclick="setPlaybackSpeed(2.0, this)">2.0x</button>
+          </div>
+          <div class="lf-cinema-controls">
+            <button class="lf-ctrl-btn" onclick="seekVideoRel(-10)" title="Rewind 10 seconds">↺ -10s</button>
+            <button class="lf-ctrl-btn" onclick="seekVideoRel(10)" title="Forward 10 seconds">↻ +10s</button>
+            <button class="lf-ctrl-btn" onclick="jumpToChapter(1)" title="Restart Act 1">Act 1</button>
+            <button class="lf-ctrl-btn" onclick="togglePlayPause()" id="btnPlayPause">▶ Play</button>
+          </div>
+        </div>
+
+        <!-- Main Video Container -->
+        <div class="longform-player-container" id="lfPlayerContainer">
           <video id="lfMainVideo" src="/media-longform/ferdinand-demara-great-imposter/renders/ch1.mp4" controls preload="metadata" poster="/media-longform/ferdinand-demara-great-imposter/review/ch1/t15.00.jpg"></video>
+        </div>
+
+        <!-- Interactive Chapter Timeline Bar -->
+        <div style="margin-top:4px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;max-width:860px;margin-left:auto;margin-right:auto;" id="lfTimelineHeader">
+            <span style="font-size:0.74rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;">Interactive Multi-Act Timeline (Click to Jump)</span>
+            <span class="mono" style="font-size:0.72rem;color:var(--cyan);" id="lfTimelineDur">~15 Minutes Total</span>
+          </div>
+          <div class="lf-chapter-timeline" id="lfChapterTimeline">
+            <!-- Timeline segments rendered here -->
+          </div>
         </div>
       </div>
 
@@ -2901,28 +3110,127 @@
       if (iconEl) iconEl.style.transform = expandedChapters[chNum] ? "rotate(180deg)" : "rotate(0deg)";
     }
 
+    function toggleTheaterMode() {
+      const c = document.getElementById("lfPlayerContainer");
+      const lbl = document.getElementById("theaterToggleLabel");
+      if (!c) return;
+      c.classList.toggle("theater-mode");
+      const isTheater = c.classList.contains("theater-mode");
+      if (lbl) lbl.textContent = isTheater ? "Normal View" : "Theater Mode";
+      if (isTheater) {
+        c.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+
+    function setPlaybackSpeed(speed, btnEl) {
+      const vid = document.getElementById("lfMainVideo");
+      if (vid) vid.playbackRate = speed;
+      document.querySelectorAll(".lf-speed-btn").forEach(b => b.classList.remove("active"));
+      if (btnEl) btnEl.classList.add("active");
+    }
+
+    function seekVideoRel(sec) {
+      const vid = document.getElementById("lfMainVideo");
+      if (vid) {
+        vid.currentTime = Math.max(0, Math.min(vid.duration || 9999, vid.currentTime + sec));
+      }
+    }
+
+    function togglePlayPause() {
+      const vid = document.getElementById("lfMainVideo");
+      const btn = document.getElementById("btnPlayPause");
+      if (!vid) return;
+      if (vid.paused) {
+        vid.play();
+        if (btn) btn.innerHTML = "⏸ Pause";
+      } else {
+        vid.pause();
+        if (btn) btn.innerHTML = "▶ Play";
+      }
+    }
+
+    function jumpToChapter(chNum) {
+      const vid = document.getElementById("lfMainVideo");
+      if (vid) {
+        vid.currentTime = 0;
+        vid.play().catch(() => {});
+      }
+      expandedChapters[chNum] = true;
+      const bodyEl = document.getElementById(`chBody-${chNum}`);
+      const iconEl = document.getElementById(`chIcon-${chNum}`);
+      if (bodyEl) bodyEl.style.display = "block";
+      if (iconEl) iconEl.style.transform = "rotate(180deg)";
+      document.querySelectorAll(".lf-timeline-seg").forEach((seg, idx) => {
+        if (idx === chNum - 1) seg.classList.add("active");
+        else seg.classList.remove("active");
+      });
+      document.getElementById(`chBody-${chNum}`)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
     function renderLongform(lf) {
       currentLongformData = lf || {};
       const stories = lf?.stories || [];
       const queue = lf?.queue || [];
       const sched = lf?.schedule || {};
 
-      // Story Selector Chips
+      if (selectedStoryIndex >= stories.length) selectedStoryIndex = 0;
+      const activeStory = stories[selectedStoryIndex] || stories[0] || (queue[0] ? { title: queue[0].title, slug: queue[0].slug } : null);
+
+      // 1. Story Showcase Cards Grid
+      const cardsContainer = document.getElementById("lfStoryCardsGrid");
+      if (cardsContainer && stories.length > 0) {
+        cardsContainer.innerHTML = stories.map((s, idx) => {
+          const isActive = idx === selectedStoryIndex;
+          const hasMp4 = s.has_render;
+          const thumb = s.thumb_url || (s.preview_frames && s.preview_frames[0]) || "";
+          const durLabel = s.duration_sec ? `${Math.round(s.duration_sec)}s` : `${s.target_duration_mins || 15}m`;
+          const statusPill = hasMp4
+            ? `<span class="badge badge-emerald" style="font-size:0.68rem;padding:2px 8px;">1080p Master Ready</span>`
+            : `<span class="badge badge-cyan" style="font-size:0.68rem;padding:2px 8px;">Voice Tracks Ready</span>`;
+          const topicBadge = s.slug.includes("vijayanagara")
+            ? "🏛️ Vijayanagara Empire"
+            : (s.slug.includes("victor-lustig") ? "🗼 Eiffel Tower Con" : "🚢 The Great Imposter");
+
+          return `
+            <div class="lf-story-card ${isActive ? 'active' : ''}" onclick="selectLongformStory(${idx}); document.getElementById('lfPlayerContainer')?.scrollIntoView({behavior:'smooth',block:'nearest'});">
+              <div class="lf-card-thumb-wrap">
+                <img src="${escapeHtml(thumb)}" alt="${escapeHtml(s.title)}" loading="lazy" />
+                <div class="lf-card-play-overlay">
+                  <div class="lf-card-play-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  </div>
+                </div>
+                <div class="lf-card-badge-top">${escapeHtml(topicBadge)}</div>
+                <div class="lf-card-badge-dur">${durLabel} · ${s.total_chapters || 5} Acts</div>
+              </div>
+              <div class="lf-card-body">
+                <div class="lf-card-title">${escapeHtml(s.title)}</div>
+                <div class="lf-card-desc">${escapeHtml(s.topic || s.title)}</div>
+                <div class="lf-card-footer">
+                  ${statusPill}
+                  <span style="font-size:0.75rem;font-weight:700;color:${isActive ? 'var(--cyan)' : 'var(--text-muted)'};">
+                    ${isActive ? '● Currently Playing' : 'Click to Play →'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      // 2. Filter Pills Selector
       const selContainer = document.getElementById("lfStorySelector");
       const countHint = document.getElementById("lfStoryCountHint");
       if (selContainer && stories.length > 0) {
-        if (selectedStoryIndex >= stories.length) selectedStoryIndex = 0;
         selContainer.innerHTML = stories.map((s, idx) => `
           <button class="filter-pill ${idx === selectedStoryIndex ? 'active' : ''}" onclick="selectLongformStory(${idx})">
             ${escapeHtml(s.title || s.slug)}
           </button>
         `).join("");
-        if (countHint) countHint.textContent = `${stories.length} Long-Form Stories In Library`;
+        if (countHint) countHint.textContent = `${stories.length} Stories in Library`;
       }
 
-      const activeStory = stories[selectedStoryIndex] || stories[0] || (queue[0] ? { title: queue[0].title, slug: queue[0].slug } : null);
-
-      // Badge in Navigation Tab
+      // 3. Navigation Tab Badge
       const tabBadge = document.getElementById("tabLongformBadge");
       if (tabBadge) {
         if (stories.length > 0) {
@@ -2933,13 +3241,13 @@
         }
       }
 
-      // Storage & Cloud badge
+      // 4. Storage badge
       const stBadge = document.getElementById("lfStorageBadge");
       if (stBadge && sched.storage_location) {
         stBadge.textContent = `${sched.storage_location}`;
       }
 
-      // Titles & Subtitles for active story
+      // 5. Titles & Subtitles
       const pTitle = document.getElementById("lfPlayerTitle");
       if (pTitle && activeStory) {
         pTitle.textContent = `Master Video Player: ${activeStory.title} (Act 1)`;
@@ -2957,7 +3265,7 @@
         chSub.textContent = activeStory.topic || activeStory.title;
       }
 
-      // KPIs
+      // 6. KPIs
       if (activeStory) {
         const titleEl = document.getElementById("lfStoryTitle");
         if (titleEl) titleEl.textContent = activeStory.title || "The Great Imposter";
@@ -2984,9 +3292,10 @@
         if (audioSub) audioSub.textContent = `${Math.round(totalDur)}s spoken audio (~15m runtime)`;
       }
 
-      // Main video player
+      // 7. Main Video Player setup
       const vidEl = document.getElementById("lfMainVideo");
       const dlBtn = document.getElementById("btnLfDownload");
+      const dlLbl = document.getElementById("btnLfDownloadLabel");
       if (activeStory && activeStory.mp4_url) {
         if (vidEl && vidEl.getAttribute("src") !== activeStory.mp4_url) {
           vidEl.src = activeStory.mp4_url;
@@ -2998,6 +3307,7 @@
           dlBtn.href = activeStory.mp4_url;
           dlBtn.download = activeStory.mp4_name || `${activeStory.slug}-ch1.mp4`;
           dlBtn.style.display = "inline-flex";
+          if (dlLbl) dlLbl.textContent = `Download MP4 (${activeStory.mp4_size_mb || 25} MB)`;
         }
       } else if (vidEl) {
         vidEl.removeAttribute("src");
@@ -3005,7 +3315,36 @@
         if (dlBtn) dlBtn.style.display = "none";
       }
 
-      // Chapters List
+      // Sync play/pause button state with video
+      if (vidEl && !vidEl._boundEvents) {
+        vidEl._boundEvents = true;
+        vidEl.addEventListener("play", () => {
+          const btn = document.getElementById("btnPlayPause");
+          if (btn) btn.innerHTML = "⏸ Pause";
+        });
+        vidEl.addEventListener("pause", () => {
+          const btn = document.getElementById("btnPlayPause");
+          if (btn) btn.innerHTML = "▶ Play";
+        });
+      }
+
+      // 8. Interactive Chapter Timeline Bar
+      const tlContainer = document.getElementById("lfChapterTimeline");
+      if (tlContainer && activeStory && activeStory.chapters) {
+        tlContainer.innerHTML = activeStory.chapters.map((ch, cIdx) => {
+          const isAct1 = ch.chapter === 1;
+          const dur = ch.duration_sec ? `${Math.round(ch.duration_sec)}s` : "3m";
+          return `
+            <div class="lf-timeline-seg ${isAct1 ? 'active' : ''}" onclick="jumpToChapter(${ch.chapter})" title="Act ${ch.chapter}: ${escapeHtml(ch.title)} (${dur})">
+              <div class="lf-seg-num">Act ${ch.chapter}</div>
+              <div class="lf-seg-title">${escapeHtml(ch.title)}</div>
+              <div class="lf-seg-time">${dur} · ${ch.status === 'rendered' ? '1080p MP4' : 'Voice Track'}</div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      // 9. Chapters List Breakdown
       const chContainer = document.getElementById("lfChapterList");
       if (chContainer && activeStory && activeStory.chapters) {
         chContainer.innerHTML = activeStory.chapters.map(ch => {
@@ -3069,30 +3408,49 @@
         }).join("");
       }
 
-      // Storyboard frames grid
+      // 10. Storyboard frames grid with custom labels
       const sbGrid = document.getElementById("lfStoryboardGrid");
       if (sbGrid) {
         const frames = (activeStory?.preview_frames && activeStory.preview_frames.length)
           ? activeStory.preview_frames
           : [];
         if (frames.length > 0) {
-          const frameLabels = activeStory.slug.includes("victor-lustig")
-            ? [
-                "Scene 01: Paris 1925 Hotel Suite",
-                "Scene 02: 7,000 Tons Scrap Order",
-                "Scene 03: The Tycoons Summoned",
-                "Scene 04: The Debonair Host",
-                "Scene 05: Forged Wax Seals",
-                "Scene 06: A King's Ransom"
-              ]
-            : [
-                "Scene 01: Korean Strait Sickbay",
-                "Scene 02: Demara Studying Manual",
-                "Scene 03: Surgical Ward Prep",
-                "Scene 04: Operating Under Pressure",
-                "Scene 05: The Miracle Extraction",
-                "Scene 06: Con Artist Resolution"
-              ];
+          let frameLabels = [
+            "Scene 01: Establishing Shot",
+            "Scene 02: Narrative Turning Point",
+            "Scene 03: Character Confrontation",
+            "Scene 04: High Stakes Escalation",
+            "Scene 05: Climax Resolution",
+            "Scene 06: Final Legacy"
+          ];
+          if (activeStory.slug.includes("vijayanagara")) {
+            frameLabels = [
+              "Scene 01: 1336 CE Southern India Crisis",
+              "Scene 02: Sultan of Delhi Invades",
+              "Scene 03: Two Captive Brothers",
+              "Scene 04: The 700-Year Blunder",
+              "Scene 05: Sage on Tungabhadra",
+              "Scene 06: The Courageous Hare & Victory"
+            ];
+          } else if (activeStory.slug.includes("victor-lustig")) {
+            frameLabels = [
+              "Scene 01: Paris 1925 Hotel Suite",
+              "Scene 02: 7,000 Tons Scrap Order",
+              "Scene 03: The Tycoons Summoned",
+              "Scene 04: The Debonair Host",
+              "Scene 05: Forged Wax Seals",
+              "Scene 06: A King's Ransom"
+            ];
+          } else if (activeStory.slug.includes("ferdinand-demara")) {
+            frameLabels = [
+              "Scene 01: Korean Strait Sickbay",
+              "Scene 02: Demara Studying Manual",
+              "Scene 03: Surgical Ward Prep",
+              "Scene 04: Operating Under Pressure",
+              "Scene 05: The Miracle Extraction",
+              "Scene 06: Con Artist Resolution"
+            ];
+          }
           sbGrid.innerHTML = frames.map((fUrl, idx) => {
             const label = frameLabels[idx] || `Keyframe ${idx + 1}`;
             return `
