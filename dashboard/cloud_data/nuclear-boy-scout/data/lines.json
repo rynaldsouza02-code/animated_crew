@@ -1,0 +1,79 @@
+{
+ "duration": 70.837,
+ "voice": "am_michael",
+ "speed": 1.06,
+ "lines": [
+  {
+   "i": 0,
+   "text": "In nineteen ninety-four, federal agents in hazmat suits raided a teenager's backyard potting shed -",
+   "start": 0.28,
+   "end": 6.66
+  },
+  {
+   "i": 1,
+   "text": "and discovered a working radioactive breeder reactor.",
+   "start": 7.19,
+   "end": 10.31
+  },
+  {
+   "i": 2,
+   "text": "Seventeen-year-old David Hahn wanted to earn the Boy Scout atomic energy merit badge.",
+   "start": 10.53,
+   "end": 16.164
+  },
+  {
+   "i": 3,
+   "text": "Instead of just reading pamphlets, he decided to build an actual nuclear reactor in his mom's garden shed.",
+   "start": 16.324,
+   "end": 22.848
+  },
+  {
+   "i": 4,
+   "text": "David posed as a physics teacher to extract government research,",
+   "start": 23.028,
+   "end": 26.908
+  },
+  {
+   "i": 5,
+   "text": "then bought hundreds of smoke detectors to harvest radioactive americium.",
+   "start": 27.408,
+   "end": 32.169
+  },
+  {
+   "i": 6,
+   "text": "He scraped thorium off camping lantern mantles and bought radium clocks from antique shops.",
+   "start": 32.369,
+   "end": 38.037
+  },
+  {
+   "i": 7,
+   "text": "Using lead blocks, duct tape, and a tin-foil core, his makeshift reactor started generating lethal radiation.",
+   "start": 38.197,
+   "end": 45.478
+  },
+  {
+   "i": 8,
+   "text": "When his homemade Geiger counter went berserk five blocks away, David panicked and packed the core into his car trunk.",
+   "start": 45.678,
+   "end": 52.579
+  },
+  {
+   "i": 9,
+   "text": "Police pulled him over, searched the trunk, and instantly called the FBI.",
+   "start": 52.739,
+   "end": 57.162
+  },
+  {
+   "i": 10,
+   "text": "Federal emergency teams dismantled the shed, sealed it into thirty-nine barrels, and buried it in the Utah desert.",
+   "start": 57.382,
+   "end": 64.446
+  },
+  {
+   "i": 11,
+   "text": "David still earned his Boy Scout badge, but left the entire neighborhood contaminated.",
+   "start": 64.606,
+   "end": 69.827
+  }
+ ]
+}

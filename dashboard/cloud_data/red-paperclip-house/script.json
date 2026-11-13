@@ -1,0 +1,62 @@
+{
+  "title": "The Guy Who Traded A Paperclip For A House",
+  "voice": "am_michael",
+  "speed": 1.06,
+  "lead": 0.28,
+  "outro": 0.85,
+  "gap": 0.16,
+  "music": "bounce",
+  "sources": [
+    "Wikipedia / BBC / ABC News - In July 2005, Kyle MacDonald began with a red paperclip on his blog One Red Paperclip and completed 14 trades over one year.",
+    "Town of Kipling, Saskatchewan - On July 12, 2006, MacDonald traded a paid movie role with Corbin Bernsen for a two-story farmhouse at 503 Main Street, Kipling."
+  ],
+  "lines": [
+    {
+      "text": "In two thousand five, an unemployed man started with one single red paperclip on his desk -",
+      "caps": "In 2005, | an unemployed man | started with | one single | red paperclip -",
+      "gap": 0.18
+    },
+    {
+      "text": "and traded it all the way up to a two-story farmhouse.",
+      "gap": 0.22
+    },
+    {
+      "text": "Kyle MacDonald was tired of paying rent and had zero savings,"
+    },
+    {
+      "text": "so he posted a classified ad offering to swap his red paperclip for anything bigger or better.",
+      "gap": 0.18
+    },
+    {
+      "text": "First, two women traded him a pen shaped like a fish."
+    },
+    {
+      "text": "The same day, he traded the fish pen for a hand-carved ceramic doorknob.",
+      "gap": 0.2
+    },
+    {
+      "text": "Then came a camp stove, an electric generator, and a snowmobile."
+    },
+    {
+      "text": "Each trade sounded completely ridiculous, but every single swap was real.",
+      "gap": 0.18
+    },
+    {
+      "text": "Trade number thirteen was an afternoon with rock legend Alice Cooper,"
+    },
+    {
+      "text": "which he traded to a collector for a paid movie role.",
+      "gap": 0.2
+    },
+    {
+      "text": "Finally, the mayor of Kipling, Saskatchewan offered the ultimate deal:"
+    },
+    {
+      "text": "the movie role in exchange for a deed to a renovated two-story farmhouse!",
+      "gap": 0.22
+    },
+    {
+      "text": "Fourteen trades, zero dollars spent, and he moved right into his new home."
+    }
+  ]
+}

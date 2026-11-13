@@ -1,0 +1,57 @@
+{
+  "title": "The Con Artist Who Sold An Imaginary Country For Millions",
+  "voice": "am_michael",
+  "speed": 1.06,
+  "lead": 0.28,
+  "outro": 0.85,
+  "gap": 0.16,
+  "music": "bounce",
+  "sources": [
+    "The Economist / David Sinclair 'The Land That Never Was' - In 1820, Scottish officer Gregor MacGregor claimed the title 'Cazique of Poyais' and invented a fictional Central American nation.",
+    "Bank of England Archives - MacGregor issued 200,000 pounds in Poyais government land certificates and loans in London, sending 250 British settlers to an unsettled wilderness in 1822."
+  ],
+  "lines": [
+    {
+      "text": "In eighteen twenty, a Scottish general made millions of dollars by selling an entire country -",
+      "caps": "In 1820, | a Scottish general | made millions | selling a country -",
+      "gap": 0.18
+    },
+    {
+      "text": "that did not exist anywhere on Earth.",
+      "gap": 0.22
+    },
+    {
+      "text": "Gregor MacGregor claimed he was the official sovereign prince of Poyais,"
+    },
+    {
+      "text": "a mythical paradise in Central America loaded with fertile gold mines and exotic timber.",
+      "gap": 0.18
+    },
+    {
+      "text": "He printed glossy guidebooks, opened a fake Poyais embassy in London, and invented his own national currency.",
+      "gap": 0.2
+    },
+    {
+      "text": "British investors scrambled to buy government bonds, handing MacGregor over two hundred thousand pounds.",
+      "gap": 0.2
+    },
+    {
+      "text": "Two hundred and fifty eager settlers sold everything they owned and boarded ships for their new tropical life."
+    },
+    {
+      "text": "When they landed, there were no cities, no farms, and no gold mines.",
+      "gap": 0.2
+    },
+    {
+      "text": "Just an untamed, malaria-infested swamp where dozens of settlers died before rescue ships arrived.",
+      "gap": 0.2
+    },
+    {
+      "text": "Back in Europe, MacGregor slipped across the border to France and immediately started selling Poyais bonds all over again!",
+      "gap": 0.22
+    },
+    {
+      "text": "One of the greatest real estate frauds in human history, built on pure imagination."
+    }
+  ]
+}

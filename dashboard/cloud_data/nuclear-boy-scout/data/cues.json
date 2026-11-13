@@ -1,0 +1,125 @@
+{
+ "duration": 70.837,
+ "cues": [
+  {
+   "t": 0.05,
+   "type": "whoosh",
+   "gain": 0.6
+  },
+  {
+   "t": 0.35,
+   "type": "alarm",
+   "gain": 0.85
+  },
+  {
+   "t": 7.18,
+   "type": "sizzle",
+   "gain": 0.7
+  },
+  {
+   "t": 7.43,
+   "type": "pop",
+   "gain": 0.85
+  },
+  {
+   "t": 10.52,
+   "type": "whoosh",
+   "gain": 0.5
+  },
+  {
+   "t": 10.82,
+   "type": "sparkle",
+   "gain": 0.8
+  },
+  {
+   "t": 16.314,
+   "type": "whoosh",
+   "gain": 0.5
+  },
+  {
+   "t": 16.664,
+   "type": "tock",
+   "gain": 0.75
+  },
+  {
+   "t": 23.018,
+   "type": "whoosh",
+   "gain": 0.55
+  },
+  {
+   "t": 23.318,
+   "type": "pop",
+   "gain": 0.8
+  },
+  {
+   "t": 27.398,
+   "type": "whoosh",
+   "gain": 0.5
+  },
+  {
+   "t": 27.698,
+   "type": "sizzle",
+   "gain": 0.85
+  },
+  {
+   "t": 32.359,
+   "type": "whoosh",
+   "gain": 0.5
+  },
+  {
+   "t": 32.559,
+   "type": "tock",
+   "gain": 0.75
+  },
+  {
+   "t": 38.187,
+   "type": "sizzle",
+   "gain": 0.8
+  },
+  {
+   "t": 38.437,
+   "type": "alarm",
+   "gain": 0.9
+  },
+  {
+   "t": 45.668,
+   "type": "whoosh",
+   "gain": 0.6
+  },
+  {
+   "t": 45.968,
+   "type": "tock",
+   "gain": 0.95
+  },
+  {
+   "t": 52.729,
+   "type": "whoosh",
+   "gain": 0.6
+  },
+  {
+   "t": 52.979,
+   "type": "pop",
+   "gain": 0.85
+  },
+  {
+   "t": 57.372,
+   "type": "whoosh",
+   "gain": 0.6
+  },
+  {
+   "t": 57.622,
+   "type": "thud",
+   "gain": 0.85
+  },
+  {
+   "t": 64.796,
+   "type": "sparkle",
+   "gain": 0.85
+  },
+  {
+   "t": 65.746,
+   "type": "pop",
+   "gain": 0.9
+  }
+ ]
+}

@@ -60,8 +60,12 @@ def sync() -> None:
         slug = r.get("slug")
         if not slug:
             continue
-        proj_dir = PROJECTS_ROOT / slug
-        if not proj_dir.is_dir():
+        proj_dir = None
+        for r_root in (Path(r"D:\faceless-shorts"), PROJECTS_ROOT):
+            if (r_root / slug).is_dir():
+                proj_dir = r_root / slug
+                break
+        if not proj_dir or not proj_dir.is_dir():
             continue
 
         # Record exact rendered MP4 & duration metadata so Vercel displays accurate sizes/ready state

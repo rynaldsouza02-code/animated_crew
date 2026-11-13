@@ -1,0 +1,73 @@
+{
+ "duration": 65.3,
+ "voice": "am_michael",
+ "speed": 1.06,
+ "lines": [
+  {
+   "i": 0,
+   "text": "In eighteen twenty, a Scottish general made millions of dollars by selling an entire country -",
+   "start": 0.28,
+   "end": 6.28
+  },
+  {
+   "i": 1,
+   "text": "that did not exist anywhere on Earth.",
+   "start": 6.4,
+   "end": 8.509
+  },
+  {
+   "i": 2,
+   "text": "Gregor MacGregor claimed he was the official sovereign prince of Poyais,",
+   "start": 8.729,
+   "end": 13.029
+  },
+  {
+   "i": 3,
+   "text": "a mythical paradise in Central America loaded with fertile gold mines and exotic timber.",
+   "start": 13.529,
+   "end": 19.468
+  },
+  {
+   "i": 4,
+   "text": "He printed glossy guidebooks, opened a fake Poyais embassy in London, and invented his own national currency.",
+   "start": 19.648,
+   "end": 26.742
+  },
+  {
+   "i": 5,
+   "text": "British investors scrambled to buy government bonds, handing MacGregor over two hundred thousand pounds.",
+   "start": 26.942,
+   "end": 33.495
+  },
+  {
+   "i": 6,
+   "text": "Two hundred and fifty eager settlers sold everything they owned and boarded ships for their new tropical life.",
+   "start": 33.695,
+   "end": 40.319
+  },
+  {
+   "i": 7,
+   "text": "When they landed, there were no cities, no farms, and no gold mines.",
+   "start": 40.479,
+   "end": 44.615
+  },
+  {
+   "i": 8,
+   "text": "Just an untamed, malaria-infested swamp where dozens of settlers died before rescue ships arrived.",
+   "start": 44.815,
+   "end": 51.422
+  },
+  {
+   "i": 9,
+   "text": "Back in Europe, MacGregor slipped across the border to France and immediately started selling Poyais bonds all over again!",
+   "start": 51.622,
+   "end": 58.886
+  },
+  {
+   "i": 10,
+   "text": "One of the greatest real estate frauds in human history, built on pure imagination.",
+   "start": 59.106,
+   "end": 64.29
+  }
+ ]
+}

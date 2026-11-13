@@ -1,0 +1,58 @@
+{
+  "title": "The Boy Scout Who Built A Nuclear Reactor In His Shed",
+  "voice": "am_michael",
+  "speed": 1.06,
+  "lead": 0.28,
+  "outro": 0.85,
+  "gap": 0.16,
+  "music": "bounce",
+  "sources": [
+    "Harper's Magazine / Ken Silverstein 'The Radioactive Boy Scout' (1998) - In 1994, 17-year-old David Hahn built a makeshift nuclear breeder reactor in Commerce Township, Michigan.",
+    "EPA Superfund / NRC records - In August 1994, federal authorities discovered the shed emitted radiation 1,000 times normal background levels, resulting in a Superfund cleanup of 39 sealed barrels."
+  ],
+  "lines": [
+    {
+      "text": "In nineteen ninety-four, federal agents in hazmat suits raided a teenager's backyard potting shed -",
+      "caps": "In 1994, | federal agents | in hazmat suits | raided a shed -",
+      "gap": 0.18
+    },
+    {
+      "text": "and discovered a working radioactive breeder reactor.",
+      "gap": 0.22
+    },
+    {
+      "text": "Seventeen-year-old David Hahn wanted to earn the Boy Scout atomic energy merit badge."
+    },
+    {
+      "text": "Instead of just reading pamphlets, he decided to build an actual nuclear reactor in his mom's garden shed.",
+      "gap": 0.18
+    },
+    {
+      "text": "David posed as a physics teacher to extract government research,"
+    },
+    {
+      "text": "then bought hundreds of smoke detectors to harvest radioactive americium.",
+      "gap": 0.2
+    },
+    {
+      "text": "He scraped thorium off camping lantern mantles and bought radium clocks from antique shops."
+    },
+    {
+      "text": "Using lead blocks, duct tape, and a tin-foil core, his makeshift reactor started generating lethal radiation.",
+      "gap": 0.2
+    },
+    {
+      "text": "When his homemade Geiger counter went berserk five blocks away, David panicked and packed the core into his car trunk."
+    },
+    {
+      "text": "Police pulled him over, searched the trunk, and instantly called the FBI.",
+      "gap": 0.22
+    },
+    {
+      "text": "Federal emergency teams dismantled the shed, sealed it into thirty-nine barrels, and buried it in the Utah desert."
+    },
+    {
+      "text": "David still earned his Boy Scout badge, but left the entire neighborhood contaminated."
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "title": "How The Mona Lisa Was Stolen In A Broom Closet",
+  "voice": "am_michael",
+  "speed": 1.06,
+  "lead": 0.28,
+  "outro": 0.85,
+  "gap": 0.16,
+  "music": "bounce",
+  "sources": [
+    "Louvre Museum Archives / Vanity Fair - On August 21, 1911, former Louvre glazier Vincenzo Peruggia hid overnight in a broom closet and carried out Leonardo's Mona Lisa.",
+    "The New York Times (1911-1913) - The painting was not noticed missing for 24 hours. The public hysteria turned the Mona Lisa into the most famous artwork in the world."
+  ],
+  "lines": [
+    {
+      "text": "Before nineteen eleven, the Mona Lisa was barely famous at all -",
+      "caps": "Before 1911, | the Mona Lisa | was barely famous | at all -",
+      "gap": 0.18
+    },
+    {
+      "text": "until one museum worker hid in a broom closet overnight and stole it.",
+      "gap": 0.22
+    },
+    {
+      "text": "Vincenzo Peruggia was an Italian handyman working at the Louvre in Paris."
+    },
+    {
+      "text": "On a quiet Sunday evening, he slipped into a tiny maintenance closet and stayed there until morning.",
+      "gap": 0.18
+    },
+    {
+      "text": "When the museum was closed, he casually unhooked Leonardo da Vinci's masterpiece from the wall."
+    },
+    {
+      "text": "In a hidden stairwell, he stripped off the heavy glass frame and tucked the wooden panel under his white work smock.",
+      "gap": 0.2
+    },
+    {
+      "text": "He walked straight out the front gate and took the Mona Lisa home in a wooden trunk."
+    },
+    {
+      "text": "For twenty-four hours, not a single guard noticed the blank wall.",
+      "gap": 0.2
+    },
+    {
+      "text": "When the news broke, thousands of people lined up just to stare at the empty nail."
+    },
+    {
+      "text": "Front-page headlines turned the obscure painting into the most famous artwork on Earth.",
+      "gap": 0.2
+    },
+    {
+      "text": "Peruggia kept it under his bed for two years before finally getting caught trying to sell it."
+    },
+    {
+      "text": "The theft made Leonardo's portrait an overnight worldwide legend."
+    }
+  ]
+}

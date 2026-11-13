@@ -40,10 +40,20 @@ if os.name == "nt":
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 LOCAL_PROJECTS_ROOT = Path(r"C:\Users\DELL\faceless-shorts")
+D_PROJECTS_ROOT = Path(r"D:\faceless-shorts")
 CLOUD_DATA_DIR = BASE_DIR / "cloud_data"
 IS_VERCEL = bool(os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"))
-CLOUD_MODE = IS_VERCEL or not LOCAL_PROJECTS_ROOT.exists()
-PROJECTS_ROOT = CLOUD_DATA_DIR if CLOUD_MODE else LOCAL_PROJECTS_ROOT
+CLOUD_MODE = IS_VERCEL or (not LOCAL_PROJECTS_ROOT.exists() and not D_PROJECTS_ROOT.exists())
+PROJECTS_ROOT = CLOUD_DATA_DIR if CLOUD_MODE else (D_PROJECTS_ROOT if D_PROJECTS_ROOT.exists() else LOCAL_PROJECTS_ROOT)
+
+def find_project_dir(slug: str) -> Optional[Path]:
+    for r in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT, CLOUD_DATA_DIR):
+        if r.exists():
+            p = (r / slug).resolve()
+            if p.is_dir() and p.parent.resolve() == r.resolve():
+                return p
+    return None
+
 SKILL_ROOT = Path(r"C:\Users\DELL\OneDrive\Desktop\faceless\faceless-shorts")
 RUNS_JSON_PATH = PROJECTS_ROOT / "runs.json"
 MONETIZATION_JSON_PATH = PROJECTS_ROOT / "monetization.json"
@@ -165,8 +175,14 @@ app.add_middleware(
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
-if PROJECTS_ROOT.exists():
-    app.mount("/media", StaticFiles(directory=str(PROJECTS_ROOT)), name="media")
+@app.get("/media/{file_path:path}")
+def serve_media(file_path: str):
+    for root in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT, CLOUD_DATA_DIR):
+        if root.exists():
+            target = (root / file_path).resolve()
+            if str(target).startswith(str(root.resolve())) and target.is_file():
+                return FileResponse(str(target))
+    raise HTTPException(status_code=404, detail="Media file not found")
 
 if LOCAL_LONGFORM_ROOT.exists():
     app.mount("/media-longform", StaticFiles(directory=str(LOCAL_LONGFORM_ROOT)), name="media-longform")
@@ -445,8 +461,10 @@ def _detect_active_processes() -> Dict[str, Any]:
         threading.Thread(target=_refresh_proc_tools_bg, daemon=True).start()
 
     recent_project = None
-    if PROJECTS_ROOT.exists():
-        for d in PROJECTS_ROOT.iterdir():
+    for r_root in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT, CLOUD_DATA_DIR if CLOUD_MODE else None):
+        if not r_root or not r_root.exists():
+            continue
+        for d in r_root.iterdir():
             if not d.is_dir() or d.name.startswith(".") or d.name in EXCLUDED_DIRS:
                 continue
             for check_rel in ["script.json", "data/narration.wav", "data/words.json", "data/mix.wav", "src/shots.js"]:
@@ -463,6 +481,8 @@ def _detect_active_processes() -> Dict[str, Any]:
                         break
             if recent_project:
                 break
+        if recent_project:
+            break
 
     return {
         "is_rendering": len(active_tools) > 0 or recent_project is not None,
@@ -2300,14 +2320,14 @@ def get_projects_pipeline(yt_data: Dict[str, Any], active_project: Optional[str]
     yt_by_id = {v["id"]: v for v in yt_data.get("videos", [])}
 
     projects: List[Dict[str, Any]] = []
-    if not PROJECTS_ROOT.exists():
-        return projects
-
-    dirs = [
-        d
-        for d in PROJECTS_ROOT.iterdir()
-        if d.is_dir() and not d.name.startswith(".") and d.name not in EXCLUDED_DIRS
-    ]
+    seen_slugs = set()
+    dirs = []
+    for r_root in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT, CLOUD_DATA_DIR if CLOUD_MODE else None):
+        if r_root and r_root.exists():
+            for d in r_root.iterdir():
+                if d.is_dir() and not d.name.startswith(".") and d.name not in EXCLUDED_DIRS and d.name not in seen_slugs:
+                    dirs.append(d)
+                    seen_slugs.add(d.name)
 
     now = time.time()
     for proj_dir in dirs:
@@ -4175,8 +4195,8 @@ def api_monetization_settings(payload: Dict[str, Any] = Body(...)):
 
 @app.get("/api/projects/{slug}/script")
 def api_project_script(slug: str):
-    proj_dir = (PROJECTS_ROOT / slug).resolve()
-    if proj_dir.parent != PROJECTS_ROOT.resolve() or not proj_dir.is_dir():
+    proj_dir = find_project_dir(slug)
+    if not proj_dir or not proj_dir.is_dir():
         raise HTTPException(status_code=404, detail="Project not found")
 
     runs_data = _read_json(RUNS_JSON_PATH, {"runs": []})
@@ -4292,8 +4312,8 @@ def api_queue_metadata(payload: Dict[str, Any] = Body(...)):
     slug = str(payload.get("slug") or "").strip()
     if not slug:
         raise HTTPException(status_code=400, detail="Missing slug")
-    proj_dir = (PROJECTS_ROOT / slug).resolve()
-    if proj_dir.parent != PROJECTS_ROOT.resolve() or not proj_dir.is_dir():
+    proj_dir = find_project_dir(slug)
+    if proj_dir is None:
         raise HTTPException(status_code=404, detail="Project directory not found")
 
     with _runs_lock:
@@ -4443,8 +4463,8 @@ async def api_upload_manual(request: Request):
     if mp4_path is None:
         if not slug:
             raise HTTPException(status_code=400, detail="Select a queued video project OR choose a local .mp4 file to upload.")
-        proj_dir = (PROJECTS_ROOT / slug).resolve()
-        if proj_dir.parent != PROJECTS_ROOT.resolve() or not proj_dir.is_dir():
+        proj_dir = find_project_dir(slug)
+        if proj_dir is None:
             raise HTTPException(status_code=404, detail=f"Project '{slug}' not found.")
 
         runs_data = _read_json(RUNS_JSON_PATH, {"runs": []})
