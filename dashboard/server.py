@@ -50,11 +50,42 @@ def find_project_dir(slug: str) -> Optional[Path]:
     for r in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT, CLOUD_DATA_DIR):
         if r.exists():
             p = (r / slug).resolve()
-            if p.is_dir() and p.parent.resolve() == r.resolve():
+            if p.is_dir():
                 return p
     return None
 
+def find_project_mp4(slug: str, rel_video: Optional[str] = None) -> Optional[Path]:
+    candidates = []
+    for r in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT, CLOUD_DATA_DIR):
+        if r.exists():
+            p = (r / slug).resolve()
+            if p.is_dir():
+                candidates.append(p)
+
+    if rel_video:
+        for p in candidates:
+            cand = p / rel_video
+            if cand.exists() and cand.stat().st_size > 50_000:
+                return cand
+
+    for p in candidates:
+        rdir = p / "renders"
+        if rdir.exists():
+            renders = sorted(rdir.glob("*.mp4"), key=lambda x: x.stat().st_mtime, reverse=True)
+            for cand in renders:
+                if cand.exists() and cand.stat().st_size > 50_000:
+                    return cand
+    return None
+
 SKILL_ROOT = Path(r"C:\Users\DELL\OneDrive\Desktop\faceless\faceless-shorts")
+
+def resolve_helper_script(name: str) -> Path:
+    for base in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT, BASE_DIR, SKILL_ROOT):
+        cand = base / name
+        if cand.exists():
+            return cand
+    return LOCAL_PROJECTS_ROOT / name
+
 RUNS_JSON_PATH = PROJECTS_ROOT / "runs.json"
 MONETIZATION_JSON_PATH = PROJECTS_ROOT / "monetization.json"
 STUDIO_ANALYTICS_PATH = PROJECTS_ROOT / "studio_analytics.json"
@@ -63,9 +94,9 @@ STUDIO_SYNC_JOB_PATH = PROJECTS_ROOT / "studio_sync_job.json"
 YT_LIVE_CACHE_PATH = LOCAL_PROJECTS_ROOT / "yt_live_cache.json"
 UPLOAD_JOB_PATH = PROJECTS_ROOT / "upload_job.json"
 MANUAL_UPLOADS_DIR = PROJECTS_ROOT / "manual-uploads"
-UPLOAD_MEDIA_PY = PROJECTS_ROOT / "upload_media.py"
-FINALIZE_UPLOAD_PY = PROJECTS_ROOT / "finalize_upload.py"
-FINALIZE_STUDIO_SYNC_PY = PROJECTS_ROOT / "finalize_studio_sync.py"
+UPLOAD_MEDIA_PY = resolve_helper_script("upload_media.py")
+FINALIZE_UPLOAD_PY = resolve_helper_script("finalize_upload.py")
+FINALIZE_STUDIO_SYNC_PY = resolve_helper_script("finalize_studio_sync.py")
 PYTHON_BIN = Path(r"C:\Python314\python.exe")
 AGENTAPI_BAT = Path(r"C:\Users\DELL\.gemini\antigravity\bin\agentapi.bat")
 LANGUAGE_SERVER_EXE = Path(r"C:\Users\DELL\AppData\Local\Programs\antigravity\resources\bin\language_server.exe")
@@ -2349,14 +2380,15 @@ def get_projects_pipeline(yt_data: Dict[str, Any], active_project: Optional[str]
         shots_js = proj_dir / "src" / "shots.js"
         index_html = proj_dir / "index.html"
 
-        renders_dir = proj_dir / "renders"
-        mp4_files = sorted(renders_dir.glob("*.mp4"), key=lambda p: p.stat().st_mtime, reverse=True) if renders_dir.exists() else []
         declared_video = run_meta.get("video_file")
-        mp4_path = None
-        if declared_video and (proj_dir / declared_video).exists():
-            mp4_path = proj_dir / declared_video
-        elif mp4_files:
-            mp4_path = mp4_files[0]
+        mp4_path = find_project_mp4(slug, declared_video)
+        if not mp4_path:
+            renders_dir = proj_dir / "renders"
+            mp4_files = sorted(renders_dir.glob("*.mp4"), key=lambda p: p.stat().st_mtime, reverse=True) if renders_dir.exists() else []
+            if declared_video and (proj_dir / declared_video).exists():
+                mp4_path = proj_dir / declared_video
+            elif mp4_files:
+                mp4_path = mp4_files[0]
 
         mp4_size = mp4_path.stat().st_size if mp4_path and mp4_path.exists() else 0
         mp4_is_actively_writing = bool(mp4_path and mp4_path.exists() and (now - mp4_path.stat().st_mtime) < 35)
@@ -2727,7 +2759,10 @@ def _finalize_published_run(job: Dict[str, Any], vid: str) -> Dict[str, Any]:
                         if qo == 1
                         else f"Queued #{qo}: Held in queue for future daily auto-upload."
                     )
-            _write_json_atomic(RUNS_JSON_PATH, runs_data)
+            for root in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT):
+                rp = root / "runs.json"
+                if rp.exists():
+                    _write_json_atomic(rp, runs_data)
 
     with _yt_lock:
         _yt_cache["timestamp"] = 0.0
@@ -2754,6 +2789,11 @@ def _inspect_upload_job() -> Dict[str, Any]:
             "step": "Cloud Monitor mode — trigger Zapier uploads from your local CrewTube server.",
         }
     job = _read_json(UPLOAD_JOB_PATH, None)
+    if not job:
+        for root in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT):
+            job = _read_json(root / "upload_job.json", None)
+            if job:
+                break
     if not job:
         return {"active": False, "status": "idle", "step": "No manual upload running."}
 
@@ -2821,13 +2861,20 @@ def _update_upload_job(updates: Dict[str, Any], expected_job_id: Optional[str] =
         if expected_job_id and expected_job_id in _cancelled_jobs:
             return None
         job = _read_json(UPLOAD_JOB_PATH, None)
+        if not job:
+            for root in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT):
+                job = _read_json(root / "upload_job.json", None)
+                if job:
+                    break
         if expected_job_id:
             if not job or job.get("job_id") != expected_job_id or job.get("status") == "cancelled":
                 return None
         job = job or {}
         job.update(updates)
         job["updated_at"] = datetime.now().astimezone().isoformat(timespec="seconds")
-        _write_json_atomic(UPLOAD_JOB_PATH, job)
+        for root in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT):
+            if root.exists():
+                _write_json_atomic(root / "upload_job.json", job)
         return job
 
 
@@ -2850,8 +2897,9 @@ def _run_manual_upload_worker(job_id: str, local_mp4_path: Path, reuse_staged_ur
 
         # 1. Stage to direct binary HTTPS host (uguu.se -> catbox.moe -> x0.at over IPv4)
         if not staged_url:
+            upload_script = resolve_helper_script("upload_media.py")
             stage_proc = subprocess.Popen(
-                [str(PYTHON_BIN), str(UPLOAD_MEDIA_PY), str(local_mp4_path)],
+                [str(PYTHON_BIN), str(upload_script), str(local_mp4_path)],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
@@ -3217,7 +3265,7 @@ def get_system_health() -> List[Dict[str, Any]]:
         },
         {
             "name": "FIFO Queue & Manual Upload",
-            "ok": (PROJECTS_ROOT / "AUTO_PROMPT.md").exists() and (PROJECTS_ROOT / "UPLOAD_PROMPT.md").exists() and UPLOAD_MEDIA_PY.exists(),
+            "ok": resolve_helper_script("AUTO_PROMPT.md").exists() and resolve_helper_script("UPLOAD_PROMPT.md").exists() and resolve_helper_script("upload_media.py").exists(),
             "detail": "AUTO_PROMPT.md (1/day FIFO) + UPLOAD_PROMPT.md + STUDIO_SYNC ready",
         },
     ]
@@ -4382,11 +4430,13 @@ def api_upload_clear():
             cur["status"] = "cancelled"
             cur["step"] = "Upload cancelled"
             _write_json_atomic(UPLOAD_JOB_PATH, cur)
-        if UPLOAD_JOB_PATH.exists():
-            try:
-                UPLOAD_JOB_PATH.unlink()
-            except Exception:
-                pass
+        for root in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT):
+            jp = root / "upload_job.json"
+            if jp.exists():
+                try:
+                    jp.unlink()
+                except Exception:
+                    pass
     return JSONResponse({"ok": True, "status": "idle", "cancelled": True})
 
 
@@ -4489,10 +4539,9 @@ async def api_upload_manual(request: Request):
         category_id = category_id or defaults["category_id"]
 
         rel_video = run_meta.get("video_file")
-        if rel_video and (proj_dir / rel_video).exists():
-            mp4_path = proj_dir / rel_video
-        else:
-            renders = sorted((proj_dir / "renders").glob("*.mp4"), key=lambda p: p.stat().st_mtime, reverse=True) if (proj_dir / "renders").exists() else []
+        mp4_path = find_project_mp4(slug, rel_video)
+        if not mp4_path and (proj_dir / "renders").exists():
+            renders = sorted((proj_dir / "renders").glob("*.mp4"), key=lambda p: p.stat().st_mtime, reverse=True)
             mp4_path = renders[0] if renders else None
 
         if not mp4_path or not mp4_path.exists() or mp4_path.stat().st_size < 50_000:
@@ -4504,15 +4553,19 @@ async def api_upload_manual(request: Request):
 
     if source_type == "queued_project" and slug:
         with _runs_lock:
-            latest_runs = _read_json(RUNS_JSON_PATH, {"runs": []})
-            entry = next((r for r in latest_runs.get("runs", []) if r.get("slug") == slug), None)
-            if entry is not None:
-                entry["youtube_title"] = title
-                entry["youtube_description"] = description
-                entry["youtube_tags"] = tags
-                entry["privacy_status"] = privacy_status
-                entry["category_id"] = category_id
-                _write_json_atomic(RUNS_JSON_PATH, latest_runs)
+            for root in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT):
+                rp = root / "runs.json"
+                if not rp.exists():
+                    continue
+                latest_runs = _read_json(rp, {"runs": []})
+                entry = next((r for r in latest_runs.get("runs", []) if r.get("slug") == slug), None)
+                if entry is not None:
+                    entry["youtube_title"] = title
+                    entry["youtube_description"] = description
+                    entry["youtube_tags"] = tags
+                    entry["privacy_status"] = privacy_status
+                    entry["category_id"] = category_id
+                    _write_json_atomic(rp, latest_runs)
 
     st = mp4_path.stat()
     source_sig = f"{mp4_path}|{st.st_size}|{int(st.st_mtime)}"
@@ -4556,7 +4609,9 @@ async def api_upload_manual(request: Request):
     }
     with _upload_lock:
         _cancelled_jobs.discard(job_id)
-        _write_json_atomic(UPLOAD_JOB_PATH, job)
+        for root in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT):
+            if root.exists():
+                _write_json_atomic(root / "upload_job.json", job)
         _active_worker_jobs.add(job_id)
 
     threading.Thread(target=_run_manual_upload_worker, args=(job_id, mp4_path, reuse_staged_url), daemon=True).start()
