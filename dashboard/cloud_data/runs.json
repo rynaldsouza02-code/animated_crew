@@ -29,11 +29,7 @@
       "privacy_status": "public",
       "category_id": "23",
       "zapier_upload_id": "ZaY-CB-m4dM",
-      "notes": "First Tall Tale 3D viral Short; live on Animated_Crew channel as U2JI4OeNHP4.",
-      "rendered_mp4_name": "the-man-who-bought-a-bank-for-one-dollar.mp4",
-      "rendered_size_mb": 24.67,
-      "mp4_ready_snapshot": true,
-      "rendered_duration_sec": 38.82
+      "notes": "First Tall Tale 3D viral Short; live on Animated_Crew channel as U2JI4OeNHP4."
     },
     {
       "slug": "one-dollar-bank",
@@ -61,11 +57,7 @@
       ],
       "privacy_status": "public",
       "category_id": "23",
-      "notes": "Published live on Animated_Crew channel as GM2VoeHNEV4.",
-      "rendered_mp4_name": "the-girl-who-was-mailed-to-grandma.mp4",
-      "rendered_size_mb": 33.39,
-      "mp4_ready_snapshot": true,
-      "rendered_duration_sec": 51.83
+      "notes": "Published live on Animated_Crew channel as GM2VoeHNEV4."
     },
     {
       "slug": "eiffel-tower-con-man",
@@ -94,11 +86,7 @@
       "privacy_status": "public",
       "category_id": "23",
       "zapier_upload_id": "ACCzOdTOvMM",
-      "notes": "Published autonomously via daily queue runner.",
-      "rendered_mp4_name": "the-man-who-sold-the-eiffel-tower-twice.mp4",
-      "rendered_size_mb": 31.48,
-      "mp4_ready_snapshot": true,
-      "rendered_duration_sec": 51.94
+      "notes": "Published autonomously via daily queue runner."
     },
     {
       "slug": "great-maple-syrup-heist",
@@ -126,11 +114,7 @@
       "privacy_status": "public",
       "category_id": "23",
       "notes": "Published live on Animated_Crew channel as Ju_GMnwmskA.",
-      "published_at": "2026-11-11T07:10:43+02:00",
-      "rendered_mp4_name": "the-maple-syrup-heist.mp4",
-      "rendered_size_mb": 26.27,
-      "mp4_ready_snapshot": true,
-      "rendered_duration_sec": 49.25
+      "published_at": "2026-11-11T07:10:43+02:00"
     },
     {
       "slug": "australia-emu-war",
@@ -160,11 +144,7 @@
       "category_id": "23",
       "notes": "Published autonomously via daily queue runner (Video ID: WgfRHgulLlk).",
       "published_at": "2026-11-11T19:18:15+05:30",
-      "zapier_upload_id": "WgfRHgulLlk",
-      "rendered_mp4_name": "australia-emu-war.mp4",
-      "rendered_size_mb": 29.21,
-      "mp4_ready_snapshot": true,
-      "rendered_duration_sec": 40.1
+      "zapier_upload_id": "WgfRHgulLlk"
     },
     {
       "slug": "pet-rock-millionaire",
@@ -194,11 +174,7 @@
       "privacy_status": "public",
       "category_id": "23",
       "notes": "Published live on Animated_Crew channel as 1NIuI9OpAkk.",
-      "published_at": "2026-11-12T14:38:50+05:30",
-      "rendered_mp4_name": "pet-rock-millionaire.mp4",
-      "rendered_size_mb": 32.33,
-      "mp4_ready_snapshot": true,
-      "rendered_duration_sec": 52.95
+      "published_at": "2026-11-12T14:38:50+05:30"
     },
     {
       "slug": "pepsi-fighter-jet",
@@ -229,11 +205,7 @@
       "category_id": "23",
       "notes": "Published autonomously via daily queue runner (Video ID: kCfs21z7RYg).",
       "published_at": "2026-11-12T19:15:36+05:30",
-      "zapier_upload_id": "kCfs21z7RYg",
-      "rendered_mp4_name": "pepsi-fighter-jet.mp4",
-      "rendered_size_mb": 31.79,
-      "mp4_ready_snapshot": true,
-      "rendered_duration_sec": 54.33
+      "zapier_upload_id": "kCfs21z7RYg"
     },
     {
       "slug": "unlimited-flight-pass",
@@ -262,11 +234,7 @@
       "privacy_status": "public",
       "category_id": "23",
       "notes": "Published live on Animated_Crew channel as a_0Tvz5jIR0.",
-      "published_at": "2026-11-13T11:52:50+05:30",
-      "rendered_mp4_name": "unlimited-flight-pass.mp4",
-      "rendered_size_mb": 30.32,
-      "mp4_ready_snapshot": true,
-      "rendered_duration_sec": 57.9
+      "published_at": "2026-11-13T11:52:50+05:30"
     },
     {
       "slug": "pudding-frequent-flyer",
@@ -297,11 +265,7 @@
       "category_id": "23",
       "notes": "Published autonomously via daily queue runner (Video ID: 5L59bPRWGWs).",
       "published_at": "2026-11-13T19:06:35+05:30",
-      "zapier_upload_id": "5L59bPRWGWs",
-      "rendered_mp4_name": "pudding-frequent-flyer.mp4",
-      "rendered_size_mb": 31.21,
-      "mp4_ready_snapshot": true,
-      "rendered_duration_sec": 53.66
+      "zapier_upload_id": "5L59bPRWGWs"
     },
     {
       "slug": "lemon-juice-bank-robber",
@@ -310,7 +274,7 @@
       "created_at": "2026-11-12T19:13:00+05:30",
       "status": "queued",
       "stage": "ready_in_queue",
-      "queue_order": 1,
+      "queue_order": 2,
       "video_file": "renders/lemon-juice-bank-robber.mp4",
       "youtube_id": null,
       "youtube_url": null,
@@ -330,11 +294,7 @@
       ],
       "privacy_status": "public",
       "category_id": "23",
-      "notes": "Queued #2: Held in queue for future daily auto-upload.",
-      "rendered_mp4_name": "lemon-juice-bank-robber.mp4",
-      "rendered_size_mb": 25.61,
-      "mp4_ready_snapshot": true,
-      "rendered_duration_sec": 53.03
+      "notes": "Queued #2: Held in queue for future daily auto-upload."
     },
     {
       "slug": "lawnchair-larry-flight",
@@ -343,7 +303,7 @@
       "created_at": "2026-11-12T19:23:00+05:30",
       "status": "queued",
       "stage": "ready_in_queue",
-      "queue_order": 2,
+      "queue_order": 3,
       "video_file": "renders/lawnchair-larry-flight.mp4",
       "youtube_id": null,
       "youtube_url": null,
@@ -363,11 +323,7 @@
       ],
       "privacy_status": "public",
       "category_id": "23",
-      "notes": "Queued #3: Held in queue for future daily auto-upload.",
-      "rendered_mp4_name": "lawnchair-larry-flight.mp4",
-      "rendered_size_mb": 36.14,
-      "mp4_ready_snapshot": true,
-      "rendered_duration_sec": 53.05
+      "notes": "Queued #3: Held in queue for future daily auto-upload."
     },
     {
       "slug": "press-your-luck-glitch",
@@ -376,7 +332,7 @@
       "created_at": "2026-11-12T19:41:00+05:30",
       "status": "queued",
       "stage": "ready_in_queue",
-      "queue_order": 3,
+      "queue_order": 1,
       "video_file": "renders/press-your-luck-glitch.mp4",
       "youtube_id": null,
       "youtube_url": null,
@@ -396,11 +352,7 @@
       ],
       "privacy_status": "public",
       "category_id": "23",
-      "notes": "Queued #4: Held in queue for future daily auto-upload.",
-      "rendered_mp4_name": "press-your-luck-glitch.mp4",
-      "rendered_size_mb": 32.08,
-      "mp4_ready_snapshot": true,
-      "rendered_duration_sec": 59.52
+      "notes": "Queued #4: Held in queue for future daily auto-upload."
     },
     {
       "slug": "red-paperclip-house",
@@ -409,7 +361,7 @@
       "created_at": "2026-11-13T19:40:00+05:30",
       "status": "queued",
       "stage": "ready_in_queue",
-      "queue_order": 4,
+      "queue_order": 6,
       "video_file": "renders/red-paperclip-house.mp4",
       "youtube_id": null,
       "youtube_url": null,
@@ -442,7 +394,7 @@
       "created_at": "2026-11-13T19:40:00+05:30",
       "status": "queued",
       "stage": "ready_in_queue",
-      "queue_order": 5,
+      "queue_order": 4,
       "video_file": "renders/nuclear-boy-scout.mp4",
       "youtube_id": null,
       "youtube_url": null,
@@ -475,12 +427,12 @@
       "created_at": "2026-11-13T19:40:00+05:30",
       "status": "queued",
       "stage": "ready_in_queue",
-      "queue_order": 6,
+      "queue_order": 5,
       "video_file": "renders/mona-lisa-broom-closet.mp4",
       "youtube_id": null,
       "youtube_url": null,
       "youtube_title": "How The Mona Lisa Was Stolen In A Broom Closet! 🎨🚪 #Shorts",
-      "youtube_description": "The Mona Lisa was barely famous until a Louvre handyman hid in a broom closet overnight and walked out with it under his coat!\n#Shorts #Viral #Trending #Art #History #Heist #Louvre #MonaLisa #TrueStory #CrazyHistory #DidYouKnow",
+      "youtube_description": "The Mona Lisa was barely famous until a Louvre handyman hid in a broom closet overnight and walked out with it under his coat!\n#Shorts #Viral #Trending #Art #History #Heist #Louvre #MonaLisa #TrueStory #CrazyHistory #DidYouKnow#viral #viralshorts #popular #Shorts #BaringsBank #Finance #Money #History #Business #Investing #DidYouKnow #StoryTime #Wealth #RoyalFamily #Viral\n#Shorts #History #TrueStory #CrazyHistory #Loophole #Animation #DidYouKnow",
       "youtube_tags": [
         "Shorts",
         "Viral",
@@ -667,6 +619,108 @@
       "rendered_size_mb": 61.08,
       "mp4_ready_snapshot": true,
       "rendered_duration_sec": 68.9
+    },
+    {
+      "slug": "fake-ipl-scam",
+      "title": "The Gang That Staged A Fake IPL Tournament",
+      "style": "tall-tale",
+      "created_at": "2026-11-14T09:40:00+05:30",
+      "status": "queued",
+      "stage": "ready_in_queue",
+      "queue_order": 12,
+      "video_file": "renders/fake-ipl-scam.mp4",
+      "youtube_id": null,
+      "youtube_url": null,
+      "youtube_title": "The Fake Indian Premier League Cricket Heist! 🏏🚜 #Shorts",
+      "youtube_description": "In 2022, a gang hired Gujarat farmers for ₹400 a day to stage a completely fake Indian Premier League to swindle Russian Telegram gamblers!\n#Shorts #Viral #Trending #Cricket #IPL #Heist #Funny #CrazyHistory #TrueStory #India #DidYouKnow",
+      "youtube_tags": [
+        "Shorts",
+        "Viral",
+        "Trending",
+        "Cricket",
+        "IPL",
+        "Heist",
+        "Funny",
+        "CrazyHistory",
+        "TrueStory",
+        "India",
+        "DidYouKnow"
+      ],
+      "privacy_status": "public",
+      "category_id": "17",
+      "notes": "Queued #12: Indian viral topic. Stored on D: drive for scheduled or manual upload.",
+      "rendered_mp4_name": "fake-ipl-scam.mp4",
+      "rendered_size_mb": 28.14,
+      "mp4_ready_snapshot": true,
+      "rendered_duration_sec": 73.51
+    },
+    {
+      "slug": "padmanabhaswamy-treasure",
+      "title": "The $22 Billion Padmanabhaswamy Temple Treasure",
+      "style": "tall-tale",
+      "created_at": "2026-11-14T09:40:00+05:30",
+      "status": "queued",
+      "stage": "ready_in_queue",
+      "queue_order": 13,
+      "video_file": "renders/padmanabhaswamy-treasure.mp4",
+      "youtube_id": null,
+      "youtube_url": null,
+      "youtube_title": "The Secret $22 Billion Temple Vault! 👑🪙 #Shorts",
+      "youtube_description": "In 2011, explorers opened the subterranean vaults of Kerala's Padmanabhaswamy Temple and discovered over $22 BILLION in gold and diamonds—except for Vault B, guarded by a carved King Cobra!\n#Shorts #Viral #Trending #Mystery #Treasure #Gold #India #Kerala #AncientHistory #DidYouKnow #TrueStory",
+      "youtube_tags": [
+        "Shorts",
+        "Viral",
+        "Trending",
+        "Mystery",
+        "Treasure",
+        "Gold",
+        "India",
+        "Kerala",
+        "AncientHistory",
+        "DidYouKnow",
+        "TrueStory"
+      ],
+      "privacy_status": "public",
+      "category_id": "24",
+      "notes": "Queued #13: Indian viral topic. Stored on D: drive for scheduled or manual upload.",
+      "rendered_mp4_name": "padmanabhaswamy-treasure.mp4",
+      "rendered_size_mb": 24.23,
+      "mp4_ready_snapshot": true,
+      "rendered_duration_sec": 70.89
+    },
+    {
+      "slug": "iron-pillar-delhi",
+      "title": "The 1,600-Year-Old Iron Pillar That Never Rusts",
+      "style": "tall-tale",
+      "created_at": "2026-11-14T09:40:00+05:30",
+      "status": "queued",
+      "stage": "ready_in_queue",
+      "queue_order": 14,
+      "video_file": "renders/iron-pillar-delhi.mp4",
+      "youtube_id": null,
+      "youtube_url": null,
+      "youtube_title": "The 1,600-Year-Old Iron Pillar That Never Rusts! 🇮🇳⚙️ #Shorts",
+      "youtube_description": "Standing for over 1,600 years through monsoon rains and scorching Delhi heat, a 6-ton iron pillar from the Gupta Empire refuses to rust! Here is the ancient Indian metallurgy secret scientists discovered.\n#Shorts #Viral #Trending #Science #AncientIndia #History #Engineering #Mystery #Delhi #DidYouKnow #TrueStory",
+      "youtube_tags": [
+        "Shorts",
+        "Viral",
+        "Trending",
+        "Science",
+        "AncientIndia",
+        "History",
+        "Engineering",
+        "Mystery",
+        "Delhi",
+        "DidYouKnow",
+        "TrueStory"
+      ],
+      "privacy_status": "public",
+      "category_id": "28",
+      "notes": "Queued #14: Indian viral topic. Stored on D: drive for scheduled or manual upload.",
+      "rendered_mp4_name": "iron-pillar-delhi.mp4",
+      "rendered_size_mb": 26.13,
+      "mp4_ready_snapshot": true,
+      "rendered_duration_sec": 80.06
     }
   ]
 }

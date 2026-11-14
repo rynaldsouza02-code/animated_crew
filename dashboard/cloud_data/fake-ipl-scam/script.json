@@ -1,0 +1,59 @@
+{
+  "title": "The Gang That Staged A Fake Indian Premier League",
+  "voice": "am_michael",
+  "speed": 1.06,
+  "lead": 0.28,
+  "outro": 0.85,
+  "gap": 0.16,
+  "music": "bounce",
+  "sources": [
+    "BBC News (July 2022) 'Fake Indian Premier League busted in Gujarat' - Conmen set up a fake cricket league on a remote farm in Mehsana to scam Russian gamblers.",
+    "The Times of India (July 2022) - Laborers were paid 400 rupees a day to wear official IPL team jerseys and play scripted matches streamed live on YouTube."
+  ],
+  "lines": [
+    {
+      "text": "In twenty twenty-two, a gang in Gujarat staged a complete fake Indian Premier League -",
+      "caps": "In 2022, | a gang in Gujarat | staged a fake IPL | inside a remote farm -",
+      "gap": 0.18
+    },
+    {
+      "text": "and fooled international gamblers out of millions of rupees.",
+      "gap": 0.22
+    },
+    {
+      "text": "Inside a remote farm in Mehsana, conmen set up a makeshift cricket pitch with halogen floodlights."
+    },
+    {
+      "text": "They hired twenty-one local farmers and laborers for four hundred rupees a day,",
+      "gap": 0.18
+    },
+    {
+      "text": "dressing them in replica jerseys of Chennai Super Kings, Mumbai Indians, and Gujarat Titans.",
+      "gap": 0.2
+    },
+    {
+      "text": "They set up five HD cameras, hired an umpire with a walkie-talkie, and streamed the matches live on YouTube."
+    },
+    {
+      "text": "To make it look authentic, they blasted fake crowd cheering sound effects through giant speakers,",
+      "gap": 0.18
+    },
+    {
+      "text": "while a commentator mimicked famous Indian sports broadcasters over the microphone!"
+    },
+    {
+      "text": "Russian gamblers on Telegram placed thousands of dollars in bets on every single delivery.",
+      "gap": 0.2
+    },
+    {
+      "text": "The organizers would radio the umpire, telling the bowler when to bowl a slow ball and when the batsman should hit a six!",
+      "gap": 0.22
+    },
+    {
+      "text": "The entire tournament was running smoothly until local police raided the farm right in the middle of the quarter-finals!"
+    },
+    {
+      "text": "Subscribe for more unbelievable true stories, and hit like if this blew your mind!"
+    }
+  ]
+}

@@ -12,7 +12,9 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-PROJECTS_ROOT = Path(r"C:\Users\DELL\faceless-shorts")
+LOCAL_PROJECTS_ROOT = Path(r"C:\Users\DELL\faceless-shorts")
+D_PROJECTS_ROOT = Path(r"D:\faceless-shorts")
+PROJECTS_ROOT = D_PROJECTS_ROOT if D_PROJECTS_ROOT.exists() else LOCAL_PROJECTS_ROOT
 CLOUD_DATA_DIR = Path(__file__).resolve().parent / "cloud_data"
 GEMINI_CONFIG_JSON = Path(r"C:\Users\DELL\.gemini\config\config.json")
 SIDECAR_JSON = Path(r"C:\Users\DELL\.gemini\config\sidecars\daily-viral-shorts\sidecar.json")

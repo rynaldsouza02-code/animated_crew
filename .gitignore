@@ -11,7 +11,8 @@ venv/
 .DS_Store
 Thumbs.db
 
-# Prevent giant rendered MP4 / WAV files from entering cloud snapshot data
+# Prevent giant rendered MP4 / WAV files and heavy contact sheets from entering cloud snapshot data
 dashboard/cloud_data/**/renders/*.mp4
 dashboard/cloud_data/**/*.wav
+dashboard/cloud_data/**/review/all.jpg
 dashboard/cloud_data/**/upload_job.json
