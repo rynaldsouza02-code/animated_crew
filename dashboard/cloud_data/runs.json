@@ -562,6 +562,9 @@
       "privacy_status": "public",
       "category_id": "23",
       "notes": "Queued #8: Stored on D: drive for scheduled or manual upload.",
+      "rendered_mp4_name": "mailed-himself-in-a-crate.mp4",
+      "rendered_size_mb": 32.96,
+      "mp4_ready_snapshot": true,
       "rendered_duration_sec": 70.67
     },
     {
@@ -593,6 +596,9 @@
       "privacy_status": "public",
       "category_id": "28",
       "notes": "Queued #9: Stored on D: drive for scheduled or manual upload.",
+      "rendered_mp4_name": "taylor-wilson-fusion.mp4",
+      "rendered_size_mb": 24.89,
+      "mp4_ready_snapshot": true,
       "rendered_duration_sec": 70.92
     },
     {
@@ -623,6 +629,9 @@
       "privacy_status": "public",
       "category_id": "23",
       "notes": "Queued #10: Stored on D: drive for scheduled or manual upload.",
+      "rendered_mp4_name": "san-diego-tank-rampage.mp4",
+      "rendered_size_mb": 20.03,
+      "mp4_ready_snapshot": true,
       "rendered_duration_sec": 73.84
     },
     {
@@ -654,6 +663,9 @@
       "privacy_status": "public",
       "category_id": "23",
       "notes": "Queued #11: Stored on D: drive for scheduled or manual upload.",
+      "rendered_mp4_name": "stolen-jamaican-beach.mp4",
+      "rendered_size_mb": 61.08,
+      "mp4_ready_snapshot": true,
       "rendered_duration_sec": 68.9
     }
   ]
