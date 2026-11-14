@@ -46,27 +46,67 @@ IS_VERCEL = bool(os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"))
 CLOUD_MODE = IS_VERCEL or (not LOCAL_PROJECTS_ROOT.exists() and not D_PROJECTS_ROOT.exists())
 PROJECTS_ROOT = CLOUD_DATA_DIR if CLOUD_MODE else (D_PROJECTS_ROOT if D_PROJECTS_ROOT.exists() else LOCAL_PROJECTS_ROOT)
 
+LOCAL_LONGFORM_ROOT = Path(r"D:\faceless-longform")
+CLOUD_LONGFORM_DIR = CLOUD_DATA_DIR / "longform"
+CLOUD_LONGFORM_JSON = CLOUD_DATA_DIR / "longform.json"
+LONGFORM_ROOT = LOCAL_LONGFORM_ROOT if LOCAL_LONGFORM_ROOT.exists() else CLOUD_LONGFORM_DIR
+LONGFORM_QUEUE_PATH = LONGFORM_ROOT / "queue" / "queue.json"
+
+
+def is_longform_project(slug: Optional[str]) -> bool:
+    if not slug:
+        return False
+    clean_s = str(slug).strip()
+    for r in (LOCAL_LONGFORM_ROOT, CLOUD_LONGFORM_DIR):
+        if r.exists() and (r / clean_s).is_dir():
+            return True
+    if LONGFORM_QUEUE_PATH.exists():
+        try:
+            q_data = _read_json(LONGFORM_QUEUE_PATH, {})
+            if any(item.get("slug") == clean_s for item in q_data.get("queue", [])):
+                return True
+        except Exception:
+            pass
+    return False
+
+
 def find_project_dir(slug: str) -> Optional[Path]:
-    for r in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT, CLOUD_DATA_DIR):
+    for r in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT, LOCAL_LONGFORM_ROOT, CLOUD_DATA_DIR, CLOUD_LONGFORM_DIR):
         if r.exists():
             p = (r / slug).resolve()
             if p.is_dir():
                 return p
     return None
 
+
 def find_project_mp4(slug: str, rel_video: Optional[str] = None) -> Optional[Path]:
     candidates = []
-    for r in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT, CLOUD_DATA_DIR):
+    for r in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT, LOCAL_LONGFORM_ROOT, CLOUD_DATA_DIR, CLOUD_LONGFORM_DIR):
         if r.exists():
             p = (r / slug).resolve()
             if p.is_dir():
                 candidates.append(p)
 
     if rel_video:
+        rel_p = Path(rel_video)
+        if rel_p.is_absolute() and rel_p.exists() and rel_p.stat().st_size > 50_000:
+            return rel_p
         for p in candidates:
             cand = p / rel_video
             if cand.exists() and cand.stat().st_size > 50_000:
                 return cand
+
+    # Check longform queue.json for declared mp4_file
+    if LONGFORM_QUEUE_PATH.exists():
+        try:
+            q_data = _read_json(LONGFORM_QUEUE_PATH, {})
+            for item in q_data.get("queue", []):
+                if item.get("slug") == slug and item.get("mp4_file"):
+                    cand = Path(item["mp4_file"])
+                    if cand.exists() and cand.stat().st_size > 50_000:
+                        return cand
+        except Exception:
+            pass
 
     for p in candidates:
         rdir = p / "renders"
@@ -114,12 +154,6 @@ YOUTUBE_CHANNEL_ID = "UCT-NT5b7lbS1mqaITYfeZ4g"
 YOUTUBE_CHANNEL_TITLE = "Animated_Crew"
 
 EXCLUDED_DIRS = {"manual-uploads", "__pycache__", "renders", "review", "tmp", "temp"}
-
-LOCAL_LONGFORM_ROOT = Path(r"D:\faceless-longform")
-CLOUD_LONGFORM_DIR = CLOUD_DATA_DIR / "longform"
-CLOUD_LONGFORM_JSON = CLOUD_DATA_DIR / "longform.json"
-LONGFORM_ROOT = LOCAL_LONGFORM_ROOT if LOCAL_LONGFORM_ROOT.exists() else CLOUD_LONGFORM_DIR
-LONGFORM_QUEUE_PATH = LONGFORM_ROOT / "queue" / "queue.json"
 
 # Fallback analytics baseline (refreshed continuously by real-time InnerTube + disk cache)
 BASELINE_VIDEO_META: Dict[str, Dict[str, Any]] = {
@@ -329,27 +363,29 @@ def _sanitize_youtube_meta(
     tags_raw: Any,
     privacy_status: str,
     category_id: str,
+    is_longform: bool = False,
 ) -> Tuple[str, str, List[str], str, str]:
     clean_title = re.sub(r"[<>]+", "", str(title or "")).strip()
     clean_title = re.sub(r"\s+", " ", clean_title)
     if not clean_title:
-        clean_title = "CrewTube Short #Shorts"
+        clean_title = "Documentary True Story" if is_longform else "CrewTube Short #Shorts"
     if len(clean_title) > 100:
         clean_title = clean_title[:97].rstrip() + "..."
 
     clean_desc = re.sub(r"[<>]+", "", str(description or "")).strip()
     if not clean_desc:
-        clean_desc = f"{clean_title}\n\n#Shorts #Animation #History #TrueStory"
-    elif "#shorts" not in clean_desc.lower():
+        clean_desc = f"{clean_title}\n\n#Documentary #History #TrueStory" if is_longform else f"{clean_title}\n\n#Shorts #Animation #History #TrueStory"
+    elif not is_longform and "#shorts" not in clean_desc.lower():
         clean_desc = clean_desc.rstrip() + "\n\n#Shorts"
     if len(clean_desc) > 4900:
-        clean_desc = clean_desc[:4880].rstrip() + "\n\n#Shorts"
+        clean_desc = clean_desc[:4880].rstrip() + ("\n\n#Documentary" if is_longform else "\n\n#Shorts")
 
     clean_tags = _normalize_tags(tags_raw)
     clean_priv = privacy_status.strip().lower() if privacy_status else "public"
     if clean_priv not in ("public", "unlisted", "private"):
         clean_priv = "public"
-    clean_cat = re.sub(r"[^0-9]", "", str(category_id or "23")) or "23"
+    default_cat = "27" if is_longform else "23"
+    clean_cat = re.sub(r"[^0-9]", "", str(category_id or default_cat)) or default_cat
     return clean_title, clean_desc, clean_tags, clean_priv, clean_cat
 
 
@@ -2726,43 +2762,64 @@ def _finalize_published_run(job: Dict[str, Any], vid: str) -> Dict[str, Any]:
     ) or {**job, "status": "published", "youtube_id": vid, "youtube_url": yurl, "completed_at": now_iso}
 
     slug = (updated_job.get("slug") or "").strip()
+    is_lf = updated_job.get("source_type") == "longform_project" or is_longform_project(slug)
     if slug and not CLOUD_MODE:
-        with _runs_lock:
-            runs_data = _read_json(
-                RUNS_JSON_PATH,
-                {"channel_id": YOUTUBE_CHANNEL_ID, "channel_title": YOUTUBE_CHANNEL_TITLE, "runs": []},
-            )
-            for r in runs_data.get("runs", []):
-                if r.get("slug") == slug:
-                    r["status"] = "published"
-                    r["stage"] = "completed"
-                    r["queue_order"] = None
-                    r["youtube_id"] = vid
-                    r["youtube_url"] = yurl
-                    if updated_job.get("title"):
-                        r["youtube_title"] = updated_job["title"]
-                    if updated_job.get("description"):
-                        r["youtube_description"] = updated_job["description"]
-                    if updated_job.get("tags"):
-                        r["youtube_tags"] = updated_job["tags"]
-                    r["privacy_status"] = updated_job.get("privacy_status") or "public"
-                    r["category_id"] = updated_job.get("category_id") or "23"
-                    r["published_at"] = r.get("published_at") or now_iso
-                    r["notes"] = f"Published live on {YOUTUBE_CHANNEL_TITLE} channel as {vid}."
-                    break
-            _normalize_queue_locked(runs_data)
-            for r in runs_data.get("runs", []):
-                if r.get("status") == "queued" and r.get("queue_order"):
-                    qo = r["queue_order"]
-                    r["notes"] = (
-                        "Queued #1: Next scheduled automatic upload at 7:00 PM IST (only 1 queued video uploads per day)."
-                        if qo == 1
-                        else f"Queued #{qo}: Held in queue for future daily auto-upload."
-                    )
-            for root in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT):
-                rp = root / "runs.json"
-                if rp.exists():
-                    _write_json_atomic(rp, runs_data)
+        if is_lf:
+            if LONGFORM_QUEUE_PATH.exists():
+                lf_data = _read_json(LONGFORM_QUEUE_PATH, {})
+                for it in lf_data.get("queue", []):
+                    if it.get("slug") == slug:
+                        it["status"] = "published"
+                        it["youtube_id"] = vid
+                        it["youtube_url"] = yurl
+                        it["published_at"] = now_iso
+                        if updated_job.get("title"):
+                            it["youtube_title"] = updated_job["title"]
+                        if updated_job.get("description"):
+                            it["youtube_description"] = updated_job["description"]
+                        if updated_job.get("tags"):
+                            it["youtube_tags"] = updated_job["tags"]
+                        it["privacy_status"] = updated_job.get("privacy_status") or "public"
+                        it["category_id"] = updated_job.get("category_id") or "27"
+                        break
+                _write_json_atomic(LONGFORM_QUEUE_PATH, lf_data)
+        else:
+            with _runs_lock:
+                runs_data = _read_json(
+                    RUNS_JSON_PATH,
+                    {"channel_id": YOUTUBE_CHANNEL_ID, "channel_title": YOUTUBE_CHANNEL_TITLE, "runs": []},
+                )
+                for r in runs_data.get("runs", []):
+                    if r.get("slug") == slug:
+                        r["status"] = "published"
+                        r["stage"] = "completed"
+                        r["queue_order"] = None
+                        r["youtube_id"] = vid
+                        r["youtube_url"] = yurl
+                        if updated_job.get("title"):
+                            r["youtube_title"] = updated_job["title"]
+                        if updated_job.get("description"):
+                            r["youtube_description"] = updated_job["description"]
+                        if updated_job.get("tags"):
+                            r["youtube_tags"] = updated_job["tags"]
+                        r["privacy_status"] = updated_job.get("privacy_status") or "public"
+                        r["category_id"] = updated_job.get("category_id") or "23"
+                        r["published_at"] = r.get("published_at") or now_iso
+                        r["notes"] = f"Published live on {YOUTUBE_CHANNEL_TITLE} channel as {vid}."
+                        break
+                _normalize_queue_locked(runs_data)
+                for r in runs_data.get("runs", []):
+                    if r.get("status") == "queued" and r.get("queue_order"):
+                        qo = r["queue_order"]
+                        r["notes"] = (
+                            "Queued #1: Next scheduled automatic upload at 7:00 PM IST (only 1 queued video uploads per day)."
+                            if qo == 1
+                            else f"Queued #{qo}: Held in queue for future daily auto-upload."
+                        )
+                for root in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT):
+                    rp = root / "runs.json"
+                    if rp.exists():
+                        _write_json_atomic(rp, runs_data)
 
     with _yt_lock:
         _yt_cache["timestamp"] = 0.0
@@ -2945,7 +3002,7 @@ def _run_manual_upload_worker(job_id: str, local_mp4_path: Path, reuse_staged_ur
                     _kill_proc_tree(stage_proc)
                     return
                 elapsed = int(time.time() - start_ts)
-                if elapsed >= 900:
+                if elapsed >= 1800:
                     _kill_proc_tree(stage_proc)
                     t_out.join(timeout=2)
                     t_err.join(timeout=2)
@@ -2953,7 +3010,7 @@ def _run_manual_upload_worker(job_id: str, local_mp4_path: Path, reuse_staged_ur
                         {
                             "status": "error",
                             "step": "Cloud staging timed out",
-                            "error": f"Staging {size_mb:.1f} MB exceeded 900s limit across hosts. Check uplink speed and retry.",
+                            "error": f"Staging {size_mb:.1f} MB exceeded 1800s limit across hosts. Check uplink speed and retry.",
                         },
                         expected_job_id=job_id,
                     )
@@ -4364,6 +4421,25 @@ def api_queue_metadata(payload: Dict[str, Any] = Body(...)):
     if proj_dir is None:
         raise HTTPException(status_code=404, detail="Project directory not found")
 
+    if is_longform_project(slug):
+        if LONGFORM_QUEUE_PATH.exists():
+            lf_q = _read_json(LONGFORM_QUEUE_PATH, {})
+            for item in lf_q.get("queue", []):
+                if item.get("slug") == slug:
+                    if payload.get("youtube_title") is not None:
+                        item["youtube_title"] = str(payload["youtube_title"]).strip()
+                    if payload.get("youtube_description") is not None:
+                        item["youtube_description"] = str(payload["youtube_description"]).strip()
+                    if payload.get("youtube_tags") is not None:
+                        item["youtube_tags"] = _normalize_tags(payload["youtube_tags"])
+                    if payload.get("privacy_status") in ("public", "unlisted", "private"):
+                        item["privacy_status"] = payload["privacy_status"]
+                    if payload.get("category_id") is not None:
+                        item["category_id"] = str(payload["category_id"]).strip()
+                    break
+            _write_json_atomic(LONGFORM_QUEUE_PATH, lf_q)
+        return JSONResponse({"ok": True, "slug": slug, "type": "longform"})
+
     with _runs_lock:
         runs_data = _read_json(RUNS_JSON_PATH, {"channel_id": YOUTUBE_CHANNEL_ID, "channel_title": YOUTUBE_CHANNEL_TITLE, "runs": []})
         runs = runs_data.setdefault("runs", [])
@@ -4463,8 +4539,8 @@ async def api_upload_manual(request: Request):
 
     if "multipart/form-data" in content_type.lower():
         raw_body = await request.body()
-        if len(raw_body) > 510 * 1024 * 1024:
-            raise HTTPException(status_code=413, detail="Uploaded file exceeds 500 MB staging cap.")
+        if len(raw_body) > 1024 * 1024 * 1024:
+            raise HTTPException(status_code=413, detail="Uploaded file exceeds 1 GB staging cap.")
         try:
             fields, files = _parse_multipart(content_type, raw_body)
         except Exception as exc:
@@ -4483,11 +4559,11 @@ async def api_upload_manual(request: Request):
             content_bytes = uploaded_file.get("content") or b""
             if len(content_bytes) < 4096:
                 raise HTTPException(status_code=400, detail="Uploaded video file is empty or too small (< 4 KB).")
-            if len(content_bytes) > 480 * 1024 * 1024:
-                raise HTTPException(status_code=413, detail="Video exceeds 480 MB limit for automated upload hosts. Compress below 200 MB first.")
+            if len(content_bytes) > 1000 * 1024 * 1024:
+                raise HTTPException(status_code=413, detail="Video exceeds 1000 MB limit for automated upload hosts. Compress below 500 MB first.")
             source_type = "custom_file"
-            raw_name = uploaded_file.get("filename") or "custom-short.mp4"
-            safe_name = re.sub(r"[^a-zA-Z0-9._-]+", "-", raw_name).strip("-.") or "custom-short.mp4"
+            raw_name = uploaded_file.get("filename") or "custom-video.mp4"
+            safe_name = re.sub(r"[^a-zA-Z0-9._-]+", "-", raw_name).strip("-.") or "custom-video.mp4"
             if not safe_name.lower().endswith((".mp4", ".mov", ".webm", ".mkv")):
                 safe_name += ".mp4"
             MANUAL_UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
@@ -4496,7 +4572,7 @@ async def api_upload_manual(request: Request):
             with mp4_path.open("wb") as fp:
                 fp.write(content_bytes)
             if not title:
-                title = Path(raw_name).stem.replace("-", " ").replace("_", " ").strip().title() + " #Shorts"
+                title = Path(raw_name).stem.replace("-", " ").replace("_", " ").strip().title()
     else:
         try:
             data = await request.json()
@@ -4507,8 +4583,10 @@ async def api_upload_manual(request: Request):
         description = (data.get("description") or data.get("youtube_description") or "").strip()
         tags_raw = data.get("tags") or data.get("youtube_tags")
         privacy_status = str(data.get("privacy_status") or "public").strip()
-        category_id = str(data.get("category_id") or "23").strip()
+        category_id = str(data.get("category_id") or "").strip()
         force_reupload = bool(data.get("force"))
+
+    is_lf = is_longform_project(slug) if slug else False
 
     if mp4_path is None:
         if not slug:
@@ -4517,41 +4595,80 @@ async def api_upload_manual(request: Request):
         if proj_dir is None:
             raise HTTPException(status_code=404, detail=f"Project '{slug}' not found.")
 
-        runs_data = _read_json(RUNS_JSON_PATH, {"runs": []})
-        run_meta = next((r for r in runs_data.get("runs", []) if r.get("slug") == slug), {})
-        if (run_meta.get("status") == "published" or run_meta.get("youtube_id")) and not force_reupload:
-            existing_url = run_meta.get("youtube_url") or f"https://www.youtube.com/watch?v={run_meta.get('youtube_id')}"
-            raise HTTPException(
-                status_code=409,
-                detail=f"'{slug}' is already published on YouTube ({existing_url}). Pick another Short or custom MP4.",
-            )
+        if is_lf:
+            source_type = "longform_project"
+            lf_q = _read_json(LONGFORM_QUEUE_PATH, {})
+            lf_item = next((it for it in lf_q.get("queue", []) if it.get("slug") == slug), {})
+            if (lf_item.get("status") == "published" or lf_item.get("youtube_id")) and not force_reupload:
+                existing_url = lf_item.get("youtube_url") or f"https://www.youtube.com/watch?v={lf_item.get('youtube_id')}"
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"'{slug}' is already published on YouTube ({existing_url}). Pick another story or check force reupload.",
+                )
+            ch_meta = _read_json(proj_dir / "chapters.json", {})
+            if not title:
+                title = lf_item.get("youtube_title") or ch_meta.get("title") or slug
+            if not description:
+                description = lf_item.get("youtube_description") or ch_meta.get("topic") or ""
+            if not tags_raw:
+                tags_raw = lf_item.get("youtube_tags") or ["Documentary", "History", "TrueStory"]
+            privacy_status = privacy_status or lf_item.get("privacy_status") or "public"
+            category_id = category_id if (category_id and category_id != "23") else (lf_item.get("category_id") or "27")
 
-        script = _read_json(proj_dir / "script.json", {})
-        defaults = _build_default_metadata(slug, script, run_meta)
+            rel_video = lf_item.get("mp4_file")
+            mp4_path = find_project_mp4(slug, rel_video)
+            if not mp4_path and (proj_dir / "renders").exists():
+                renders = sorted((proj_dir / "renders").glob("*.mp4"), key=lambda p: p.stat().st_mtime, reverse=True)
+                mp4_path = renders[0] if renders else None
+        else:
+            runs_data = _read_json(RUNS_JSON_PATH, {"runs": []})
+            run_meta = next((r for r in runs_data.get("runs", []) if r.get("slug") == slug), {})
+            if (run_meta.get("status") == "published" or run_meta.get("youtube_id")) and not force_reupload:
+                existing_url = run_meta.get("youtube_url") or f"https://www.youtube.com/watch?v={run_meta.get('youtube_id')}"
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"'{slug}' is already published on YouTube ({existing_url}). Pick another Short or custom MP4.",
+                )
 
-        if not title:
-            title = defaults["youtube_title"]
-        if not description:
-            description = defaults["youtube_description"]
-        if not tags_raw:
-            tags_raw = defaults["youtube_tags"]
-        privacy_status = privacy_status or defaults["privacy_status"]
-        category_id = category_id or defaults["category_id"]
+            script = _read_json(proj_dir / "script.json", {})
+            defaults = _build_default_metadata(slug, script, run_meta)
 
-        rel_video = run_meta.get("video_file")
-        mp4_path = find_project_mp4(slug, rel_video)
-        if not mp4_path and (proj_dir / "renders").exists():
-            renders = sorted((proj_dir / "renders").glob("*.mp4"), key=lambda p: p.stat().st_mtime, reverse=True)
-            mp4_path = renders[0] if renders else None
+            if not title:
+                title = defaults["youtube_title"]
+            if not description:
+                description = defaults["youtube_description"]
+            if not tags_raw:
+                tags_raw = defaults["youtube_tags"]
+            privacy_status = privacy_status or defaults["privacy_status"]
+            category_id = category_id or defaults["category_id"]
+
+            rel_video = run_meta.get("video_file")
+            mp4_path = find_project_mp4(slug, rel_video)
+            if not mp4_path and (proj_dir / "renders").exists():
+                renders = sorted((proj_dir / "renders").glob("*.mp4"), key=lambda p: p.stat().st_mtime, reverse=True)
+                mp4_path = renders[0] if renders else None
 
         if not mp4_path or not mp4_path.exists() or mp4_path.stat().st_size < 50_000:
             raise HTTPException(status_code=409, detail=f"MP4 video for '{slug}' is still rendering or not ready yet.")
 
+    category_id = category_id or ("27" if is_lf else "23")
     title, description, tags, privacy_status, category_id = _sanitize_youtube_meta(
-        title, description, tags_raw, privacy_status, category_id
+        title, description, tags_raw, privacy_status, category_id, is_longform=is_lf
     )
 
-    if source_type == "queued_project" and slug:
+    if is_lf and slug:
+        if LONGFORM_QUEUE_PATH.exists():
+            lf_q = _read_json(LONGFORM_QUEUE_PATH, {})
+            for item in lf_q.get("queue", []):
+                if item.get("slug") == slug:
+                    item["youtube_title"] = title
+                    item["youtube_description"] = description
+                    item["youtube_tags"] = tags
+                    item["privacy_status"] = privacy_status
+                    item["category_id"] = category_id
+                    break
+            _write_json_atomic(LONGFORM_QUEUE_PATH, lf_q)
+    elif source_type == "queued_project" and slug:
         with _runs_lock:
             for root in (D_PROJECTS_ROOT, LOCAL_PROJECTS_ROOT):
                 rp = root / "runs.json"

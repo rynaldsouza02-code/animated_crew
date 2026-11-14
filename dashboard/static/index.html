@@ -1180,9 +1180,13 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               <span id="btnLfDownloadLabel">Download MP4 (1080p)</span>
             </a>
-            <button class="btn btn-sm btn-crimson" onclick="openLongformUploadModal()">
+            <button class="btn btn-sm btn-outline-cyan" onclick="openLongformUploadModal()" title="View Metadata, Chapters and Upload Options">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
-              <span>YouTube Upload Kit</span>
+              <span>Upload Kit &amp; Chapters</span>
+            </button>
+            <button class="btn btn-sm btn-crimson" onclick="triggerActiveLongformUpload()" title="Publish Current Long-Form Story Directly to YouTube">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+              <span>🚀 Publish Long-Form Now</span>
             </button>
           </div>
         </div>
@@ -1298,25 +1302,25 @@
           <div class="panel-head" style="margin-bottom:12px;">
             <div>
               <div class="panel-title">Select Video Source</div>
-              <div class="panel-sub">Publish any queued project early or upload your own MP4 file.</div>
+              <div class="panel-sub">Publish 15-minute long-form stories or viral Shorts, or upload your own local MP4 file.</div>
             </div>
           </div>
 
           <div class="mode-switch">
             <button type="button" class="mode-btn active" id="tabQueuedBtn" onclick="setManualMode('queued')">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>
-              <span>Ready / Queued Short</span>
+              <span>Library Video (Long-Form &amp; Shorts)</span>
             </button>
             <button type="button" class="mode-btn" id="tabCustomBtn" onclick="setManualMode('custom')">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              <span>Custom MP4 File</span>
+              <span>Custom MP4 File (Up to 15 Mins)</span>
             </button>
           </div>
 
           <div id="queuedSelectWrap">
             <div class="form-group">
               <div class="form-label">
-                <span>Queued Project</span>
+                <span>Select Project</span>
                 <span class="mono" id="selectedMp4Info" style="color:var(--emerald);"></span>
               </div>
               <select class="form-control" id="manualSlugSelect" onchange="onManualSlugChanged(false)"></select>
@@ -1327,8 +1331,8 @@
             <label class="dropzone" for="manualFileInput" id="customDropzone">
               <input type="file" id="manualFileInput" accept="video/mp4,video/quicktime,video/webm,video/x-matroska,.mp4,.mov,.mkv,.webm" style="display:none;" onclick="this.value=''" onchange="onCustomFileSelected(this)" />
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9aa5b8" stroke-width="1.8" style="margin-bottom:8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              <div id="customFileDropText" style="font-weight:600;font-size:0.86rem;color:#fff;">Click or drop a local .mp4 / .mov / .webm file here</div>
-              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Up to 480 MB (≤ 120 MB fastest) · Stages automatically and uploads to Animated_Crew via Zapier</div>
+              <div id="customFileDropText" style="font-weight:600;font-size:0.86rem;color:#fff;">Click or drop a local .mp4 / .mov / .webm file here (up to 1 GB)</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Supports 15-minute long-form videos &amp; Shorts · Direct cloud staging with automatic YouTube upload via Zapier</div>
             </label>
           </div>
 
@@ -2148,7 +2152,7 @@
         if (stage.dataset.previewKey === key) return;
         stage.dataset.previewKey = key;
         if (customFileObjectUrl) {
-          stage.innerHTML = `<video class="preview-video" src="${customFileObjectUrl}" controls playsinline></video>`;
+          stage.innerHTML = `<video class="preview-video" style="max-height:360px;width:100%;object-fit:contain;border-radius:10px;background:#000;" src="${customFileObjectUrl}" controls playsinline></video>`;
         } else {
           stage.innerHTML = `<div style="color:var(--text-muted);font-size:0.82rem;text-align:center;">Choose an .mp4 / .mov / .webm file above to preview it here</div>`;
         }
@@ -2167,7 +2171,10 @@
       if (stage.dataset.previewKey === key) return;
       stage.dataset.previewKey = key;
       if (p.mp4_url) {
-        stage.innerHTML = `<video class="preview-video" src="${escapeHtml(p.mp4_url)}" ${p.cover_url ? `poster="${escapeHtml(p.cover_url)}"` : ""} controls playsinline></video>`;
+        const aspectStyle = p.is_longform
+          ? "style='aspect-ratio:16/9;width:100%;max-height:360px;object-fit:contain;background:#000;border-radius:10px;border:1px solid var(--border);'"
+          : "";
+        stage.innerHTML = `<video class="preview-video" ${aspectStyle} src="${escapeHtml(p.mp4_url)}" ${p.cover_url ? `poster="${escapeHtml(p.cover_url)}"` : ""} controls playsinline></video>`;
       } else if (p.cover_url || p.sheet_url) {
         stage.innerHTML = `<img src="${escapeHtml(p.cover_url || p.sheet_url)}" style="max-height:340px;border-radius:10px;border:1px solid var(--border);" alt="Preview" />`;
       } else {
@@ -2200,9 +2207,9 @@
       customFileObjectUrl = URL.createObjectURL(file);
       const mb = (file.size / (1024 * 1024)).toFixed(2);
       const dropText = document.getElementById("customFileDropText");
-      if (file.size > 480 * 1024 * 1024) {
-        dropText.textContent = `Too large: ${file.name} (${mb} MB > 480 MB limit)`;
-        showToast("Video exceeds 480 MB limit — compress before uploading");
+      if (file.size > 1000 * 1024 * 1024) {
+        dropText.textContent = `Too large: ${file.name} (${mb} MB > 1000 MB limit)`;
+        showToast("Video exceeds 1000 MB limit — compress before uploading");
       } else if (file.size < 4096) {
         dropText.textContent = `Invalid file: ${file.name} (${file.size} bytes)`;
         showToast("Video file is empty or corrupted (< 4 KB)");
@@ -2211,12 +2218,13 @@
       }
 
       if (!customFormDraft.dirty) {
-        const stem = file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim() || "CrewTube Short";
-        const autoTitle = (`${stem} #Shorts`).slice(0, 100);
-        const autoDesc = `${stem}\n\n#Shorts #YouTubeShorts #Viral`;
+        const stem = file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim() || "CrewTube Video";
+        const autoTitle = stem.slice(0, 100);
+        const autoDesc = `${stem}\n\n#Animation #Documentary #Story`;
         document.getElementById("manualTitleInput").value = autoTitle;
         document.getElementById("manualDescInput").value = autoDesc;
-        document.getElementById("manualTagsInput").value = customFormDraft.tags || "Shorts, Animation, YouTubeShorts, Viral";
+        document.getElementById("manualTagsInput").value = customFormDraft.tags || "Animation, History, TrueStory, Documentary";
+        document.getElementById("manualCategorySelect").value = "27";
         customFormDraft.title = autoTitle;
         customFormDraft.description = autoDesc;
         updateTitleCounter();
@@ -2229,21 +2237,47 @@
       document.getElementById("titleCharCount").textContent = `${val.length} / 100`;
     }
 
-    function populateManualSelector(projects) {
+    function populateManualSelector(projects, lfQueue = null) {
       const select = document.getElementById("manualSlugSelect");
+      if (!select) return;
       const prev = select.value;
-      const uploadable = projects.filter(p => !p.is_posted);
-      if (!uploadable.length) {
+      const queueList = (lfQueue || currentLongformData?.queue || []);
+      const lfUploadable = queueList.filter(q => q.status !== "published");
+      const shortUploadable = (projects || []).filter(p => !p.is_posted);
+
+      if (!lfUploadable.length && !shortUploadable.length) {
         select.innerHTML = `<option value="">No queued videos available</option>`;
         return;
       }
-      select.innerHTML = uploadable.map(p => {
-        const qTag = p.queue_order ? `#${p.queue_order} · ` : "";
-        const readyTag = p.ready_to_upload ? `${p.mp4_size_mb} MB` : "Rendering";
-        return `<option value="${escapeHtml(p.slug)}">${qTag}${escapeHtml(p.title)} (${readyTag})</option>`;
-      }).join("");
-      if (prev && uploadable.some(p => p.slug === prev)) select.value = prev;
-      else select.value = uploadable[0].slug;
+
+      let html = "";
+      if (lfUploadable.length > 0) {
+        html += `<optgroup label="🎬 Long-Form 15-Min Stories (16:9 Widescreen)">`;
+        html += lfUploadable.map(q => {
+          const readyTag = (q.mp4_ready ?? Boolean(q.mp4_file)) ? `${q.size_mb || q.mp4_size_mb || 25} MB · 1080p` : "Audio Ready";
+          return `<option value="${escapeHtml(q.slug)}">🎬 ${escapeHtml(q.title)} (${readyTag})</option>`;
+        }).join("");
+        html += `</optgroup>`;
+      }
+
+      if (shortUploadable.length > 0) {
+        html += `<optgroup label="📱 Viral Shorts (9:16 Vertical)">`;
+        html += shortUploadable.map(p => {
+          const qTag = p.queue_order ? `#${p.queue_order} · ` : "";
+          const readyTag = p.ready_to_upload ? `${p.mp4_size_mb} MB` : "Rendering";
+          return `<option value="${escapeHtml(p.slug)}">${qTag}${escapeHtml(p.title)} (${readyTag})</option>`;
+        }).join("");
+        html += `</optgroup>`;
+      }
+
+      select.innerHTML = html;
+      if (prev && (lfUploadable.some(q => q.slug === prev) || shortUploadable.some(p => p.slug === prev))) {
+        select.value = prev;
+      } else if (lfUploadable.length > 0) {
+        select.value = lfUploadable[0].slug;
+      } else if (shortUploadable.length > 0) {
+        select.value = shortUploadable[0].slug;
+      }
 
       if (!queuedFormDirty && manualMode === "queued") onManualSlugChanged(false);
     }
@@ -2256,15 +2290,16 @@
         renderManualPreview();
         return;
       }
+      const isLf = Boolean(p.is_longform);
       document.getElementById("selectedMp4Info").textContent = p.ready_to_upload
-        ? `Ready · ${p.mp4_size_mb} MB`
+        ? `${isLf ? "16:9 1080p Master · " : ""}${p.mp4_size_mb} MB`
         : "Rendering MP4...";
       if (!preserveInputs) {
         document.getElementById("manualTitleInput").value = p.youtube_title || p.title || "";
         document.getElementById("manualDescInput").value = p.youtube_description || "";
-        document.getElementById("manualTagsInput").value = (p.youtube_tags || []).join(", ");
+        document.getElementById("manualTagsInput").value = Array.isArray(p.youtube_tags) ? p.youtube_tags.join(", ") : (p.youtube_tags || "");
         document.getElementById("manualPrivacySelect").value = p.privacy_status || "public";
-        document.getElementById("manualCategorySelect").value = p.category_id || "23";
+        document.getElementById("manualCategorySelect").value = p.category_id || (isLf ? "27" : "23");
         queuedFormDirty = false;
         updateTitleCounter();
       }
@@ -2274,7 +2309,8 @@
     function loadSlugIntoManualUploader(slug) {
       switchTab("upload");
       setManualMode("queued");
-      document.getElementById("manualSlugSelect").value = slug;
+      const sel = document.getElementById("manualSlugSelect");
+      if (sel) sel.value = slug;
       queuedFormDirty = false;
       onManualSlugChanged(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -2470,7 +2506,7 @@
           const file = document.getElementById("manualFileInput").files[0];
           if (!file) throw new Error("Choose an .mp4 / .mov / .webm file from your computer first.");
           if (file.size < 4096) throw new Error("Selected file is empty or corrupted (< 4 KB).");
-          if (file.size > 480 * 1024 * 1024) throw new Error("Video exceeds 480 MB temporary host limit. Compress below 200 MB first.");
+          if (file.size > 1000 * 1024 * 1024) throw new Error("Video exceeds 1000 MB limit. Compress below 500 MB first.");
           if (!confirm(`Upload "${file.name}" to Animated_Crew as ${privacy_status.toUpperCase()}?`)) {
             setUploadButtonBusy(false);
             return;
@@ -3206,11 +3242,14 @@
               <div class="lf-card-body">
                 <div class="lf-card-title">${escapeHtml(s.title)}</div>
                 <div class="lf-card-desc">${escapeHtml(s.topic || s.title)}</div>
-                <div class="lf-card-footer">
-                  ${statusPill}
-                  <span style="font-size:0.75rem;font-weight:700;color:${isActive ? 'var(--cyan)' : 'var(--text-muted)'};">
-                    ${isActive ? '● Currently Playing' : 'Click to Play →'}
-                  </span>
+                <div class="lf-card-footer" style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+                  <div>${statusPill}</div>
+                  <div style="display:flex;gap:6px;align-items:center;">
+                    <button class="btn btn-xs btn-outline-crimson" style="padding:2px 8px;font-size:0.72rem;font-weight:700;" onclick="event.stopPropagation(); triggerLongformUpload('${escapeHtml(s.slug)}')">🚀 Upload</button>
+                    <span style="font-size:0.72rem;font-weight:700;color:${isActive ? 'var(--cyan)' : 'var(--text-muted)'};">
+                      ${isActive ? '● Playing' : 'Play →'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -3542,14 +3581,81 @@
               <input class="form-control" id="lfYtTags" value="${escapeHtml(tags)}" />
             </div>
 
-            <div style="display:flex;gap:8px;margin-top:12px;align-items:center;">
-              <span class="badge badge-cyan">Scheduled Drop: Tue &amp; Fri @ 8:00 PM IST</span>
-              <button class="btn btn-sm btn-crimson" onclick="showToast('Video is scheduled in queue for Tuesday / Friday 8:00 PM IST drop!')">Publish Now</button>
+            <div style="display:flex;gap:8px;margin-top:14px;align-items:center;flex-wrap:wrap;">
+              <button type="button" class="btn btn-crimson" onclick="closeModal(); triggerLongformUpload('${escapeHtml(activeStory?.slug || '')}')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                <span>🚀 Publish Live to YouTube</span>
+              </button>
+              <button type="button" class="btn btn-outline-cyan" onclick="closeModal(); loadSlugIntoManualUploader('${escapeHtml(activeStory?.slug || '')}')">
+                <span>✏️ Open in Manual Studio</span>
+              </button>
+              <span class="badge badge-cyan" style="margin-left:auto;">16:9 Long-Form Master</span>
             </div>
           </div>
         </div>
       `;
       document.getElementById("previewModal").classList.add("open");
+    }
+
+    function triggerActiveLongformUpload() {
+      const activeStory = currentLongformData?.stories?.[selectedStoryIndex] || currentLongformData?.stories?.[0];
+      if (activeStory && activeStory.slug) {
+        triggerLongformUpload(activeStory.slug);
+      } else {
+        showToast("No active long-form story selected.");
+      }
+    }
+
+    async function triggerLongformUpload(slug) {
+      if (currentOverviewData?.cloud_mode) {
+        showToast("Cloud Monitor mode on Vercel is read-only — publish live from your local server (http://127.0.0.1:8765)");
+        return;
+      }
+      if (currentUploadJobActive || activeCustomXhr) {
+        switchTab("upload");
+        showToast("Another upload is currently running — monitor it in Manual Upload.");
+        return;
+      }
+      const p = projectsBySlug[slug];
+      if (!p) {
+        showToast("Could not find project: " + slug);
+        return;
+      }
+      const title = p.youtube_title || p.title || slug;
+      if (!confirm(`Publish 15-minute long-form story:\n\n"${title}"\n\nlive to Animated_Crew on YouTube now?`)) {
+        return;
+      }
+
+      switchTab("upload");
+      setManualMode("queued");
+      const sel = document.getElementById("manualSlugSelect");
+      if (sel) sel.value = slug;
+      queuedFormDirty = false;
+      onManualSlugChanged(false);
+
+      setUploadButtonBusy(true, "Staging 1080p Master...");
+      try {
+        const res = await fetch("/api/upload/manual", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            slug: slug,
+            title: p.youtube_title || p.title,
+            description: p.youtube_description || "",
+            tags: p.youtube_tags || [],
+            privacy_status: p.privacy_status || "public",
+            category_id: p.category_id || "27",
+          }),
+        });
+        const data = await _parseSafeResponse(res);
+        showToast("Long-form upload dispatched — staging MP4 to cloud host");
+        renderUploadStatus(data.job);
+        startUploadStatusPolling();
+      } catch (err) {
+        setUploadButtonBusy(false);
+        renderUploadStatus({ status: "error", title: title, error: err.message });
+        showToast("Upload failed: " + err.message);
+      }
     }
 
     /* Render Analytics Tab */
@@ -4008,11 +4114,51 @@
         currentOverviewData = data;
         projectsBySlug = {};
         (data.projects || []).forEach(p => { projectsBySlug[p.slug] = p; });
+        (data.longform?.queue || []).forEach(q => {
+          projectsBySlug[q.slug] = {
+            slug: q.slug,
+            title: q.title,
+            youtube_title: q.youtube_title || q.title,
+            youtube_description: q.youtube_description || "",
+            youtube_tags: q.youtube_tags || ["Documentary", "History", "TrueStory"],
+            category_id: q.category_id || "27",
+            privacy_status: q.privacy_status || "public",
+            ready_to_upload: Boolean(q.mp4_ready ?? q.mp4_file),
+            mp4_size_mb: q.size_mb || q.mp4_size_mb || 25,
+            mp4_url: q.mp4_url || `/media-longform/${q.slug}/renders/ch1.mp4`,
+            cover_url: q.thumb_url || (q.preview_frames && q.preview_frames[0]),
+            is_longform: true,
+            is_posted: q.status === "published",
+            duration_sec: q.duration_sec || 78,
+            format: q.resolution || "16:9 Widescreen (1920x1080)"
+          };
+        });
+        (data.longform?.stories || []).forEach(s => {
+          if (!projectsBySlug[s.slug]) {
+            projectsBySlug[s.slug] = {
+              slug: s.slug,
+              title: s.title,
+              youtube_title: s.title,
+              youtube_description: s.topic || "",
+              youtube_tags: ["Documentary", "History", "TrueStory"],
+              category_id: "27",
+              privacy_status: "public",
+              ready_to_upload: Boolean(s.has_render),
+              mp4_size_mb: s.mp4_size_mb || 25,
+              mp4_url: s.mp4_url,
+              cover_url: s.thumb_url,
+              is_longform: true,
+              is_posted: false,
+              duration_sec: s.duration_sec || 78,
+              format: s.format || "16:9 Widescreen (1920x1080)"
+            };
+          }
+        });
 
         renderKpis(data);
         renderQueueList(data.projects || []);
         renderLibraryTable(data.projects || []);
-        populateManualSelector(data.projects || []);
+        populateManualSelector(data.projects || [], data.longform?.queue || []);
         renderAnalytics(data.youtube || {});
         renderMonetization(data.monetization || {});
         renderAutomation(data.automation || {}, data.queue_summary || {});
