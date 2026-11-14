@@ -1,0 +1,64 @@
+{
+  "title": "The Man Who Mailed Himself in a Wooden Crate Across the World",
+  "voice": "am_michael",
+  "speed": 1.06,
+  "lead": 0.28,
+  "outro": 0.85,
+  "gap": 0.16,
+  "music": "bounce",
+  "sources": [
+    "BBC News / Brian Robson 'The Crate Escape' (1965) - 19-year-old Welshman Brian Robson shipped himself from Melbourne to London as air freight inside a small wooden crate.",
+    "Los Angeles Times Archives (April 1965) - Robson survived 96 hours trapped in airline cargo holds, accidentally arriving in Los Angeles where customs officials found him alive."
+  ],
+  "lines": [
+    {
+      "text": "In nineteen sixty five, a broke teenager nailed himself inside a tiny wooden crate -",
+      "caps": "In 1965, | a broke teenager | nailed himself | inside a wooden crate -",
+      "gap": 0.18
+    },
+    {
+      "text": "and mailed himself halfway across the world as air cargo.",
+      "gap": 0.22
+    },
+    {
+      "text": "Nineteen year old Brian Robson was stranded in Australia, desperately homesick for the United Kingdom."
+    },
+    {
+      "text": "An airline ticket cost seven hundred pounds, but Brian had almost nothing.",
+      "gap": 0.18
+    },
+    {
+      "text": "So he bought a wooden mini-crate, packed a pillow, a flashlight, and a hammer,",
+      "gap": 0.18
+    },
+    {
+      "text": "and had two friends nail the wooden lid shut over his head."
+    },
+    {
+      "text": "They stamped This Side Up on the crate and checked him into air freight, expecting a thirty-six hour flight.",
+      "gap": 0.2
+    },
+    {
+      "text": "Instead, careless airport baggage handlers loaded the box completely upside down!",
+      "gap": 0.2
+    },
+    {
+      "text": "For four agonizing days, blood rushed to his head in freezing cargo holds as he drifted in and out of consciousness."
+    },
+    {
+      "text": "Even worse, the flight was rerouted, dumping the crate in a Los Angeles warehouse.",
+      "gap": 0.2
+    },
+    {
+      "text": "A customs inspector spotted a small hole, peeked inside, and saw two human eyes blinking in the dark.",
+      "gap": 0.22
+    },
+    {
+      "text": "He screamed, thinking he had seen a ghost!",
+      "gap": 0.18
+    },
+    {
+      "text": "Paramedics broke the crate open, saving Brian from severe dehydration after ninety-six hours in the mail."
+    }
+  ]
+}

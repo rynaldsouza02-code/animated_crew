@@ -1,0 +1,79 @@
+{
+ "duration": 70.818,
+ "voice": "am_michael",
+ "speed": 1.06,
+ "lines": [
+  {
+   "i": 0,
+   "text": "At age fourteen, while other teenagers played video games, Taylor Wilson built a nuclear fusion reactor -",
+   "start": 0.28,
+   "end": 7.03
+  },
+  {
+   "i": 1,
+   "text": "inside his parents' garage.",
+   "start": 7.39,
+   "end": 9.148
+  },
+  {
+   "i": 2,
+   "text": "Taylor was not an ordinary kid. By age ten, he had memorized the periodic table.",
+   "start": 9.368,
+   "end": 15.114
+  },
+  {
+   "i": 3,
+   "text": "By age eleven, he was making homemade rocket fuel in his backyard.",
+   "start": 15.274,
+   "end": 19.534
+  },
+  {
+   "i": 4,
+   "text": "Then he decided to master the ultimate secret of physics: harnessing the power of the sun.",
+   "start": 19.714,
+   "end": 24.996
+  },
+  {
+   "i": 5,
+   "text": "He scoured the internet for vacuum chambers, deuterium gas, and a hundred-thousand-volt transformer.",
+   "start": 25.196,
+   "end": 31.669
+  },
+  {
+   "i": 6,
+   "text": "Working alone in his garage workshop, he constructed a Farnsworth-Hirsch fusor.",
+   "start": 31.829,
+   "end": 36.76
+  },
+  {
+   "i": 7,
+   "text": "Inside a steel sphere, high-voltage fields accelerated deuterium ions at hundreds of millions of degrees,",
+   "start": 36.96,
+   "end": 43.8
+  },
+  {
+   "i": 8,
+   "text": "smashing atomic nuclei together until they fused into helium and released a blast of neutrons!",
+   "start": 44.29,
+   "end": 50.501
+  },
+  {
+   "i": 9,
+   "text": "When radiation safety inspectors brought geiger counters into the house, needles spiked into the red.",
+   "start": 50.661,
+   "end": 56.721
+  },
+  {
+   "i": 10,
+   "text": "Taylor had officially become the youngest human in history to achieve nuclear fusion.",
+   "start": 56.921,
+   "end": 61.909
+  },
+  {
+   "i": 11,
+   "text": "He won the world's top science fairs and was personally invited to the White House to demonstrate nuclear detection to the President!",
+   "start": 62.129,
+   "end": 69.808
+  }
+ ]
+}

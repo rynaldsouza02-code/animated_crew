@@ -1,0 +1,60 @@
+{
+  "title": "The Mystery of the Stolen White Sand Beach",
+  "voice": "am_michael",
+  "speed": 1.06,
+  "lead": 0.28,
+  "outro": 0.85,
+  "gap": 0.16,
+  "music": "bounce",
+  "sources": [
+    "BBC News (October 21, 2008) 'Jamaica beach stolen by thieves' - 500 truckloads of white sand vanished from a resort complex in Coral Spring, Trelawny.",
+    "The Guardian (October 2008) - Prime Minister Bruce Golding launched an official police inquiry into the multi-million dollar sand theft, suspected to involve tourism rivals."
+  ],
+  "lines": [
+    {
+      "text": "In two thousand and eight, thieves in Jamaica pulled off one of the strangest crimes ever -",
+      "caps": "In 2008, | thieves in Jamaica | pulled off a wild heist: | they stole an entire beach!",
+      "gap": 0.18
+    },
+    {
+      "text": "by stealing an entire four-hundred-meter white sand beach overnight.",
+      "gap": 0.22
+    },
+    {
+      "text": "In the tropical bay of Coral Spring, developers were building a multi-million-dollar luxury beach resort."
+    },
+    {
+      "text": "The property was famous for its rare, sugar-white coral sand.",
+      "gap": 0.18
+    },
+    {
+      "text": "Then one morning, project managers showed up to work and stood in disbelief.",
+      "gap": 0.18
+    },
+    {
+      "text": "The beach was completely gone."
+    },
+    {
+      "text": "Under the cover of darkness, an organized convoy of heavy excavators and dump trucks had arrived in secret.",
+      "gap": 0.2
+    },
+    {
+      "text": "They scooped up five hundred truckloads - over four thousand metric tons of precious white sand,",
+      "gap": 0.18
+    },
+    {
+      "text": "leaving behind nothing but jagged, barren limestone rocks facing the Caribbean ocean."
+    },
+    {
+      "text": "The stolen sand was worth hundreds of thousands of dollars on the black market.",
+      "gap": 0.2
+    },
+    {
+      "text": "Jamaica's Prime Minister ordered an urgent national task force, suspecting rival hotels bought the sand to pave their own private shores.",
+      "gap": 0.22
+    },
+    {
+      "text": "Yet to this day, not a single grain of sand was ever recovered, making it the most audacious environmental heist in history."
+    }
+  ]
+}

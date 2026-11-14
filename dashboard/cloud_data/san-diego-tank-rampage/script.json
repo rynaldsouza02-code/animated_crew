@@ -1,0 +1,60 @@
+{
+  "title": "The Man Who Stole A 57-Ton Army Battle Tank",
+  "voice": "am_michael",
+  "speed": 1.06,
+  "lead": 0.28,
+  "outro": 0.85,
+  "gap": 0.16,
+  "music": "bounce",
+  "sources": [
+    "San Diego Police Department & California Highway Patrol Incident Reports (May 17, 1995) - Shawn Nelson stole an M60A3 Patton tank from the National Guard Armory.",
+    "The New York Times (May 19, 1995) 'Tank Rampage in San Diego Ends With Driver's Death' - The 23-minute rampage damaged 40 vehicles, traffic signals, and utilities."
+  ],
+  "lines": [
+    {
+      "text": "In nineteen ninety five, a man hotwired a fifty-seven-ton military battle tank with a screwdriver -",
+      "caps": "In 1995, | a man hotwired | a 57-ton tank | with a screwdriver -",
+      "gap": 0.18
+    },
+    {
+      "text": "and drove it straight into rush-hour city traffic.",
+      "gap": 0.22
+    },
+    {
+      "text": "Shawn Nelson, an unemployed former soldier, casually walked into the San Diego National Guard Armory."
+    },
+    {
+      "text": "He climbed atop an M sixty A three Patton tank, snapped the lock, and cranked the ignition.",
+      "gap": 0.18
+    },
+    {
+      "text": "The massive twelve-cylinder turbo diesel roared to life.",
+      "gap": 0.18
+    },
+    {
+      "text": "Nelson rammed through the armory security gates and steered the steel colossus onto public avenues."
+    },
+    {
+      "text": "For twenty-three unbelievable minutes, he tore through suburban neighborhoods and highway State Route one sixty-three.",
+      "gap": 0.2
+    },
+    {
+      "text": "He crushed forty parked cars flat like tin cans, snapped utility poles, and ripped fire hydrants out of the ground,",
+      "gap": 0.18
+    },
+    {
+      "text": "sending geysers of water shooting thirty feet into the sky!"
+    },
+    {
+      "text": "Police cruisers could only watch helplessly as bullets ricocheted harmlessly off the heavy armor.",
+      "gap": 0.2
+    },
+    {
+      "text": "Live news helicopters broadcasted the spectacle to stunned audiences across the nation.",
+      "gap": 0.22
+    },
+    {
+      "text": "The wild joyride only ended when the tank became wedged atop a concrete freeway divider, ending one of the craziest chases in American history."
+    }
+  ]
+}
