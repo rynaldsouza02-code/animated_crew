@@ -1,0 +1,85 @@
+{
+ "duration": 72.621,
+ "cues": [
+  {
+   "t": 0.05,
+   "type": "whoosh",
+   "gain": 0.6
+  },
+  {
+   "t": 0.35,
+   "type": "sparkle",
+   "gain": 0.8
+  },
+  {
+   "t": 4.97,
+   "type": "whoosh",
+   "gain": 0.65
+  },
+  {
+   "t": 7.959,
+   "type": "whoosh",
+   "gain": 0.6
+  },
+  {
+   "t": 11.671,
+   "type": "sparkle",
+   "gain": 0.8
+  },
+  {
+   "t": 17.103,
+   "type": "whoosh",
+   "gain": 0.6
+  },
+  {
+   "t": 22.317,
+   "type": "whoosh",
+   "gain": 0.65
+  },
+  {
+   "t": 26.037,
+   "type": "whoosh",
+   "gain": 0.6
+  },
+  {
+   "t": 30.641,
+   "type": "sparkle",
+   "gain": 0.8
+  },
+  {
+   "t": 35.647,
+   "type": "whoosh",
+   "gain": 0.65
+  },
+  {
+   "t": 41.467,
+   "type": "sparkle",
+   "gain": 0.85
+  },
+  {
+   "t": 46.347,
+   "type": "whoosh",
+   "gain": 0.6
+  },
+  {
+   "t": 49.807,
+   "type": "whoosh",
+   "gain": 0.65
+  },
+  {
+   "t": 55.2,
+   "type": "whoosh",
+   "gain": 0.6
+  },
+  {
+   "t": 61.302,
+   "type": "sparkle",
+   "gain": 0.85
+  },
+  {
+   "t": 64.306,
+   "type": "cheer",
+   "gain": 0.85
+  }
+ ]
+}
