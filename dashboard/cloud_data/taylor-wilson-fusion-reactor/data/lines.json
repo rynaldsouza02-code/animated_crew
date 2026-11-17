@@ -1,0 +1,73 @@
+{
+ "duration": 39.572,
+ "voice": "am_michael",
+ "speed": 1.1,
+ "lines": [
+  {
+   "i": 0,
+   "text": "A fourteen-year-old kid built a miniature star inside his suburban garage.",
+   "start": 0.01,
+   "end": 4.23
+  },
+  {
+   "i": 1,
+   "text": "And it reached five hundred million degrees.",
+   "start": 4.47,
+   "end": 6.39
+  },
+  {
+   "i": 2,
+   "text": "Taylor Wilson was obsessed with nuclear physics before high school.",
+   "start": 6.97,
+   "end": 10.35
+  },
+  {
+   "i": 3,
+   "text": "For his birthday, he asked for radioactive elements and a Geiger counter.",
+   "start": 10.45,
+   "end": 14.43
+  },
+  {
+   "i": 4,
+   "text": "He collected uranium ore and scavenged parts across internet forums.",
+   "start": 14.65,
+   "end": 18.69
+  },
+  {
+   "i": 5,
+   "text": "In his parents' garage, he assembled a real nuclear fusion reactor.",
+   "start": 18.87,
+   "end": 22.69
+  },
+  {
+   "i": 6,
+   "text": "At fourteen, he achieved nuclear fusion, smashing atoms together.",
+   "start": 22.87,
+   "end": 26.31
+  },
+  {
+   "i": 7,
+   "text": "Federal agents showed up in utter disbelief at what he built.",
+   "start": 26.43,
+   "end": 29.45
+  },
+  {
+   "i": 8,
+   "text": "President Obama invited him straight to the White House.",
+   "start": 29.43,
+   "end": 32.51
+  },
+  {
+   "i": 9,
+   "text": "The government even offered him secret homeland security grants.",
+   "start": 32.77,
+   "end": 36.05
+  },
+  {
+   "i": 10,
+   "text": "Because while other kids were playing video games, this teenager...",
+   "start": 36.27,
+   "end": 39.57
+  }
+ ]
+}

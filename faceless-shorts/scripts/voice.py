@@ -124,7 +124,7 @@ def main():
     if a.download: return
     if not a.project: ap.error('project folder missing')
     from kokoro_onnx import Kokoro
-    P = Path(a.project); S = json.loads((P / 'script.json').read_text())
+    P = Path(a.project); S = json.loads((P / 'script.json').read_text(encoding='utf-8'))
     
     # Retention Rule: Default 1.1x speed for fast-paced short-form retention
     voice = a.voice or S.get('voice', 'am_michael')

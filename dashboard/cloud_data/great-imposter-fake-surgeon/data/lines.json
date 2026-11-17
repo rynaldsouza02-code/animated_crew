@@ -1,0 +1,73 @@
+{
+ "duration": 43.65,
+ "voice": "am_michael",
+ "speed": 1.1,
+ "lines": [
+  {
+   "i": 0,
+   "text": "A fake doctor performed sixteen successful warship surgeries without losing one patient.",
+   "start": 0.05,
+   "end": 5.128
+  },
+  {
+   "i": 1,
+   "text": "And he had zero days of medical training.",
+   "start": 5.208,
+   "end": 7.358
+  },
+  {
+   "i": 2,
+   "text": "In nineteen fifty-one, Canadian warship HMCS Cayuga needed an emergency surgeon.",
+   "start": 7.438,
+   "end": 12.877
+  },
+  {
+   "i": 3,
+   "text": "Ferdinand Demara stole a real doctor's credentials and volunteered for duty.",
+   "start": 12.957,
+   "end": 17.772
+  },
+  {
+   "i": 4,
+   "text": "When sixteen critically wounded soldiers were rushed into his operating room...",
+   "start": 17.852,
+   "end": 21.925
+  },
+  {
+   "i": 5,
+   "text": "He locked himself in his cabin and speed-read surgical handbooks overnight.",
+   "start": 22.005,
+   "end": 25.959
+  },
+  {
+   "i": 6,
+   "text": "He removed bullets, extracted shrapnel, and amputated limbs flawlessly.",
+   "start": 26.039,
+   "end": 30.198
+  },
+  {
+   "i": 7,
+   "text": "The Canadian Navy praised him as a national medical hero.",
+   "start": 30.278,
+   "end": 33.541
+  },
+  {
+   "i": 8,
+   "text": "Until the real doctor's mother read the newspaper in total shock.",
+   "start": 33.621,
+   "end": 37.043
+  },
+  {
+   "i": 9,
+   "text": "The navy was so embarrassed they let him walk away free.",
+   "start": 37.123,
+   "end": 39.94
+  },
+  {
+   "i": 10,
+   "text": "Because even without a medical license, this legendary con artist...",
+   "start": 40.02,
+   "end": 43.92
+  }
+ ]
+}

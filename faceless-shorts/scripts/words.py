@@ -38,7 +38,7 @@ def align(script_words, heard, t0, t1):
 
 
 def inline_fallback(P, S):
-    L = json.loads((P / 'data/lines.json').read_text())['lines']; words = []
+    L = json.loads((P / 'data/lines.json').read_text(encoding='utf-8'))['lines']; words = []
     for i, ln in enumerate(S['lines']):
         toks = [w for w in ln['text'].split() if norm(w)]
         wts = [len(norm(w)) + 2.5 + (2.5 if w.endswith(',') else 4.5 if re.search(r'[.?!]$', w) and k < len(toks) - 1 else 0) for k, w in enumerate(toks)]
@@ -52,8 +52,10 @@ def inline_fallback(P, S):
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument('project'); ap.add_argument('--audio'); a = ap.parse_args()
-    P = Path(a.project); S = json.loads((P / 'script.json').read_text())
+    ap = argparse.ArgumentParser(); ap.add_argument('project'); ap.add_argument('--audio'); ap.add_argument('--fast', action='store_true'); a = ap.parse_args()
+    P = Path(a.project); S = json.loads((P / 'script.json').read_text(encoding='utf-8'))
+    if a.fast:
+        return inline_fallback(P, S)
     try:
         from faster_whisper import WhisperModel
         model = WhisperModel('small.en', device='cpu', compute_type='int8')
@@ -81,7 +83,7 @@ def main():
     
     # Sync and refine line boundaries to tightly hug heard words
     if (P / 'data/lines.json').exists():
-        data_lines = json.loads((P / 'data/lines.json').read_text())
+        data_lines = json.loads((P / 'data/lines.json').read_text(encoding='utf-8'))
         L = data_lines.get('lines', [])
         for i, ln in enumerate(S['lines']):
             ws = [w for w in words if w['line'] == i]

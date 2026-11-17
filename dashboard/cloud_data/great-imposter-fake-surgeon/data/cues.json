@@ -1,0 +1,49 @@
+{
+ "duration": 43.65,
+ "cues": [
+  {
+   "t": 0.1,
+   "type": "whoosh"
+  },
+  {
+   "t": 5.208,
+   "type": "pop"
+  },
+  {
+   "t": 7.438,
+   "type": "alarm"
+  },
+  {
+   "t": 12.957,
+   "type": "stamp"
+  },
+  {
+   "t": 17.852,
+   "type": "heartbeat"
+  },
+  {
+   "t": 22.005,
+   "type": "whoosh"
+  },
+  {
+   "t": 26.039,
+   "type": "ding"
+  },
+  {
+   "t": 30.278,
+   "type": "pop"
+  },
+  {
+   "t": 33.621,
+   "type": "alarm"
+  },
+  {
+   "t": 37.123,
+   "type": "whoosh"
+  },
+  {
+   "t": 40.02,
+   "type": "ding"
+  }
+ ]
+}

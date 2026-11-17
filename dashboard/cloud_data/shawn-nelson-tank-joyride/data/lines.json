@@ -1,0 +1,73 @@
+{
+ "duration": 45.644,
+ "voice": "am_michael",
+ "speed": 1.1,
+ "lines": [
+  {
+   "i": 0,
+   "text": "A plumber walked onto an active military base and stole a 57-ton combat tank.",
+   "start": 0.05,
+   "end": 5.0
+  },
+  {
+   "i": 1,
+   "text": "Then took it on a rampage down a California highway.",
+   "start": 5.08,
+   "end": 8.123
+  },
+  {
+   "i": 2,
+   "text": "In nineteen ninety-five, Shawn Nelson was furious after losing his plumbing business.",
+   "start": 8.203,
+   "end": 12.726
+  },
+  {
+   "i": 3,
+   "text": "He bypassed armory security, popped open an M-sixty tank, and hotwired the engine.",
+   "start": 12.806,
+   "end": 17.795
+  },
+  {
+   "i": 4,
+   "text": "Crashing through the base gates, he rolled straight onto San Diego streets.",
+   "start": 17.875,
+   "end": 21.623
+  },
+  {
+   "i": 5,
+   "text": "He crushed forty parked cars, flattened utility poles, and ripped fire hydrants.",
+   "start": 21.703,
+   "end": 26.002
+  },
+  {
+   "i": 6,
+   "text": "Police cruisers chased the tank helplessly, unable to pierce three-inch armor.",
+   "start": 26.082,
+   "end": 30.178
+  },
+  {
+   "i": 7,
+   "text": "He charged onto the interstate, trying to cross over into opposing traffic.",
+   "start": 30.258,
+   "end": 34.383
+  },
+  {
+   "i": 8,
+   "text": "Until the tank got high-centered on a heavy concrete highway divider.",
+   "start": 34.463,
+   "end": 38.223
+  },
+  {
+   "i": 9,
+   "text": "Officers used bolt cutters to pop the hatch, ending the thirty-minute joyride.",
+   "start": 38.303,
+   "end": 42.638
+  },
+  {
+   "i": 10,
+   "text": "Because even against fifty police cars, nobody could stop...",
+   "start": 42.718,
+   "end": 46.044
+  }
+ ]
+}
