@@ -1,0 +1,14 @@
+{
+ "id": "warm-canvas",
+ "title": "Warm Canvas",
+ "family": "Talking Head",
+ "fonts": [
+  "560 60px \"Fraunces\"",
+  "600 30px \"Fraunces\"",
+  "500 20px \"Inter\"",
+  "600 20px \"Inter\""
+ ],
+ "demo_duration": 32.6,
+ "demo_still": 18.9,
+ "has_aroll": true
+}

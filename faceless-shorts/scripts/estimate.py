@@ -12,12 +12,12 @@ from pathlib import Path
 
 ap = argparse.ArgumentParser()
 ap.add_argument('project')
-ap.add_argument('--wps', type=float, default=2.8, help='speaking rate in words per second (Kokoro am_michael at 1.05 is ~2.8)')
+ap.add_argument('--wps', type=float, default=3.0, help='speaking rate in words per second (Kokoro am_michael at 1.1x is ~3.0)')
 a = ap.parse_args()
 P = Path(a.project)
 S = json.loads((P / 'script.json').read_text())
-speed = S.get('speed', 1.0)
-t = float(S.get('lead', 0.4))
+speed = float(S.get('speed', 1.1))
+t = float(min(0.06, S.get('lead', 0.05)))
 lines, words = [], []
 for i, ln in enumerate(S['lines']):
     toks = ln['text'].split()
@@ -29,11 +29,11 @@ for i, ln in enumerate(S['lines']):
         d = (l + 2.5) * unit
         words.append({'w': w, 'line': i, 's': round(t, 3), 'e': round(t + d * 0.92, 3)})
         t += d
-        if w.endswith(','): t += 0.16
-        elif re.search(r'[.?!]$', w) and w is not toks[-1]: t += 0.32
+        if w.endswith(','): t += 0.08
+        elif re.search(r'[.?!]$', w) and w is not toks[-1]: t += 0.10
     lines.append({'i': i, 'text': ln['text'], 'start': round(start, 3), 'end': round(t, 3)})
-    t += float(ln.get('gap', S.get('gap', 0.32)))
-dur = lines[-1]['end'] + float(S.get('outro', 0.9))
+    t += float(min(0.10, ln.get('gap', S.get('gap', 0.08))))
+dur = lines[-1]['end'] + float(min(0.06, S.get('outro', 0.05)))
 (P / 'data').mkdir(exist_ok=True)
 (P / 'data/lines.json').write_text(json.dumps({'duration': round(dur, 3), 'estimated': True, 'lines': lines}, indent=1))
 (P / 'data/words.json').write_text(json.dumps(words, indent=1))

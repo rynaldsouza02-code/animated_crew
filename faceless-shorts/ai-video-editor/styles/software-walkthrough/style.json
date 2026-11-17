@@ -1,0 +1,15 @@
+{
+ "id": "software-walkthrough",
+ "title": "Software Walkthrough",
+ "family": "Screen and UI",
+ "fonts": [
+  "700 30px \"DM Sans\"",
+  "600 30px \"DM Sans\"",
+  "500 30px \"DM Sans\"",
+  "400 30px \"DM Sans\"",
+  "500 20px \"DM Mono\""
+ ],
+ "demo_duration": 19.5,
+ "demo_still": 10.9,
+ "has_aroll": false
+}

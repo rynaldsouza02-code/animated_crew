@@ -1,0 +1,4 @@
+faster-whisper>=1.1
+playwright>=1.40
+numpy
+pillow

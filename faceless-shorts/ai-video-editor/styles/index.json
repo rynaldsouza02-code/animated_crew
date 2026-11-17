@@ -1,0 +1,103 @@
+[
+ {
+  "id": "creator-motion-graphics",
+  "title": "Creator Motion Graphics",
+  "family": "Kinetic Type",
+  "fonts": [
+   "60px \"Anton\"",
+   "italic 60px \"Instrument Serif\"",
+   "600 30px \"Inter\"",
+   "700 30px \"Inter\"",
+   "800 30px \"Inter\"",
+   "500 20px \"Inter\""
+  ],
+  "demo_duration": 21.5,
+  "demo_still": 1.95,
+  "has_aroll": false
+ },
+ {
+  "id": "chalk-talk",
+  "title": "Chalk Talk",
+  "family": "Hand-Drawn",
+  "fonts": [
+   "700 60px \"Cabin Sketch\"",
+   "700 40px \"Kalam\"",
+   "400 40px \"Kalam\"",
+   "600 14px \"Inter\""
+  ],
+  "demo_duration": 20.8,
+  "demo_still": 12.6,
+  "has_aroll": false
+ },
+ {
+  "id": "clean-tech",
+  "title": "Clean Tech",
+  "family": "Kinetic Type",
+  "fonts": [
+   "800 60px \"Inter Tight\"",
+   "500 30px \"Inter Tight\"",
+   "600 30px \"Inter Tight\"",
+   "700 30px \"Inter Tight\"",
+   "700 20px \"JetBrains Mono\""
+  ],
+  "demo_duration": 20.0,
+  "demo_still": 8.6,
+  "has_aroll": false
+ },
+ {
+  "id": "software-walkthrough",
+  "title": "Software Walkthrough",
+  "family": "Screen and UI",
+  "fonts": [
+   "700 30px \"DM Sans\"",
+   "600 30px \"DM Sans\"",
+   "500 30px \"DM Sans\"",
+   "400 30px \"DM Sans\"",
+   "500 20px \"DM Mono\""
+  ],
+  "demo_duration": 19.5,
+  "demo_still": 10.9,
+  "has_aroll": false
+ },
+ {
+  "id": "data-story",
+  "title": "Data Story",
+  "family": "Data",
+  "fonts": [
+   "800 60px \"Archivo\"",
+   "600 30px \"Archivo\"",
+   "500 30px \"IBM Plex Mono\"",
+   "600 30px \"IBM Plex Mono\""
+  ],
+  "demo_duration": 21.0,
+  "demo_still": 7.0,
+  "has_aroll": false
+ },
+ {
+  "id": "warm-canvas",
+  "title": "Warm Canvas",
+  "family": "Talking Head",
+  "fonts": [
+   "560 60px \"Fraunces\"",
+   "600 30px \"Fraunces\"",
+   "500 20px \"Inter\"",
+   "600 20px \"Inter\""
+  ],
+  "demo_duration": 32.6,
+  "demo_still": 18.9,
+  "has_aroll": true
+ },
+ {
+  "id": "pop-info",
+  "title": "Pop Info",
+  "family": "Illustrated",
+  "fonts": [
+   "600 20px \"Fredoka\"",
+   "500 20px \"Fredoka\"",
+   "700 20px \"Fredoka\""
+  ],
+  "demo_duration": 12.0,
+  "demo_still": 4.6,
+  "has_aroll": false
+ }
+]

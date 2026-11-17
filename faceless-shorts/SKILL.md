@@ -39,19 +39,25 @@ length (default ~30 s), voice (`SKILL/scripts/py SKILL/scripts/voice.py --list`;
 **captions-only** (no voice yet; `estimate.py`), music (built-in bed · none · their own royalty-free file), end line / handle.
 "Just go" = the defaults.
 
-## 2. The plan (ONE screen, then wait)
-Show: title · the full narration, one line per cut, with its caption chunks (`WHAT IF *YOU | SWALLOW *GUM?`) · the shot list,
-one line each (what we see, what moves, which word it lands on) · new components you'll add to the kit, if any · facts and
-their sources. Ask **"Build it?"** and wait.
+## 2. Retention Rules & Scripting Plan
+Show: title · full narration, one line per cut, with its 3–4 word caption chunks · the shot list (alternating Close-up -> Wide Action -> Prop Insert every 2.5–3s) · sources.
 
-**Script rules.** Write it the way a person actually talks to a friend: full, flowing sentences with connecting words
-("Well,", "where", "but", "so", "which means"), not a list of short caption-like statements. ~90-110 words for 35 s.
-**A line is a CUT, not a sentence**: split each sentence into 1-3 lines at natural pauses (commas, "and", "where"), so
-the picture changes every 1.5-3.5 s while the voice keeps flowing (voice.py speaks each whole sentence in one pass).
-Shape: hook question, then escalation, a myth or surprise, a twist ("but if you…"), a punchy last line that loops.
-Write numbers as they're said ("seven"). Read it out loud in your head: if it sounds like captions, rewrite it.
-Original writing only: take a format you like, never another creator's script or shots. Every fact is checked against a
-reliable source (list them in `script.json` "sources"). Health topics: accurate, no gore, no scary misinformation.
+### Viral Retention Rules (MANDATORY)
+1. **HOOK & SCRIPT:**
+   - **First 3 Seconds**: Open mid-action with an unanswered "open-loop" curiosity gap. Zero warm-up, zero intro ("Did you know?", "Hey guys"), and never give away the ending in the first sentence.
+   - **Sentence Length**: Strict maximum of **8–12 words per sentence**. Punchy, rhythmic, spoken English.
+   - **Duration**: **35–45 seconds total** (~85–115 words at 1.1x speed).
+   - **Infinite Seamless Loop**: End on a twist or grammatical setup line that loops seamlessly back into line 1.
+2. **VISUAL PACING & ANGLES:**
+   - Change the visual frame every **2.5–3.0 seconds** (never linger on one camera angle > 3s).
+   - Alternating camera cycle: `Close-up character reaction` -> `Wide action shot` -> `Prop / document insert`.
+   - Keep central upper-middle space clear and high-contrast for captions.
+3. **AUDIO & CAPTIONS:**
+   - **Zero Dead Air**: Trim all voiceover pauses > 0.15s down to <= 0.08s. Speech speed defaults to **1.1x**.
+   - Lead silence <= 0.05s, outro silence <= 0.06s for seamless looping.
+   - **Bold 3–4 Word Captions**: Render bold, 3–4 word animated chunks in the **center-lower safe zone around Y=1250px** (clear of YouTube Shorts UI). Current spoken word actively highlighted in bright yellow (`#FFE600`) with subtle pop, other words crisp white (`#FFFFFF`) with thick black outline.
+
+**A line is a CUT, not a sentence**: split each sentence into cuts at natural pauses so the picture changes every 2.5–3.0s while the voice flows.
 
 ## 3. Build
 1. `bash SKILL/scripts/new_video.sh <style> <short-name>` copies the example into `~/faceless-shorts/<short-name>/`.
@@ -71,10 +77,10 @@ frames full size. For every frame ask:
   body). Props move with whatever holds them (gum stays in the hand until the hand reaches the mouth). Nothing appears before
   its cause.
 - **Does it match the narration at that moment?** The picture changes just before its line; reveals land on their word.
-- **Is anything colliding?** Moving things never cross labels, pills, the caption zone (y 1250-1550) or each other by accident.
-- **Captions:** 1-3 words, exactly one yellow word, spelled right, on the word being said, readable on a phone.
-- **Style sheet:** only the palette, flat shapes, x-ray views in cyan, danger in red.
-- **Sound:** voice clear over the music; effects soft (no harsh ticks or beeps).
+- **Is anything colliding?** Moving things never cross labels, pills, the caption safe zone (around Y=1250px) or each other by accident.
+- **Captions:** 3–4 words, active spoken word highlighted in bright yellow (#FFE600), spelled right, readable on a phone.
+- **Pacing:** Camera angle changes every 2.5–3.0s, alternating Close-up Reaction -> Wide Action -> Prop Insert.
+- **Sound & Dead Air:** Voice at 1.1x speed, zero pauses > 0.15s, sound effects soft, outro/lead <= 0.06s for seamless looping.
 Fix, re-render the sheet, re-check. Tell the user what you caught and fixed.
 
 ## 5. Deliver

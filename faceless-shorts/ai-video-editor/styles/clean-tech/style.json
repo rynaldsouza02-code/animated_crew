@@ -1,0 +1,15 @@
+{
+ "id": "clean-tech",
+ "title": "Clean Tech",
+ "family": "Kinetic Type",
+ "fonts": [
+  "800 60px \"Inter Tight\"",
+  "500 30px \"Inter Tight\"",
+  "600 30px \"Inter Tight\"",
+  "700 30px \"Inter Tight\"",
+  "700 20px \"JetBrains Mono\""
+ ],
+ "demo_duration": 20.0,
+ "demo_still": 8.6,
+ "has_aroll": false
+}

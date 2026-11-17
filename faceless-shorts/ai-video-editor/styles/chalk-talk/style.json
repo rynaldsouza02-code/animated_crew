@@ -1,0 +1,14 @@
+{
+ "id": "chalk-talk",
+ "title": "Chalk Talk",
+ "family": "Hand-Drawn",
+ "fonts": [
+  "700 60px \"Cabin Sketch\"",
+  "700 40px \"Kalam\"",
+  "400 40px \"Kalam\"",
+  "600 14px \"Inter\""
+ ],
+ "demo_duration": 20.8,
+ "demo_still": 12.6,
+ "has_aroll": false
+}

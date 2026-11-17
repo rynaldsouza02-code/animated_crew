@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{TITLE}}</title>
+<link rel="stylesheet" href="{{SKILL}}/assets/fonts/fonts.css">
+<style>
+  :root { color-scheme: dark; --bg: #0b0b0d; --panel: #141417; --ink: #f2f0ea; --dim: #8d8c93; --line: #26262c; --acc: #7aa7ff; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font: 14px "Inter", system-ui, sans-serif; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 20px 16px 28px; display: grid; gap: 12px; }
+  h1 { font-size: 20px; margin: 0; font-weight: 700; }
+  .meta { color: var(--dim); margin: 0; }
+  .stage { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+  .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .bar button { font: 600 14px inherit; font-family: inherit; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 7px; padding: 8px 12px; cursor: pointer; }
+  #play { min-width: 82px; background: var(--ink); color: #0b0b0d; border-color: var(--ink); }
+  .track { position: relative; flex: 1 1 260px; min-width: 0; }
+  #scrub { width: 100%; accent-color: var(--acc); }
+  #marks { position: absolute; left: 0; right: 0; top: -6px; height: 4px; pointer-events: none; }
+  #marks i { position: absolute; top: 0; height: 4px; border-radius: 2px; background: var(--acc); opacity: 0.8; }
+  #time { font-variant-numeric: tabular-nums; color: var(--dim); min-width: 110px; text-align: right; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>{{TITLE}}</h1>
+  <p class="meta">Preview of the edit. Blue marks on the timeline are where graphics play. Space to play or pause.</p>
+  <div class="stage"><canvas id="stage" width="1280" height="720"></canvas></div>
+  <div class="bar">
+    <button id="play" type="button">Play</button>
+    <div class="track"><div id="marks"></div><input id="scrub" type="range" min="0" max="1" step="0.01" value="0" aria-label="Timeline"></div>
+    <span id="time">0:00.0</span>
+    <button id="sound" type="button" aria-pressed="true">Effects on</button>
+  </div>
+</div>
+<script>window.STYLE_FONTS = {{FONTS}}; window.FOOTAGE_URL = {{FOOTAGE}};</script>
+<script src="{{SKILL}}/styles/{{STYLE}}/base.js"></script>
+<script src="{{STORY}}"></script>
+<script src="{{SKILL}}/engine/player.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+ "id": "creator-motion-graphics",
+ "title": "Creator Motion Graphics",
+ "family": "Kinetic Type",
+ "fonts": [
+  "60px \"Anton\"",
+  "italic 60px \"Instrument Serif\"",
+  "600 30px \"Inter\"",
+  "700 30px \"Inter\"",
+  "800 30px \"Inter\"",
+  "500 20px \"Inter\""
+ ],
+ "demo_duration": 21.5,
+ "demo_still": 1.95,
+ "has_aroll": false
+}

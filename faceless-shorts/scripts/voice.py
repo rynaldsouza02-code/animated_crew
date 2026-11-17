@@ -4,13 +4,10 @@
   scripts/py scripts/voice.py --list             voices that narrate well
   scripts/py scripts/voice.py --download         only fetch the model files (~340 MB, once)
 
-script.json: { "voice": "am_michael", "speed": 1.05, "lead": 0.45, "outro": 0.9, "gap": 0.32,
-               "lines": [ { "text": "What if you swallow gum?", "caps": "...", "gap": 0.3 }, ... ] }
-One line = one CUT, not one sentence: a sentence can run across several lines ("It slides down your throat and lands
-in your stomach," / "where acid gets to work on it."). Lines are grouped into whole sentences and each sentence is
-spoken in ONE pass, so the intonation flows naturally; then every cut inside a sentence is found in the audio (snapped
-to the nearest pause, else placed by length). "gap" (on a sentence's last line) = the pause after that sentence.
-Write numbers the way they're SAID. Then run words.py for the word timings.
+Retention Rules Enforced:
+1. Speech speed: Default 1.1x (speed=1.1) for brisk, engaging retention.
+2. Zero dead air: All silences longer than 0.15s are trimmed/compressed to <= 0.08s.
+3. Seamless loop: Lead silence <= 0.05s, outro silence <= 0.06s so the short loops cleanly into line 1.
 """
 import argparse, json, os, re, sys, urllib.request
 from pathlib import Path
@@ -42,23 +39,77 @@ def ensure_models():
 
 
 def trim(x, thr=0.008):
-    """cut leading/trailing silence so line start/end times are exact"""
+    """Cut leading/trailing silence so line start/end times are exact and crisp"""
     idx = np.where(np.abs(x) > thr)[0]
     if not len(idx): return x
-    a = max(0, idx[0] - int(0.01 * SR)); b = min(len(x), idx[-1] + int(0.03 * SR)); return x[a:b]
+    a = max(0, idx[0] - int(0.005 * SR))
+    b = min(len(x), idx[-1] + int(0.015 * SR))
+    return x[a:b]
 
 
-def silences(x, thr=0.012, min_len=0.06):
-    """pauses inside speech: [(start_s, end_s)] where the 10 ms RMS stays under thr for >= min_len"""
-    hop = int(0.01 * SR); n = len(x) // hop
-    rms = np.sqrt(np.mean(x[:n * hop].reshape(n, hop) ** 2, axis=1)); quiet = rms < thr * np.abs(x).max()
+def silences(x, thr=0.012, min_len=0.05):
+    """Pauses inside speech: [(start_s, end_s)] where the 5 ms RMS stays under thr for >= min_len"""
+    hop = int(0.005 * SR); n = len(x) // hop
+    if n == 0: return []
+    rms = np.sqrt(np.mean(x[:n * hop].reshape(n, hop) ** 2, axis=1))
+    quiet = rms < thr * (np.abs(x).max() + 1e-9)
     out, st = [], None
     for f, q in enumerate(quiet):
         if q and st is None: st = f
         if (not q or f == n - 1) and st is not None:
-            if (f - st) * 0.01 >= min_len: out.append((st * 0.01, f * 0.01))
+            if (f - st) * 0.005 >= min_len: out.append((st * 0.005, f * 0.005))
             st = None
     return out
+
+
+def compress_all_silences(x, max_pause=0.15, target_pause=0.08, thr=0.012):
+    """Compress any quiet period in x longer than max_pause down to target_pause with smooth crossfade."""
+    hop = int(0.005 * SR)
+    if len(x) < hop * 4: return x
+    n = len(x) // hop
+    rms = np.sqrt(np.mean(x[:n * hop].reshape(n, hop) ** 2, axis=1))
+    quiet = rms < thr * (np.abs(x).max() + 1e-9)
+    
+    silent_regions = []
+    st = None
+    for f, q in enumerate(quiet):
+        if q and st is None: st = f
+        if (not q or f == n - 1) and st is not None:
+            dur = (f - st) * 0.005
+            if dur > max_pause:
+                silent_regions.append((st * hop, f * hop))
+            st = None
+            
+    if not silent_regions:
+        return x
+        
+    chunks = []
+    curr_orig = 0
+    target_samples = int(target_pause * SR)
+    fade_len = int(0.004 * SR)
+    
+    for s_start, s_end in silent_regions:
+        if s_start > curr_orig:
+            chunks.append(x[curr_orig:s_start])
+        orig_len = s_end - s_start
+        if orig_len > target_samples:
+            mid = (s_start + s_end) // 2
+            half = target_samples // 2
+            kept = x[mid - half : mid - half + target_samples].copy()
+            if len(kept) >= 2 * fade_len:
+                fade_in = 0.5 * (1 - np.cos(np.pi * np.linspace(0, 1, fade_len)))
+                fade_out = 0.5 * (1 + np.cos(np.pi * np.linspace(0, 1, fade_len)))
+                kept[:fade_len] *= fade_in
+                kept[-fade_len:] *= fade_out
+            chunks.append(kept)
+        else:
+            chunks.append(x[s_start:s_end])
+        curr_orig = s_end
+        
+    if curr_orig < len(x):
+        chunks.append(x[curr_orig:])
+        
+    return np.concatenate(chunks)
 
 
 def main():
@@ -74,35 +125,69 @@ def main():
     if not a.project: ap.error('project folder missing')
     from kokoro_onnx import Kokoro
     P = Path(a.project); S = json.loads((P / 'script.json').read_text())
-    voice = a.voice or S.get('voice', 'am_michael'); speed = a.speed or S.get('speed', 1.0)
+    
+    # Retention Rule: Default 1.1x speed for fast-paced short-form retention
+    voice = a.voice or S.get('voice', 'am_michael')
+    speed = a.speed or float(S.get('speed', 1.1))
+    
     k = Kokoro(str(KDIR / 'kokoro-v1.0.onnx'), str(KDIR / 'voices-v1.0.bin'))
     lang = 'en-gb' if voice.startswith('b') else 'en-us'
     say = lambda text: trim(np.asarray(k.create(text, voice=voice, speed=speed, lang=lang)[0], dtype=np.float64))
-    # group the lines into whole sentences (a line ending in . ? ! closes one; "break": true forces a close)
+    
+    # Group the lines into whole sentences (a line ending in . ? ! closes one; "break": true forces a close)
     groups, cur = [], []
     for i, ln in enumerate(S['lines']):
         cur.append(i)
-        if re.search(r'[.?!]["\')]*$', ln['text'].strip()) or ln.get('break') or i == len(S['lines']) - 1: groups.append(cur); cur = []
-    out = [np.zeros(int(S.get('lead', 0.4) * SR))]; t = len(out[0]) / SR; lines = [None] * len(S['lines'])
+        if re.search(r'[.?!]["\')]*$', ln['text'].strip()) or ln.get('break') or i == len(S['lines']) - 1:
+            groups.append(cur)
+            cur = []
+            
+    # Retention Rule: Lead silence <= 0.05s (zero dead air at start)
+    lead_s = min(0.06, float(S.get('lead', 0.05)))
+    out = [np.zeros(int(lead_s * SR))]
+    t = len(out[0]) / SR
+    lines = [None] * len(S['lines'])
+    
     for g in groups:
-        x = say(' '.join(S['lines'][i]['text'] for i in g))
+        raw_x = say(' '.join(S['lines'][i]['text'] for i in g))
+        # Retention Rule: Compress any internal silences > 0.15s down to <= 0.08s
+        x = compress_all_silences(raw_x, max_pause=0.15, target_pause=0.08)
+        
         cuts = [0.0]
         if len(g) > 1:                                    # find each cut inside the sentence
             lens = np.array([len(say(S['lines'][i]['text'])) for i in g], dtype=float)
             pauses = silences(x)
             for c in np.cumsum(lens)[:-1] / lens.sum() * len(x) / SR:
                 near = [p for p in pauses if abs((p[0] + p[1]) / 2 - c) < 0.4]
-                if near: p = min(near, key=lambda p: abs((p[0] + p[1]) / 2 - c)); cuts.append((p[0], p[1]))
-                else: cuts.append((c, c))
+                if near:
+                    p = min(near, key=lambda p: abs((p[0] + p[1]) / 2 - c))
+                    cuts.append((p[0], p[1]))
+                else:
+                    cuts.append((c, c))
+                    
         n = len(x) / SR
         for j, i in enumerate(g):
-            a = 0.0 if j == 0 else cuts[j][1]; b = n if j == len(g) - 1 else cuts[j + 1][0]
-            lines[i] = {'i': i, 'text': S['lines'][i]['text'], 'start': round(t + a, 3), 'end': round(t + b, 3)}
+            a_cut = 0.0 if j == 0 else cuts[j][1]
+            b_cut = n if j == len(g) - 1 else cuts[j + 1][0]
+            lines[i] = {'i': i, 'text': S['lines'][i]['text'], 'start': round(t + a_cut, 3), 'end': round(t + b_cut, 3)}
             print(f'{i:2d} {lines[i]["start"]:6.2f}-{lines[i]["end"]:6.2f}  {S["lines"][i]["text"]}', flush=True)
-        gap = np.zeros(int(float(S['lines'][g[-1]].get('gap', S.get('gap', 0.3))) * SR))
-        out += [x, gap]; t += (len(x) + len(gap)) / SR
-    outro = np.zeros(int(float(S.get('outro', 0.9)) * SR)); out.append(outro)
-    y = np.concatenate(out); y = y / (np.abs(y).max() + 1e-9) * 0.9
+            
+        # Retention Rule: Inter-sentence gap <= 0.10s (zero dead air between sentences)
+        gap_s = min(0.10, float(S['lines'][g[-1]].get('gap', S.get('gap', 0.08))))
+        gap = np.zeros(int(gap_s * SR))
+        out += [x, gap]
+        t += (len(x) + len(gap)) / SR
+        
+    # Retention Rule: Outro <= 0.06s for seamless looping into line 1
+    outro_s = min(0.06, float(S.get('outro', 0.05)))
+    outro = np.zeros(int(outro_s * SR))
+    out.append(outro)
+    
+    y = np.concatenate(out)
+    # Final pass: Guarantee zero silences > 0.15s anywhere across entire master audio
+    y = compress_all_silences(y, max_pause=0.15, target_pause=0.08)
+    y = y / (np.abs(y).max() + 1e-9) * 0.9
+    
     (P / 'data').mkdir(exist_ok=True)
     wavfile.write(P / 'data/narration.wav', SR, (y * 32767).astype(np.int16))
     dur = len(y) / SR

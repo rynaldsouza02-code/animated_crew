@@ -89,11 +89,11 @@ wide({ x: b.x, y: b.y, w: b.w, h: b.h - 10 }, () => {
   E2.render(S.scene, c3, { focus: 3.4, aperture: 0.003, maxblur: 0.012, bloom: 0.15 });
 }, () => {
   const mid = b.x + b.w / 2;
-  [['He bet', 60], ['everything', 160], ['a single', 260]].forEach(([w, y]) => { B.save(); B.translate(mid, b.y + y); B.scale(0.5, 0.5); captionText(w, 0, 0); B.restore(); });
-  small('ONE WORD AT A TIME · WHITE · BLACK EDGE · CENTRE', mid, b.y + b.h - 34, 'center', 13, '#FFFFFF');
+  [['HE BET IT', 60], ['ALL ON A', 160], ['SINGLE SPIN', 260]].forEach(([w, y]) => { B.save(); B.translate(mid, b.y + y); B.scale(0.5, 0.5); captionText(w, 0, 0); B.restore(); });
+  small('3-4 WORDS · ACTIVE-WORD HIGHLIGHT · SAFE ZONE Y=1250', mid, b.y + b.h - 34, 'center', 13, '#FFFFFF');
 });
 
 // 6 · rules
 b = panel(1320, 610, 580, 456, 6, 'RULES');
-rules(b, ['OPEN ON THE ENDING: "HE BET IT ALL..."', 'THEN REWIND AND SHOW THE TRICK, STEP BY STEP.', 'NEW SHOT EVERY 1.5-3 S; THE CAMERA NEVER STOPS.', 'FACES REACT ON EVERY BEAT (SMUG, SHOCK, LAUGH).', 'SHORT LINES OF DIALOGUE FROM THE CROWD.', 'BRIGHT SUN BY DAY, PINK SUNSETS, WARM ROOMS.', 'END ON A PUNCHLINE THAT FLIPS THE START.'], b.y + 26, 16, 52);
+rules(b, ['OPEN MID-ACTION (OPEN-LOOP CURIOSITY GAP IN 3 SECONDS).', 'MAX 8-12 WORDS PER SENTENCE · 35-45 SECONDS TOTAL.', 'CHANGE FRAME EVERY 2.5-3S (CLOSE-UP -> WIDE -> PROP).', 'KEEP CENTRAL UPPER-MIDDLE SPACE CLEAR FOR CAPTIONS.', 'ZERO DEAD AIR: TRIM PAUSES > 0.15S · SPEECH SPEED 1.1X.', 'BOLD 3-4 WORD ANIMATED CAPTIONS AT Y=1250 SAFE ZONE.', 'END WITH A TWIST THAT LOOPS SEAMLESSLY INTO LINE 1.'], b.y + 26, 16, 52);
 window.SHEET_READY = true;

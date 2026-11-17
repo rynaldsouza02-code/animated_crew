@@ -78,14 +78,29 @@ def main():
     dur_audio = float(subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', str(P / 'data/narration.wav')], capture_output=True, text=True).stdout)
     times = align([w for w, _ in toks], heard, 0.0, dur_audio)
     words = [{'w': w, 'line': i, 's': round(s, 3), 'e': round(e, 3)} for (w, i), (s, e) in zip(toks, times)]
-    if a.audio or not (P / 'data/lines.json').exists():
+    
+    # Sync and refine line boundaries to tightly hug heard words
+    if (P / 'data/lines.json').exists():
+        data_lines = json.loads((P / 'data/lines.json').read_text())
+        L = data_lines.get('lines', [])
+        for i, ln in enumerate(S['lines']):
+            ws = [w for w in words if w['line'] == i]
+            if ws and i < len(L):
+                L[i]['start'] = round(max(0.0, ws[0]['s'] - 0.03), 3)
+                L[i]['end'] = round(ws[-1]['e'] + 0.03, 3)
+        data_lines['duration'] = round(dur_audio, 3)
+        data_lines['lines'] = L
+        (P / 'data/lines.json').write_text(json.dumps(data_lines, indent=1))
+    else:
         lines = []
         for i, ln in enumerate(S['lines']):
-            ws = [w for w in words if w['line'] == i]; lines.append({'i': i, 'text': ln['text'], 'start': ws[0]['s'], 'end': ws[-1]['e']})
+            ws = [w for w in words if w['line'] == i]
+            if ws:
+                lines.append({'i': i, 'text': ln['text'], 'start': round(max(0.0, ws[0]['s'] - 0.03), 3), 'end': round(ws[-1]['e'] + 0.03, 3)})
+            else:
+                lines.append({'i': i, 'text': ln['text'], 'start': 0.0, 'end': 0.0})
         (P / 'data/lines.json').write_text(json.dumps({'duration': round(dur_audio, 3), 'lines': lines}, indent=1))
-    else:   # keep every word inside its line's exact TTS window
-        L = json.loads((P / 'data/lines.json').read_text())['lines']
-        for w in words: lo, hi = L[w['line']]['start'], L[w['line']]['end']; w['s'] = round(min(max(w['s'], lo), hi), 3); w['e'] = round(min(max(w['e'], w['s']), hi), 3)
+
     (P / 'data/words.json').write_text(json.dumps(words, indent=1))
     (P / 'data/words.txt').write_text('\n'.join(f"{w['s']:7.2f} {w['e']:7.2f}  L{w['line']:<2d} {w['w']}" for w in words))
     print(f'data/words.json: {len(words)} words (Whisper heard {len(heard)})')

@@ -1,0 +1,14 @@
+{
+ "id": "data-story",
+ "title": "Data Story",
+ "family": "Data",
+ "fonts": [
+  "800 60px \"Archivo\"",
+  "600 30px \"Archivo\"",
+  "500 30px \"IBM Plex Mono\"",
+  "600 30px \"IBM Plex Mono\""
+ ],
+ "demo_duration": 21.0,
+ "demo_still": 7.0,
+ "has_aroll": false
+}
