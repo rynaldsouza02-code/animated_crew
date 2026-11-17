@@ -1,0 +1,73 @@
+{
+ "duration": 41.417,
+ "voice": "am_michael",
+ "speed": 1.1,
+ "lines": [
+  {
+   "i": 0,
+   "text": "History's biggest video game leak was pulled off with a TV remote.",
+   "start": 0.01,
+   "end": 3.67
+  },
+  {
+   "i": 1,
+   "text": "And the hacker was locked inside an English hotel room.",
+   "start": 3.83,
+   "end": 6.63
+  },
+  {
+   "i": 2,
+   "text": "Seventeen-year-old Arion was arrested and had all his laptops seized.",
+   "start": 6.57,
+   "end": 10.51
+  },
+  {
+   "i": 3,
+   "text": "Police put him on bail in a budget motel under strict monitoring.",
+   "start": 10.89,
+   "end": 14.43
+  },
+  {
+   "i": 4,
+   "text": "With zero computers allowed, he bought an Amazon Fire Stick for forty dollars.",
+   "start": 14.47,
+   "end": 18.818
+  },
+  {
+   "i": 5,
+   "text": "He plugged the stick into the hotel television and bypassed security.",
+   "start": 18.81,
+   "end": 22.49
+  },
+  {
+   "i": 6,
+   "text": "Using just a keyboard and phone, he breached Rockstar Games' Slack.",
+   "start": 22.65,
+   "end": 26.13
+  },
+  {
+   "i": 7,
+   "text": "He downloaded ninety unreleased gameplay clips of Grand Theft Auto Six.",
+   "start": 26.11,
+   "end": 30.698
+  },
+  {
+   "i": 8,
+   "text": "Then leaked them online, completely shattering the internet and stock market.",
+   "start": 30.71,
+   "end": 34.41
+  },
+  {
+   "i": 9,
+   "text": "A judge sentenced him indefinitely to a secure medical facility.",
+   "start": 34.61,
+   "end": 38.21
+  },
+  {
+   "i": 10,
+   "text": "Because even without a computer, this teenager proved that...",
+   "start": 38.29,
+   "end": 41.35
+  }
+ ]
+}

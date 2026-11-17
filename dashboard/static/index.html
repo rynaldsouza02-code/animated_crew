@@ -358,261 +358,9 @@
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
-    /* Long-Form Widescreen Styles */
-    .thumb-widescreen {
-      width: 140px; height: 79px; border-radius: 9px; overflow: hidden;
-      background: #161d2f; border: 1px solid var(--border);
-      position: relative; cursor: pointer; flex-shrink: 0;
-      display: grid; place-items: center; color: var(--text-muted);
-    }
-    .thumb-widescreen img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .thumb-widescreen:hover .thumb-play { opacity: 1; }
-
-    .longform-hero {
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.75), rgba(15, 23, 42, 0.95));
-      border: 1px solid rgba(56, 189, 248, 0.32);
-      border-radius: var(--radius);
-      padding: 22px 24px;
-      margin-bottom: 22px;
-      position: relative;
-      overflow: hidden;
-    }
-    .longform-hero::before {
-      content: "";
-      position: absolute; right: -80px; top: -80px; width: 340px; height: 340px;
-      background: radial-gradient(circle, rgba(56, 189, 248, 0.14) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .longform-player-container {
-      background: #000;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      position: relative;
-      aspect-ratio: 16 / 9;
-      width: 100%;
-      max-width: 860px;
-      margin: 0 auto 16px auto;
-      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55);
-      transition: max-width 0.25s ease, box-shadow 0.25s ease;
-    }
-    .longform-player-container.theater-mode {
-      max-width: 100% !important;
-      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85);
-    }
-    .longform-player-container video {
-      width: 100%; height: 100%; display: block; object-fit: contain; background: #000;
-    }
-
-    /* Story Showcase Cards Grid */
-    .lf-story-cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-      gap: 16px;
-      margin-bottom: 22px;
-    }
-    .lf-story-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      cursor: pointer;
-      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-    .lf-story-card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(56, 189, 248, 0.5);
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
-    }
-    .lf-story-card.active {
-      border-color: #38bdf8;
-      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.35), 0 14px 34px rgba(56, 189, 248, 0.15);
-      background: linear-gradient(180deg, rgba(14, 165, 233, 0.08) 0%, var(--card-bg) 100%);
-    }
-    .lf-card-thumb-wrap {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      background: #090d16;
-      overflow: hidden;
-    }
-    .lf-card-thumb-wrap img {
-      width: 100%; height: 100%; object-fit: cover;
-      transition: transform 0.3s ease;
-    }
-    .lf-story-card:hover .lf-card-thumb-wrap img {
-      transform: scale(1.04);
-    }
-    .lf-card-play-overlay {
-      position: absolute; inset: 0;
-      background: linear-gradient(0deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.45) 100%);
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0.85; transition: opacity 0.2s ease;
-    }
-    .lf-story-card:hover .lf-card-play-overlay {
-      opacity: 1;
-    }
-    .lf-card-play-btn {
-      width: 46px; height: 46px; border-radius: 50%;
-      background: rgba(56, 189, 248, 0.95);
-      color: #030712; display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.45);
-      transition: transform 0.2s ease, background 0.2s ease;
-    }
-    .lf-story-card:hover .lf-card-play-btn {
-      transform: scale(1.1);
-      background: #38bdf8;
-    }
-    .lf-card-badge-top {
-      position: absolute; top: 10px; left: 10px;
-      background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(4px);
-      border: 1px solid rgba(255,255,255,0.12);
-      padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; color: #fff;
-    }
-    .lf-card-badge-dur {
-      position: absolute; bottom: 8px; right: 8px;
-      background: rgba(0, 0, 0, 0.85);
-      padding: 3px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; color: #e2e8f0; font-family: monospace;
-    }
-    .lf-card-body {
-      padding: 14px 16px;
-      display: flex; flex-direction: column; flex-grow: 1;
-    }
-    .lf-card-title {
-      font-size: 0.95rem; font-weight: 800; color: #fff; line-height: 1.35; margin-bottom: 6px;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-    }
-    .lf-card-desc {
-      font-size: 0.78rem; color: var(--text-muted); line-height: 1.45; margin-bottom: 12px;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-    }
-    .lf-card-footer {
-      margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px;
-      border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;
-    }
-
-    /* Cinema Bar & Controls */
-    .lf-cinema-bar {
-      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
-      padding: 10px 14px; background: #070a12; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 14px;
-    }
-    .lf-cinema-controls {
-      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-    }
-    .lf-speed-btn {
-      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-      color: var(--text-secondary); padding: 4px 9px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .lf-speed-btn.active, .lf-speed-btn:hover {
-      background: var(--cyan); color: #000; border-color: var(--cyan);
-    }
-    .lf-ctrl-btn {
-      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-      color: #fff; padding: 5px 11px; border-radius: 6px; font-size: 0.76rem; font-weight: 700; cursor: pointer;
-      display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s ease;
-    }
-    .lf-ctrl-btn:hover {
-      background: rgba(56, 189, 248, 0.15); border-color: var(--cyan); color: var(--cyan);
-    }
-
-    /* Interactive Chapter Timeline Bar */
-    .lf-chapter-timeline {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 6px;
-      margin: 12px auto 16px auto;
-      max-width: 860px;
-      transition: max-width 0.25s ease;
-    }
-    .longform-player-container.theater-mode ~ .lf-chapter-timeline {
-      max-width: 100% !important;
-    }
-    .lf-timeline-seg {
-      background: #0b101c;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 7px 9px;
-      cursor: pointer;
-      transition: all 0.18s ease;
-      text-align: left;
-    }
-    .lf-timeline-seg:hover {
-      background: #111a2e;
-      border-color: var(--cyan);
-      transform: translateY(-2px);
-    }
-    .lf-timeline-seg.active {
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(16, 185, 129, 0.12));
-      border-color: var(--cyan);
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
-    }
-    .lf-seg-num {
-      font-size: 0.68rem; font-weight: 800; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.04em;
-    }
-    .lf-seg-title {
-      font-size: 0.75rem; font-weight: 700; color: #fff; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .lf-seg-time {
-      font-size: 0.67rem; color: var(--text-muted); font-family: monospace; margin-top: 2px;
-    }
-
-    .chapter-card {
-      background: var(--card-inset);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px 16px;
-      transition: all 0.15s ease;
-      margin-bottom: 12px;
-    }
-    .chapter-card:hover {
-      border-color: var(--border-strong);
-      background: #0d1424;
-    }
-    .chapter-card.rendered {
-      border-left: 4px solid #10b981;
-    }
-    .chapter-card.audio-ready {
-      border-left: 4px solid #38bdf8;
-    }
-    .chapter-header {
-      display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; flex-wrap: wrap;
-    }
-    .chapter-body {
-      margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .storyboard-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 14px;
-    }
-    .storyboard-item {
-      background: var(--card-inset);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.15s ease, border-color 0.15s ease;
-    }
-    .storyboard-item:hover {
-      transform: translateY(-2px);
-      border-color: var(--cyan);
-    }
-    .storyboard-item img {
-      width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block;
-    }
-    .storyboard-item .sb-caption {
-      padding: 8px 12px; font-size: 0.78rem; font-weight: 600; color: #e2e8f0;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-
     .lib-video-cell { display: flex; align-items: center; gap: 12px; min-width: 280px; }
     .lib-thumb {
-      width: 80px; height: 50px; border-radius: 8px; overflow: hidden;
+      width: 50px; height: 80px; aspect-ratio: 9/16; border-radius: 8px; overflow: hidden;
       background: #161d2f; border: 1px solid var(--border);
       position: relative; flex-shrink: 0; cursor: pointer; display: grid; place-items: center;
     }
@@ -649,7 +397,7 @@
       align-items: center; justify-content: center; min-height: 360px; margin-top: 12px;
     }
     .preview-video {
-      width: 100%; max-height: 360px; border-radius: 10px; background: #000;
+      aspect-ratio: 9/16; width: 100%; max-width: 270px; max-height: 480px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); border-radius: 10px; background: #000;
       border: 1px solid var(--border);
     }
 
@@ -958,7 +706,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>
         </div>
         <div class="kpi-val" id="kpiUploads">0</div>
-        <div class="kpi-sub" id="kpiUploadsSub">Shorts: 0  |  Long: 0</div>
+        <div class="kpi-sub" id="kpiUploadsSub">100% 9:16 Shorts</div>
       </div>
 
       <div class="kpi-card kpi-emerald">
@@ -975,16 +723,8 @@
     <nav class="main-tabs" role="tablist">
       <button class="main-tab active" id="tabBtn-manager" onclick="switchTab('manager')" role="tab">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>
-        <span>Video Manager</span>
+        <span>Shorts Manager</span>
         <span class="tab-pill" id="tabQueueBadge">0</span>
-      </button>
-
-      <button class="main-tab" id="tabBtn-longform" onclick="switchTab('longform')" role="tab">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-        </svg>
-        <span>Long-Form Videos</span>
-        <span class="tab-pill" id="tabLongformBadge" style="background:rgba(56,189,248,0.18);color:#7dd3fc;">1 Ready</span>
       </button>
 
       <button class="main-tab" id="tabBtn-upload" onclick="switchTab('upload')" role="tab">
@@ -1080,220 +820,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- TAB: LONG-FORM VIDEOS (16:9 Widescreen Studio)               -->
-    <!-- ============================================================ -->
-    <section class="tab-panel" id="panel-longform">
-      <!-- Hero Header & Studio Status -->
-      <div class="longform-hero">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;position:relative;z-index:2;">
-          <div style="max-width:760px;">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
-              <span class="badge badge-cyan" style="font-weight:700;letter-spacing:0.04em;">16:9 FULL HD STUDIO</span>
-              <span class="badge badge-emerald">Twice-Weekly Automation Armed</span>
-              <span class="badge badge-muted" id="lfStorageBadge">D:\faceless-longform (314 GB Free)</span>
-            </div>
-            <h2 style="font-size:1.55rem;font-weight:800;color:#fff;margin-bottom:8px;letter-spacing:-0.02em;">Long-Form 3D Storytelling &amp; Documentaries</h2>
-            <p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.55;margin:0;">
-              Full-length 10–15 minute cinematic true stories rendered in high-graphics 1080p widescreen (1920×1080 @ 24fps). Scheduled to drop every <strong>Tuesday &amp; Friday at 8:00 PM IST</strong> on <em>Animated_Crew</em>, with automated Google Drive backup and local D: drive storage protection.
-            </p>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
-            <button class="btn btn-sm btn-outline-cyan" onclick="syncLongformToCloud()" id="btnLfCloudSync">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              <span id="lfSyncBtnLabel">Google Drive Cloud Sync</span>
-            </button>
-            <div style="font-size:0.73rem;color:var(--text-muted);text-align:right;">Zero C: Drive Impact · Pure D: Storage</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Long-Form Studio KPI Metrics -->
-      <div class="kpi-grid" style="margin-bottom:20px;">
-        <div class="kpi-card kpi-cyan">
-          <div class="kpi-top">
-            <span class="kpi-label">Active Long-Form Story</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          </div>
-          <div class="kpi-val" style="font-size:1.15rem;line-height:1.3;" id="lfStoryTitle">The Great Imposter</div>
-          <div class="kpi-sub" id="lfStorySub">Ferdinand Waldo Demara · 5 Acts</div>
-        </div>
-
-        <div class="kpi-card kpi-emerald">
-          <div class="kpi-top">
-            <span class="kpi-label">Rendered Master</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          </div>
-          <div class="kpi-val" id="lfRenderedVal">Act 1 (1080p)</div>
-          <div class="kpi-sub" id="lfRenderedSub">25.5 MB · 78.4s · 24 fps Widescreen</div>
-        </div>
-
-        <div class="kpi-card kpi-purple">
-          <div class="kpi-top">
-            <span class="kpi-label">Release Schedule</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          </div>
-          <div class="kpi-val">Tue &amp; Fri 8 PM</div>
-          <div class="kpi-sub">Twice Weekly · Automated Drops</div>
-        </div>
-
-        <div class="kpi-card kpi-red">
-          <div class="kpi-top">
-            <span class="kpi-label">Narration Audio Built</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-          </div>
-          <div class="kpi-val" id="lfAudioVal">5 / 5 Acts Ready</div>
-          <div class="kpi-sub" id="lfAudioSub">574s spoken audio (~15m runtime)</div>
-        </div>
-      </div>
-
-      <!-- Interactive Story Cards Showcase -->
-      <div style="margin-bottom:20px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
-          <div>
-            <div style="font-size:1.05rem;font-weight:800;color:#fff;display:flex;align-items:center;gap:8px;">
-              <span>Select Documentary Story</span>
-              <span class="badge badge-cyan" id="lfStoryCountHint">3 Stories in Library</span>
-            </div>
-            <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">Click any card to play the master video, inspect chapter scripts, and listen to voice tracks.</div>
-          </div>
-          <div class="filter-pills" id="lfStorySelector" style="display:inline-flex;gap:6px;flex-wrap:wrap;"></div>
-        </div>
-
-        <div class="lf-story-cards-grid" id="lfStoryCardsGrid">
-          <div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:24px;">Loading story cards...</div>
-        </div>
-      </div>
-
-      <!-- Featured Master Cinema Player -->
-      <div class="panel">
-        <div class="panel-head" style="margin-bottom:12px;">
-          <div>
-            <div class="panel-title" id="lfPlayerTitle">Master Video Player: The Great Imposter (Act 1)</div>
-            <div class="panel-sub" id="lfPlayerSub">1920×1080 16:9 Widescreen · Three.js 3D Scene · Kokoro AI Voice · Synchronized Word Captions</div>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            <button class="lf-ctrl-btn" onclick="toggleTheaterMode()" id="btnTheaterToggle" title="Toggle Theater Full-Width Mode">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-              <span id="theaterToggleLabel">Theater Mode</span>
-            </button>
-            <a class="btn btn-sm btn-emerald" id="btnLfDownload" href="/media-longform/ferdinand-demara-great-imposter/renders/ch1.mp4" download="ferdinand-demara-ch1-1080p.mp4">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              <span id="btnLfDownloadLabel">Download MP4 (1080p)</span>
-            </a>
-            <button class="btn btn-sm btn-outline-cyan" onclick="openLongformUploadModal()" title="View Metadata, Chapters and Upload Options">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
-              <span>Upload Kit &amp; Chapters</span>
-            </button>
-            <button class="btn btn-sm btn-crimson" onclick="triggerActiveLongformUpload()" title="Publish Current Long-Form Story Directly to YouTube">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-              <span>🚀 Publish Long-Form Now</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Cinema Bar Controls -->
-        <div class="lf-cinema-bar">
-          <div class="lf-cinema-controls">
-            <span style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-right:4px;">Speed:</span>
-            <button class="lf-speed-btn" onclick="setPlaybackSpeed(0.75, this)">0.75x</button>
-            <button class="lf-speed-btn active" onclick="setPlaybackSpeed(1.0, this)">1.0x</button>
-            <button class="lf-speed-btn" onclick="setPlaybackSpeed(1.25, this)">1.25x</button>
-            <button class="lf-speed-btn" onclick="setPlaybackSpeed(1.5, this)">1.5x</button>
-            <button class="lf-speed-btn" onclick="setPlaybackSpeed(2.0, this)">2.0x</button>
-          </div>
-          <div class="lf-cinema-controls">
-            <button class="lf-ctrl-btn" onclick="seekVideoRel(-10)" title="Rewind 10 seconds">↺ -10s</button>
-            <button class="lf-ctrl-btn" onclick="seekVideoRel(10)" title="Forward 10 seconds">↻ +10s</button>
-            <button class="lf-ctrl-btn" onclick="jumpToChapter(1)" title="Restart Act 1">Act 1</button>
-            <button class="lf-ctrl-btn" onclick="togglePlayPause()" id="btnPlayPause">▶ Play</button>
-          </div>
-        </div>
-
-        <!-- Main Video Container -->
-        <div class="longform-player-container" id="lfPlayerContainer">
-          <video id="lfMainVideo" src="/media-longform/ferdinand-demara-great-imposter/renders/ch1.mp4" controls preload="metadata" poster="/media-longform/ferdinand-demara-great-imposter/review/ch1/t15.00.jpg"></video>
-        </div>
-
-        <!-- Interactive Chapter Timeline Bar -->
-        <div style="margin-top:4px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;max-width:860px;margin-left:auto;margin-right:auto;" id="lfTimelineHeader">
-            <span style="font-size:0.74rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;">Interactive Multi-Act Timeline (Click to Jump)</span>
-            <span class="mono" style="font-size:0.72rem;color:var(--cyan);" id="lfTimelineDur">~15 Minutes Total</span>
-          </div>
-          <div class="lf-chapter-timeline" id="lfChapterTimeline">
-            <!-- Timeline segments rendered here -->
-          </div>
-        </div>
-      </div>
-
-      <!-- 5-Chapter Multi-Act Storyline Breakdown -->
-      <div class="panel">
-        <div class="panel-head">
-          <div>
-            <div class="panel-title" id="lfChaptersTitle">Multi-Act Storyline Breakdown (5 Chapters · ~15 Minutes)</div>
-            <div class="panel-sub" id="lfChaptersSub">The Fake Surgeon Who Performed Operations on Warships (Ferdinand Waldo Demara)</div>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <span class="badge badge-cyan" id="lfChaptersBadge">5 Acts Total</span>
-          </div>
-        </div>
-
-        <div id="lfChapterList">
-          <div style="color:var(--text-muted);font-size:0.85rem;padding:12px 0;">Loading storyline chapters...</div>
-        </div>
-      </div>
-
-      <!-- 16:9 Storyboard QA Frames -->
-      <div class="panel">
-        <div class="panel-head">
-          <div>
-            <div class="panel-title">16:9 Storyboard QA Frames (1080p 3D High Graphics)</div>
-            <div class="panel-sub">Sample frames captured directly from the Three.js 3D rendering pipeline for quality inspection. Click any frame to inspect in full HD.</div>
-          </div>
-          <span class="badge badge-muted">6 Review Keyframes</span>
-        </div>
-
-        <div class="storyboard-grid" id="lfStoryboardGrid">
-          <div style="color:var(--text-muted);font-size:0.85rem;padding:12px 0;">Loading storyboard frames...</div>
-        </div>
-      </div>
-
-      <!-- Long-Form Pipeline & Storage Architecture Info -->
-      <div class="panel">
-        <div class="panel-head">
-          <div>
-            <div class="panel-title">Long-Form Pipeline &amp; Storage Architecture</div>
-            <div class="panel-sub">Isolated storage strategy designed to never consume C: drive space while streaming to YouTube &amp; Google Drive</div>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;">
-          <div style="background:var(--card-inset);border:1px solid var(--border);border-radius:10px;padding:14px;">
-            <div style="font-size:0.75rem;font-weight:700;color:var(--cyan);text-transform:uppercase;margin-bottom:6px;">Storage Isolation</div>
-            <div style="font-size:0.95rem;font-weight:700;color:#fff;margin-bottom:4px;">D:\faceless-longform (314 GB Free)</div>
-            <div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.45;">
-              All heavy 1080p video renders, WAV audio stems, and review frames are written exclusively to the D: drive, ensuring primary system C: drive storage remains untouched.
-            </div>
-          </div>
-          <div style="background:var(--card-inset);border:1px solid var(--border);border-radius:10px;padding:14px;">
-            <div style="font-size:0.75rem;font-weight:700;color:var(--emerald);text-transform:uppercase;margin-bottom:6px;">Cloud Archival</div>
-            <div style="font-size:0.95rem;font-weight:700;color:#fff;margin-bottom:4px;">Google Drive Storage Sync</div>
-            <div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.45;">
-              Master renders and metadata automatically archive to Google Drive cloud storage upon completion, creating redundant cloud backups for global review.
-            </div>
-          </div>
-          <div style="background:var(--card-inset);border:1px solid var(--border);border-radius:10px;padding:14px;">
-            <div style="font-size:0.75rem;font-weight:700;color:var(--purple);text-transform:uppercase;margin-bottom:6px;">Autonomous Release Cadence</div>
-            <div style="font-size:0.95rem;font-weight:700;color:#fff;margin-bottom:4px;">Twice Weekly: Tue &amp; Fri @ 8:00 PM IST</div>
-            <div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.45;">
-              Long-form stories are released every Tuesday and Friday evening. Daily 7:00 PM IST Shorts continue publishing autonomously without interference.
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- TAB 2: MANUAL UPLOAD STUDIO                                  -->
+    <!-- TAB 2: MANUAL UPLOAD STUDIO (9:16 Shorts)                    -->
     <!-- ============================================================ -->
     <section class="tab-panel" id="panel-upload">
       <div class="upload-studio-grid">
@@ -1302,25 +829,25 @@
           <div class="panel-head" style="margin-bottom:12px;">
             <div>
               <div class="panel-title">Select Video Source</div>
-              <div class="panel-sub">Publish 15-minute long-form stories or viral Shorts, or upload your own local MP4 file.</div>
+              <div class="panel-sub">Publish queued viral Shorts or stage a custom 9:16 vertical MP4 file directly to YouTube.</div>
             </div>
           </div>
 
           <div class="mode-switch">
             <button type="button" class="mode-btn active" id="tabQueuedBtn" onclick="setManualMode('queued')">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>
-              <span>Library Video (Long-Form &amp; Shorts)</span>
+              <span>Library Shorts</span>
             </button>
             <button type="button" class="mode-btn" id="tabCustomBtn" onclick="setManualMode('custom')">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              <span>Custom MP4 File (Up to 15 Mins)</span>
+              <span>Custom Vertical MP4 File</span>
             </button>
           </div>
 
           <div id="queuedSelectWrap">
             <div class="form-group">
               <div class="form-label">
-                <span>Select Project</span>
+                <span>Select Short</span>
                 <span class="mono" id="selectedMp4Info" style="color:var(--emerald);"></span>
               </div>
               <select class="form-control" id="manualSlugSelect" onchange="onManualSlugChanged(false)"></select>
@@ -1331,8 +858,8 @@
             <label class="dropzone" for="manualFileInput" id="customDropzone">
               <input type="file" id="manualFileInput" accept="video/mp4,video/quicktime,video/webm,video/x-matroska,.mp4,.mov,.mkv,.webm" style="display:none;" onclick="this.value=''" onchange="onCustomFileSelected(this)" />
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9aa5b8" stroke-width="1.8" style="margin-bottom:8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              <div id="customFileDropText" style="font-weight:600;font-size:0.86rem;color:#fff;">Click or drop a local .mp4 / .mov / .webm file here (up to 1 GB)</div>
-              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Supports 15-minute long-form videos &amp; Shorts · Direct cloud staging with automatic YouTube upload via Zapier</div>
+              <div id="customFileDropText" style="font-weight:600;font-size:0.86rem;color:#fff;">Click or drop a local 9:16 vertical Short (.mp4 / .mov / .webm)</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">9:16 YouTube Shorts (1080×1920) · Direct cloud staging with automatic YouTube upload via Zapier</div>
             </label>
           </div>
 
@@ -2237,44 +1764,28 @@
       document.getElementById("titleCharCount").textContent = `${val.length} / 100`;
     }
 
-    function populateManualSelector(projects, lfQueue = null) {
+    function populateManualSelector(projects) {
       const select = document.getElementById("manualSlugSelect");
       if (!select) return;
       const prev = select.value;
-      const queueList = (lfQueue || currentLongformData?.queue || []);
-      const lfUploadable = queueList.filter(q => q.status !== "published");
       const shortUploadable = (projects || []).filter(p => !p.is_posted);
 
-      if (!lfUploadable.length && !shortUploadable.length) {
-        select.innerHTML = `<option value="">No queued videos available</option>`;
+      if (!shortUploadable.length) {
+        select.innerHTML = `<option value="">No queued Shorts available</option>`;
         return;
       }
 
-      let html = "";
-      if (lfUploadable.length > 0) {
-        html += `<optgroup label="🎬 Long-Form 15-Min Stories (16:9 Widescreen)">`;
-        html += lfUploadable.map(q => {
-          const readyTag = (q.mp4_ready ?? Boolean(q.mp4_file)) ? `${q.size_mb || q.mp4_size_mb || 25} MB · 1080p` : "Audio Ready";
-          return `<option value="${escapeHtml(q.slug)}">🎬 ${escapeHtml(q.title)} (${readyTag})</option>`;
-        }).join("");
-        html += `</optgroup>`;
-      }
-
-      if (shortUploadable.length > 0) {
-        html += `<optgroup label="📱 Viral Shorts (9:16 Vertical)">`;
-        html += shortUploadable.map(p => {
-          const qTag = p.queue_order ? `#${p.queue_order} · ` : "";
-          const readyTag = p.ready_to_upload ? `${p.mp4_size_mb} MB` : "Rendering";
-          return `<option value="${escapeHtml(p.slug)}">${qTag}${escapeHtml(p.title)} (${readyTag})</option>`;
-        }).join("");
-        html += `</optgroup>`;
-      }
+      let html = `<optgroup label="📱 Viral Shorts (9:16 Vertical · 1080×1920)">`;
+      html += shortUploadable.map(p => {
+        const qTag = p.queue_order ? `#${p.queue_order} · ` : "";
+        const readyTag = p.ready_to_upload ? `${p.mp4_size_mb} MB` : "Rendering";
+        return `<option value="${escapeHtml(p.slug)}">${qTag}${escapeHtml(p.title)} (${readyTag})</option>`;
+      }).join("");
+      html += `</optgroup>`;
 
       select.innerHTML = html;
-      if (prev && (lfUploadable.some(q => q.slug === prev) || shortUploadable.some(p => p.slug === prev))) {
+      if (prev && shortUploadable.some(p => p.slug === prev)) {
         select.value = prev;
-      } else if (lfUploadable.length > 0) {
-        select.value = lfUploadable[0].slug;
       } else if (shortUploadable.length > 0) {
         select.value = shortUploadable[0].slug;
       }
@@ -2708,9 +2219,8 @@
       document.getElementById("kpiViewsSub").textContent = `${fmtNum(newLikes)} likes · ${fmtNum(newComments)} comments · ${s.engagement_rate || 0}% rate`;
 
       const shortsCount = s.shorts_count ?? s.total_videos ?? 0;
-      const longCount = s.long_count ?? 0;
       document.getElementById("kpiUploads").textContent = fmtNum(s.total_videos || 0);
-      document.getElementById("kpiUploadsSub").textContent = `Shorts: ${shortsCount}  |  Long: ${longCount}`;
+      document.getElementById("kpiUploadsSub").textContent = `${shortsCount} Published Shorts`;
 
       document.getElementById("kpiQueue").textContent = fmtNum(qs.queued_count || 0);
       document.getElementById("kpiQueueSub").textContent = nextUp
@@ -3124,538 +2634,6 @@
       if (sa.analytics_lag_note) document.getElementById("studioLagNote").textContent = sa.analytics_lag_note;
       if (sa.studio_channel_url) document.getElementById("studioChannelLink").href = sa.studio_channel_url;
       if (sa.studio_realtime_url) document.getElementById("studioRealtimeLink").href = sa.studio_realtime_url;
-    }
-
-    /* ============================================================ */
-    /* Render Long-Form Videos Section                              */
-    /* ============================================================ */
-    let currentLongformData = null;
-    let expandedChapters = {};
-    let selectedStoryIndex = 0;
-
-    function selectLongformStory(idx) {
-      selectedStoryIndex = idx;
-      if (currentLongformData) renderLongform(currentLongformData);
-    }
-
-    function toggleChapterDetails(chNum) {
-      expandedChapters[chNum] = !expandedChapters[chNum];
-      const bodyEl = document.getElementById(`chBody-${chNum}`);
-      const iconEl = document.getElementById(`chIcon-${chNum}`);
-      if (bodyEl) bodyEl.style.display = expandedChapters[chNum] ? "block" : "none";
-      if (iconEl) iconEl.style.transform = expandedChapters[chNum] ? "rotate(180deg)" : "rotate(0deg)";
-    }
-
-    function toggleTheaterMode() {
-      const c = document.getElementById("lfPlayerContainer");
-      const lbl = document.getElementById("theaterToggleLabel");
-      if (!c) return;
-      c.classList.toggle("theater-mode");
-      const isTheater = c.classList.contains("theater-mode");
-      if (lbl) lbl.textContent = isTheater ? "Normal View" : "Theater Mode";
-      if (isTheater) {
-        c.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }
-
-    function setPlaybackSpeed(speed, btnEl) {
-      const vid = document.getElementById("lfMainVideo");
-      if (vid) vid.playbackRate = speed;
-      document.querySelectorAll(".lf-speed-btn").forEach(b => b.classList.remove("active"));
-      if (btnEl) btnEl.classList.add("active");
-    }
-
-    function seekVideoRel(sec) {
-      const vid = document.getElementById("lfMainVideo");
-      if (vid) {
-        vid.currentTime = Math.max(0, Math.min(vid.duration || 9999, vid.currentTime + sec));
-      }
-    }
-
-    function togglePlayPause() {
-      const vid = document.getElementById("lfMainVideo");
-      const btn = document.getElementById("btnPlayPause");
-      if (!vid) return;
-      if (vid.paused) {
-        vid.play();
-        if (btn) btn.innerHTML = "⏸ Pause";
-      } else {
-        vid.pause();
-        if (btn) btn.innerHTML = "▶ Play";
-      }
-    }
-
-    function jumpToChapter(chNum) {
-      const vid = document.getElementById("lfMainVideo");
-      if (vid) {
-        vid.currentTime = 0;
-        vid.play().catch(() => {});
-      }
-      expandedChapters[chNum] = true;
-      const bodyEl = document.getElementById(`chBody-${chNum}`);
-      const iconEl = document.getElementById(`chIcon-${chNum}`);
-      if (bodyEl) bodyEl.style.display = "block";
-      if (iconEl) iconEl.style.transform = "rotate(180deg)";
-      document.querySelectorAll(".lf-timeline-seg").forEach((seg, idx) => {
-        if (idx === chNum - 1) seg.classList.add("active");
-        else seg.classList.remove("active");
-      });
-      document.getElementById(`chBody-${chNum}`)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
-
-    function renderLongform(lf) {
-      currentLongformData = lf || {};
-      const stories = lf?.stories || [];
-      const queue = lf?.queue || [];
-      const sched = lf?.schedule || {};
-
-      if (selectedStoryIndex >= stories.length) selectedStoryIndex = 0;
-      const activeStory = stories[selectedStoryIndex] || stories[0] || (queue[0] ? { title: queue[0].title, slug: queue[0].slug } : null);
-
-      // 1. Story Showcase Cards Grid
-      const cardsContainer = document.getElementById("lfStoryCardsGrid");
-      if (cardsContainer && stories.length > 0) {
-        cardsContainer.innerHTML = stories.map((s, idx) => {
-          const isActive = idx === selectedStoryIndex;
-          const hasMp4 = s.has_render;
-          const thumb = s.thumb_url || (s.preview_frames && s.preview_frames[0]) || "";
-          const durLabel = s.duration_sec ? `${Math.round(s.duration_sec)}s` : `${s.target_duration_mins || 15}m`;
-          const statusPill = hasMp4
-            ? `<span class="badge badge-emerald" style="font-size:0.68rem;padding:2px 8px;">1080p Master Ready</span>`
-            : `<span class="badge badge-cyan" style="font-size:0.68rem;padding:2px 8px;">Voice Tracks Ready</span>`;
-          const topicBadge = s.slug.includes("vijayanagara")
-            ? "🏛️ Vijayanagara Empire"
-            : (s.slug.includes("victor-lustig") ? "🗼 Eiffel Tower Con" : "🚢 The Great Imposter");
-
-          return `
-            <div class="lf-story-card ${isActive ? 'active' : ''}" onclick="selectLongformStory(${idx}); document.getElementById('lfPlayerContainer')?.scrollIntoView({behavior:'smooth',block:'nearest'});">
-              <div class="lf-card-thumb-wrap">
-                <img src="${escapeHtml(thumb)}" alt="${escapeHtml(s.title)}" loading="lazy" />
-                <div class="lf-card-play-overlay">
-                  <div class="lf-card-play-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  </div>
-                </div>
-                <div class="lf-card-badge-top">${escapeHtml(topicBadge)}</div>
-                <div class="lf-card-badge-dur">${durLabel} · ${s.total_chapters || 5} Acts</div>
-              </div>
-              <div class="lf-card-body">
-                <div class="lf-card-title">${escapeHtml(s.title)}</div>
-                <div class="lf-card-desc">${escapeHtml(s.topic || s.title)}</div>
-                <div class="lf-card-footer" style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
-                  <div>${statusPill}</div>
-                  <div style="display:flex;gap:6px;align-items:center;">
-                    <button class="btn btn-xs btn-outline-crimson" style="padding:2px 8px;font-size:0.72rem;font-weight:700;" onclick="event.stopPropagation(); triggerLongformUpload('${escapeHtml(s.slug)}')">🚀 Upload</button>
-                    <span style="font-size:0.72rem;font-weight:700;color:${isActive ? 'var(--cyan)' : 'var(--text-muted)'};">
-                      ${isActive ? '● Playing' : 'Play →'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `;
-        }).join("");
-      }
-
-      // 2. Filter Pills Selector
-      const selContainer = document.getElementById("lfStorySelector");
-      const countHint = document.getElementById("lfStoryCountHint");
-      if (selContainer && stories.length > 0) {
-        selContainer.innerHTML = stories.map((s, idx) => `
-          <button class="filter-pill ${idx === selectedStoryIndex ? 'active' : ''}" onclick="selectLongformStory(${idx})">
-            ${escapeHtml(s.title || s.slug)}
-          </button>
-        `).join("");
-        if (countHint) countHint.textContent = `${stories.length} Stories in Library`;
-      }
-
-      // 3. Navigation Tab Badge
-      const tabBadge = document.getElementById("tabLongformBadge");
-      if (tabBadge) {
-        if (stories.length > 0) {
-          const renderedCount = stories.filter(s => s.has_render).length;
-          tabBadge.textContent = renderedCount > 0 ? `${renderedCount} Ready` : `${stories.length} Story`;
-        } else {
-          tabBadge.textContent = "Tue & Fri";
-        }
-      }
-
-      // 4. Storage badge
-      const stBadge = document.getElementById("lfStorageBadge");
-      if (stBadge && sched.storage_location) {
-        stBadge.textContent = `${sched.storage_location}`;
-      }
-
-      // 5. Titles & Subtitles
-      const pTitle = document.getElementById("lfPlayerTitle");
-      if (pTitle && activeStory) {
-        pTitle.textContent = `Master Video Player: ${activeStory.title} (Act 1)`;
-      }
-      const pSub = document.getElementById("lfPlayerSub");
-      if (pSub && activeStory) {
-        pSub.textContent = `1920×1080 16:9 Widescreen · Three.js 3D Scene · Kokoro AI Voice · Synchronized Word Captions`;
-      }
-      const chTitle = document.getElementById("lfChaptersTitle");
-      if (chTitle && activeStory) {
-        chTitle.textContent = `Multi-Act Storyline Breakdown (${activeStory.total_chapters || 5} Chapters · ~15 Minutes)`;
-      }
-      const chSub = document.getElementById("lfChaptersSub");
-      if (chSub && activeStory) {
-        chSub.textContent = activeStory.topic || activeStory.title;
-      }
-
-      // 6. KPIs
-      if (activeStory) {
-        const titleEl = document.getElementById("lfStoryTitle");
-        if (titleEl) titleEl.textContent = activeStory.title || "The Great Imposter";
-        const subEl = document.getElementById("lfStorySub");
-        if (subEl) subEl.textContent = `${activeStory.topic || activeStory.title} · ${activeStory.total_chapters || 5} Acts`;
-      }
-
-      const rendVal = document.getElementById("lfRenderedVal");
-      const rendSub = document.getElementById("lfRenderedSub");
-      if (activeStory && activeStory.has_render) {
-        if (rendVal) rendVal.textContent = "Act 1 Master (1080p)";
-        if (rendSub) rendSub.textContent = `${activeStory.mp4_size_mb || 25.5} MB · ${activeStory.duration_sec || 78.4}s · 24 fps`;
-      } else {
-        if (rendVal) rendVal.textContent = "In Pipeline";
-        if (rendSub) rendSub.textContent = "Narration audio ready";
-      }
-
-      const audioVal = document.getElementById("lfAudioVal");
-      const audioSub = document.getElementById("lfAudioSub");
-      if (activeStory && activeStory.chapters) {
-        const audioCount = activeStory.chapters.filter(c => c.status === "audio_ready" || c.status === "rendered").length;
-        if (audioVal) audioVal.textContent = `${audioCount} / ${activeStory.chapters.length} Acts Built`;
-        const totalDur = activeStory.chapters.reduce((acc, c) => acc + (c.duration_sec || 0), 0);
-        if (audioSub) audioSub.textContent = `${Math.round(totalDur)}s spoken audio (~15m runtime)`;
-      }
-
-      // 7. Main Video Player setup
-      const vidEl = document.getElementById("lfMainVideo");
-      const dlBtn = document.getElementById("btnLfDownload");
-      const dlLbl = document.getElementById("btnLfDownloadLabel");
-      if (activeStory && activeStory.mp4_url) {
-        if (vidEl && vidEl.getAttribute("src") !== activeStory.mp4_url) {
-          vidEl.src = activeStory.mp4_url;
-        }
-        if (activeStory.thumb_url && vidEl) {
-          vidEl.poster = activeStory.thumb_url;
-        }
-        if (dlBtn) {
-          dlBtn.href = activeStory.mp4_url;
-          dlBtn.download = activeStory.mp4_name || `${activeStory.slug}-ch1.mp4`;
-          dlBtn.style.display = "inline-flex";
-          if (dlLbl) dlLbl.textContent = `Download MP4 (${activeStory.mp4_size_mb || 25} MB)`;
-        }
-      } else if (vidEl) {
-        vidEl.removeAttribute("src");
-        if (activeStory && activeStory.thumb_url) vidEl.poster = activeStory.thumb_url;
-        if (dlBtn) dlBtn.style.display = "none";
-      }
-
-      // Sync play/pause button state with video
-      if (vidEl && !vidEl._boundEvents) {
-        vidEl._boundEvents = true;
-        vidEl.addEventListener("play", () => {
-          const btn = document.getElementById("btnPlayPause");
-          if (btn) btn.innerHTML = "⏸ Pause";
-        });
-        vidEl.addEventListener("pause", () => {
-          const btn = document.getElementById("btnPlayPause");
-          if (btn) btn.innerHTML = "▶ Play";
-        });
-      }
-
-      // 8. Interactive Chapter Timeline Bar
-      const tlContainer = document.getElementById("lfChapterTimeline");
-      if (tlContainer && activeStory && activeStory.chapters) {
-        tlContainer.innerHTML = activeStory.chapters.map((ch, cIdx) => {
-          const isAct1 = ch.chapter === 1;
-          const dur = ch.duration_sec ? `${Math.round(ch.duration_sec)}s` : "3m";
-          return `
-            <div class="lf-timeline-seg ${isAct1 ? 'active' : ''}" onclick="jumpToChapter(${ch.chapter})" title="Act ${ch.chapter}: ${escapeHtml(ch.title)} (${dur})">
-              <div class="lf-seg-num">Act ${ch.chapter}</div>
-              <div class="lf-seg-title">${escapeHtml(ch.title)}</div>
-              <div class="lf-seg-time">${dur} · ${ch.status === 'rendered' ? '1080p MP4' : 'Voice Track'}</div>
-            </div>
-          `;
-        }).join("");
-      }
-
-      // 9. Chapters List Breakdown
-      const chContainer = document.getElementById("lfChapterList");
-      if (chContainer && activeStory && activeStory.chapters) {
-        chContainer.innerHTML = activeStory.chapters.map(ch => {
-          const isRendered = ch.status === "rendered";
-          const hasAudio = Boolean(ch.narration_url);
-          const isExpanded = Boolean(expandedChapters[ch.chapter]);
-
-          let statusBadge = `<span class="badge badge-muted">Scripted</span>`;
-          if (isRendered) {
-            statusBadge = `<span class="badge badge-emerald">Rendered 1080p MP4</span>`;
-          } else if (hasAudio) {
-            statusBadge = `<span class="badge badge-cyan">Voice &amp; Timings Ready</span>`;
-          }
-
-          const linesPreview = (ch.script_lines || []).map((l, idx) => `
-            <div style="padding:6px 9px;margin-bottom:5px;border-radius:6px;background:rgba(255,255,255,0.02);font-size:0.79rem;color:#cbd5e1;">
-              <span style="font-family:monospace;color:var(--cyan);font-size:0.71rem;margin-right:8px;">#${idx+1}</span>
-              ${escapeHtml(l.text || l)}
-            </div>
-          `).join("");
-
-          return `
-            <div class="chapter-card ${isRendered ? 'rendered' : (hasAudio ? 'audio-ready' : '')}">
-              <div class="chapter-header" onclick="toggleChapterDetails(${ch.chapter})">
-                <div style="display:flex;align-items:center;gap:12px;min-width:0;">
-                  <span class="badge ${isRendered ? 'badge-emerald' : 'badge-cyan'}" style="font-weight:700;">Act ${ch.chapter}</span>
-                  <div>
-                    <div style="font-weight:700;color:#fff;font-size:0.92rem;">${escapeHtml(ch.title)}</div>
-                    <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">${escapeHtml(ch.summary || "")}</div>
-                  </div>
-                </div>
-
-                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                  <span class="mono" style="font-size:0.78rem;color:var(--text-secondary);">${fmtSecLabel(ch.duration_sec)}</span>
-                  ${statusBadge}
-                  <svg id="chIcon-${ch.chapter}" style="transform:${isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'};transition:transform 0.2s ease;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                </div>
-              </div>
-
-              <div class="chapter-body" id="chBody-${ch.chapter}" style="display:${isExpanded ? 'block' : 'none'};">
-                ${ch.narration_url ? `
-                  <div style="margin-bottom:12px;background:#060913;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                      <span style="font-size:0.76rem;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:0.04em;">Kokoro AI Voice Narration (Master Audio)</span>
-                      <span class="mono" style="font-size:0.74rem;color:var(--text-muted);">${fmtSecLabel(ch.duration_sec)}</span>
-                    </div>
-                    <audio controls src="${escapeHtml(ch.narration_url)}" style="width:100%;height:32px;"></audio>
-                  </div>
-                ` : ""}
-
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                  <span style="font-size:0.78rem;font-weight:700;color:var(--text-secondary);">Narration Script (${(ch.script_lines || []).length} Cuts)</span>
-                  <span class="mono" style="font-size:0.72rem;color:var(--text-muted);">Word Timings Aligned</span>
-                </div>
-                <div style="max-height:220px;overflow-y:auto;background:#05070e;border:1px solid var(--border);border-radius:8px;padding:8px;">
-                  ${linesPreview || '<div style="color:var(--text-muted);font-size:0.78rem;padding:8px;">No lines available.</div>'}
-                </div>
-              </div>
-            </div>
-          `;
-        }).join("");
-      }
-
-      // 10. Storyboard frames grid with custom labels
-      const sbGrid = document.getElementById("lfStoryboardGrid");
-      if (sbGrid) {
-        const frames = (activeStory?.preview_frames && activeStory.preview_frames.length)
-          ? activeStory.preview_frames
-          : [];
-        if (frames.length > 0) {
-          let frameLabels = [
-            "Scene 01: Establishing Shot",
-            "Scene 02: Narrative Turning Point",
-            "Scene 03: Character Confrontation",
-            "Scene 04: High Stakes Escalation",
-            "Scene 05: Climax Resolution",
-            "Scene 06: Final Legacy"
-          ];
-          if (activeStory.slug.includes("vijayanagara")) {
-            frameLabels = [
-              "Scene 01: 1336 CE Southern India Crisis",
-              "Scene 02: Sultan of Delhi Invades",
-              "Scene 03: Two Captive Brothers",
-              "Scene 04: The 700-Year Blunder",
-              "Scene 05: Sage on Tungabhadra",
-              "Scene 06: The Courageous Hare & Victory"
-            ];
-          } else if (activeStory.slug.includes("victor-lustig")) {
-            frameLabels = [
-              "Scene 01: Paris 1925 Hotel Suite",
-              "Scene 02: 7,000 Tons Scrap Order",
-              "Scene 03: The Tycoons Summoned",
-              "Scene 04: The Debonair Host",
-              "Scene 05: Forged Wax Seals",
-              "Scene 06: A King's Ransom"
-            ];
-          } else if (activeStory.slug.includes("ferdinand-demara")) {
-            frameLabels = [
-              "Scene 01: Korean Strait Sickbay",
-              "Scene 02: Demara Studying Manual",
-              "Scene 03: Surgical Ward Prep",
-              "Scene 04: Operating Under Pressure",
-              "Scene 05: The Miracle Extraction",
-              "Scene 06: Con Artist Resolution"
-            ];
-          }
-          sbGrid.innerHTML = frames.map((fUrl, idx) => {
-            const label = frameLabels[idx] || `Keyframe ${idx + 1}`;
-            return `
-              <div class="storyboard-item" onclick="openImageModal('${escapeHtml(fUrl)}', '${escapeHtml(label)}')">
-                <img src="${escapeHtml(fUrl)}" alt="${escapeHtml(label)}" loading="lazy" />
-                <div class="sb-caption">
-                  <span>${escapeHtml(label)}</span>
-                  <span class="mono" style="color:var(--cyan);font-size:0.72rem;">1080p 16:9</span>
-                </div>
-              </div>
-            `;
-          }).join("");
-        } else {
-          sbGrid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:24px;">Rendering storyboard frames...</div>`;
-        }
-      }
-    }
-
-    async function syncLongformToCloud() {
-      const btnLbl = document.getElementById("lfSyncBtnLabel");
-      if (btnLbl) btnLbl.textContent = "Syncing Google Drive...";
-      try {
-        const res = await fetch("/api/longform", { cache: "no-store" });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const lf = await res.json();
-        renderLongform(lf);
-        showToast("Long-form assets synchronized to Google Drive archive!");
-      } catch (err) {
-        showToast("Sync failed: " + err.message);
-      } finally {
-        if (btnLbl) btnLbl.textContent = "Google Drive Cloud Sync";
-      }
-    }
-
-    function openLongformUploadModal() {
-      const activeStory = currentLongformData?.stories?.[selectedStoryIndex] || currentLongformData?.stories?.[0];
-      const q = (currentLongformData?.queue || []).find(item => item.slug === activeStory?.slug) || currentLongformData?.queue?.[0] || {};
-      const meta = q.youtube_metadata || {
-        title: q.youtube_title || activeStory?.title || "Long-Form Video Documentary",
-        description: q.youtube_description || "Twice-weekly documentary story on Animated_Crew.",
-        tags: q.youtube_tags || ["Documentary", "TrueStory", "History"],
-        privacy_status: q.privacy_status || "public",
-        category_id: q.category_id || "27",
-      };
-
-      const title = meta.title || "Long-Form Video";
-      const desc = typeof meta.description === "string" ? meta.description.replace(/\\n/g, "\n") : "";
-      const tags = Array.isArray(meta.tags) ? meta.tags.join(", ") : (meta.tags || "");
-      const mp4Url = activeStory?.mp4_url || q.mp4_url || "";
-      const mp4Size = activeStory?.mp4_size_mb || q.size_mb || "--";
-
-      document.getElementById("modalTitle").textContent = `${activeStory?.title || "Long-Form Video"} — YouTube Upload Kit`;
-      document.getElementById("modalBody").innerHTML = `
-        <div class="script-modal-grid">
-          <div>
-            <div style="font-size:0.86rem;font-weight:700;color:#fff;margin-bottom:8px;">16:9 Widescreen Master Preview</div>
-            <div style="background:#000;border:1px solid var(--border);border-radius:10px;overflow:hidden;aspect-ratio:16/9;margin-bottom:12px;">
-              ${mp4Url ? `<video src="${escapeHtml(mp4Url)}" controls playsinline style="width:100%;height:100%;object-fit:contain;"></video>` : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);">Video rendering...</div>`}
-            </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              ${mp4Url ? `<a class="btn btn-sm" href="${escapeHtml(mp4Url)}" download="${escapeHtml(activeStory?.slug || 'video')}-ch1-1080p.mp4">Download Master MP4 (${mp4Size} MB)</a>` : ""}
-              <span class="badge badge-emerald" style="display:inline-flex;align-items:center;">1920×1080 @ 24 fps</span>
-            </div>
-          </div>
-
-          <div>
-            <div style="font-size:0.86rem;font-weight:700;color:#fff;margin-bottom:8px;">YouTube Video Metadata</div>
-            <div class="form-group">
-              <div class="form-label">
-                <span>Title</span>
-                <button type="button" class="btn btn-xs" onclick="copyText(document.getElementById('lfYtTitle').value, 'Title')">Copy</button>
-              </div>
-              <input class="form-control" id="lfYtTitle" value="${escapeHtml(title)}" />
-            </div>
-
-            <div class="form-group">
-              <div class="form-label">
-                <span>Description (with Chapters)</span>
-                <button type="button" class="btn btn-xs" onclick="copyText(document.getElementById('lfYtDesc').value, 'Description')">Copy</button>
-              </div>
-              <textarea class="form-control" id="lfYtDesc" style="min-height:120px;">${escapeHtml(desc)}</textarea>
-            </div>
-
-            <div class="form-group">
-              <div class="form-label">
-                <span>Tags</span>
-                <button type="button" class="btn btn-xs" onclick="copyText(document.getElementById('lfYtTags').value, 'Tags')">Copy</button>
-              </div>
-              <input class="form-control" id="lfYtTags" value="${escapeHtml(tags)}" />
-            </div>
-
-            <div style="display:flex;gap:8px;margin-top:14px;align-items:center;flex-wrap:wrap;">
-              <button type="button" class="btn btn-crimson" onclick="closeModal(); triggerLongformUpload('${escapeHtml(activeStory?.slug || '')}')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                <span>🚀 Publish Live to YouTube</span>
-              </button>
-              <button type="button" class="btn btn-outline-cyan" onclick="closeModal(); loadSlugIntoManualUploader('${escapeHtml(activeStory?.slug || '')}')">
-                <span>✏️ Open in Manual Studio</span>
-              </button>
-              <span class="badge badge-cyan" style="margin-left:auto;">16:9 Long-Form Master</span>
-            </div>
-          </div>
-        </div>
-      `;
-      document.getElementById("previewModal").classList.add("open");
-    }
-
-    function triggerActiveLongformUpload() {
-      const activeStory = currentLongformData?.stories?.[selectedStoryIndex] || currentLongformData?.stories?.[0];
-      if (activeStory && activeStory.slug) {
-        triggerLongformUpload(activeStory.slug);
-      } else {
-        showToast("No active long-form story selected.");
-      }
-    }
-
-    async function triggerLongformUpload(slug) {
-      if (currentOverviewData?.cloud_mode) {
-        showToast("Cloud Monitor mode on Vercel is read-only — publish live from your local server (http://127.0.0.1:8765)");
-        return;
-      }
-      if (currentUploadJobActive || activeCustomXhr) {
-        switchTab("upload");
-        showToast("Another upload is currently running — monitor it in Manual Upload.");
-        return;
-      }
-      const p = projectsBySlug[slug];
-      if (!p) {
-        showToast("Could not find project: " + slug);
-        return;
-      }
-      const title = p.youtube_title || p.title || slug;
-      if (!confirm(`Publish 15-minute long-form story:\n\n"${title}"\n\nlive to Animated_Crew on YouTube now?`)) {
-        return;
-      }
-
-      switchTab("upload");
-      setManualMode("queued");
-      const sel = document.getElementById("manualSlugSelect");
-      if (sel) sel.value = slug;
-      queuedFormDirty = false;
-      onManualSlugChanged(false);
-
-      setUploadButtonBusy(true, "Staging 1080p Master...");
-      try {
-        const res = await fetch("/api/upload/manual", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            slug: slug,
-            title: p.youtube_title || p.title,
-            description: p.youtube_description || "",
-            tags: p.youtube_tags || [],
-            privacy_status: p.privacy_status || "public",
-            category_id: p.category_id || "27",
-          }),
-        });
-        const data = await _parseSafeResponse(res);
-        showToast("Long-form upload dispatched — staging MP4 to cloud host");
-        renderUploadStatus(data.job);
-        startUploadStatusPolling();
-      } catch (err) {
-        setUploadButtonBusy(false);
-        renderUploadStatus({ status: "error", title: title, error: err.message });
-        showToast("Upload failed: " + err.message);
-      }
     }
 
     /* Render Analytics Tab */
@@ -4114,56 +3092,14 @@
         currentOverviewData = data;
         projectsBySlug = {};
         (data.projects || []).forEach(p => { projectsBySlug[p.slug] = p; });
-        (data.longform?.queue || []).forEach(q => {
-          projectsBySlug[q.slug] = {
-            slug: q.slug,
-            title: q.title,
-            youtube_title: q.youtube_title || q.title,
-            youtube_description: q.youtube_description || "",
-            youtube_tags: q.youtube_tags || ["Documentary", "History", "TrueStory"],
-            category_id: q.category_id || "27",
-            privacy_status: q.privacy_status || "public",
-            ready_to_upload: Boolean(q.mp4_ready ?? q.mp4_file),
-            mp4_size_mb: q.size_mb || q.mp4_size_mb || 25,
-            mp4_url: q.mp4_url || `/media-longform/${q.slug}/renders/ch1.mp4`,
-            cover_url: q.thumb_url || (q.preview_frames && q.preview_frames[0]),
-            is_longform: true,
-            is_posted: q.status === "published",
-            duration_sec: q.duration_sec || 78,
-            format: q.resolution || "16:9 Widescreen (1920x1080)"
-          };
-        });
-        (data.longform?.stories || []).forEach(s => {
-          if (!projectsBySlug[s.slug]) {
-            projectsBySlug[s.slug] = {
-              slug: s.slug,
-              title: s.title,
-              youtube_title: s.title,
-              youtube_description: s.topic || "",
-              youtube_tags: ["Documentary", "History", "TrueStory"],
-              category_id: "27",
-              privacy_status: "public",
-              ready_to_upload: Boolean(s.has_render),
-              mp4_size_mb: s.mp4_size_mb || 25,
-              mp4_url: s.mp4_url,
-              cover_url: s.thumb_url,
-              is_longform: true,
-              is_posted: false,
-              duration_sec: s.duration_sec || 78,
-              format: s.format || "16:9 Widescreen (1920x1080)"
-            };
-          }
-        });
-
         renderKpis(data);
         renderQueueList(data.projects || []);
         renderLibraryTable(data.projects || []);
-        populateManualSelector(data.projects || [], data.longform?.queue || []);
+        populateManualSelector(data.projects || []);
         renderAnalytics(data.youtube || {});
         renderMonetization(data.monetization || {});
         renderAutomation(data.automation || {}, data.queue_summary || {});
         renderHealth(data.system_health || []);
-        renderLongform(data.longform || {});
         if (!activeCustomXhr) {
           renderUploadStatus(data.queue_summary?.upload_job);
         }

@@ -1,0 +1,79 @@
+{
+ "duration": 40.484,
+ "voice": "am_michael",
+ "speed": 1.1,
+ "lines": [
+  {
+   "i": 0,
+   "text": "A pilot just crash-landed a stolen plane on a Manhattan street.",
+   "start": 0.01,
+   "end": 3.65
+  },
+  {
+   "i": 1,
+   "text": "And he only did it to win a drunken ten-dollar bet.",
+   "start": 3.79,
+   "end": 6.39
+  },
+  {
+   "i": 2,
+   "text": "In nineteen fifty-six, Tommy was drinking at a New York bar.",
+   "start": 6.51,
+   "end": 9.91
+  },
+  {
+   "i": 3,
+   "text": "A patron claimed nobody could fly from New Jersey in fifteen minutes.",
+   "start": 10.01,
+   "end": 13.93
+  },
+  {
+   "i": 4,
+   "text": "Tommy snuck into a flight field and hijacked a single-engine plane.",
+   "start": 14.15,
+   "end": 17.95
+  },
+  {
+   "i": 5,
+   "text": "He flew completely in the pitch-dark without radio or lights.",
+   "start": 18.11,
+   "end": 21.13
+  },
+  {
+   "i": 6,
+   "text": "Then, he touched down smoothly right outside the tavern door.",
+   "start": 21.43,
+   "end": 24.49
+  },
+  {
+   "i": 7,
+   "text": "The stunned plane owner was so impressed he dropped all charges.",
+   "start": 24.59,
+   "end": 27.77
+  },
+  {
+   "i": 8,
+   "text": "The judge only gave Tommy a small hundred-dollar fine.",
+   "start": 27.75,
+   "end": 31.03
+  },
+  {
+   "i": 9,
+   "text": "Two years later, another patron refused to believe the story.",
+   "start": 31.17,
+   "end": 34.35
+  },
+  {
+   "i": 10,
+   "text": "So Tommy stole another plane and landed on the exact same street.",
+   "start": 34.45,
+   "end": 38.11
+  },
+  {
+   "i": 11,
+   "text": "Proving to every skeptic in New York why...",
+   "start": 38.19,
+   "end": 40.37
+  }
+ ]
+}

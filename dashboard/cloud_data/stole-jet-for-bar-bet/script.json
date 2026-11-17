@@ -1,0 +1,65 @@
+{
+  "title": "The Man Who Stole A Plane For A Bar Bet",
+  "style": "tall-tale",
+  "voice": "am_michael",
+  "speed": 1.1,
+  "lead": 0.05,
+  "outro": 0.05,
+  "gap": 0.08,
+  "music": "bounce",
+  "sources": [
+    "New York Times (October 1, 1956): Stolen Plane Lands on St. Nicholas Ave",
+    "New York Times (October 5, 1958): Second Stolen Flight by Thomas Fitzpatrick",
+    "National Air and Space Museum: The Fitzpatrick Flights"
+  ],
+  "lines": [
+    {
+      "text": "A pilot just crash-landed a stolen plane on a Manhattan street.",
+      "caps": "PILOT CRASH-LANDED | A STOLEN PLANE | ON MANHATTAN STREET"
+    },
+    {
+      "text": "And he only did it to win a drunken ten-dollar bet.",
+      "caps": "HE ONLY DID IT | TO WIN A DRUNKEN | TEN-DOLLAR BET"
+    },
+    {
+      "text": "In nineteen fifty-six, Tommy was drinking at a New York bar.",
+      "caps": "IN NINETEEN FIFTY-SIX | TOMMY WAS DRINKING | AT NEW YORK BAR"
+    },
+    {
+      "text": "A patron claimed nobody could fly from New Jersey in fifteen minutes.",
+      "caps": "PATRON CLAIMED NOBODY | COULD FLY FROM JERSEY | IN FIFTEEN MINUTES"
+    },
+    {
+      "text": "Tommy snuck into a flight field and hijacked a single-engine plane.",
+      "caps": "TOMMY SNUCK IN | HIJACKED A PLANE | WITH ZERO LIGHTS"
+    },
+    {
+      "text": "He flew completely in the pitch-dark without radio or lights.",
+      "caps": "HE FLEW COMPLETELY | IN PITCH-DARK | WITHOUT RADIO OR LIGHTS"
+    },
+    {
+      "text": "Then, he touched down smoothly right outside the tavern door.",
+      "caps": "TOUCHED DOWN SMOOTHLY | RIGHT OUTSIDE | THE TAVERN DOOR"
+    },
+    {
+      "text": "The stunned plane owner was so impressed he dropped all charges.",
+      "caps": "STUNNED PLANE OWNER | WAS SO IMPRESSED | DROPPED ALL CHARGES"
+    },
+    {
+      "text": "The judge only gave Tommy a small hundred-dollar fine.",
+      "caps": "THE JUDGE ONLY GAVE | A SMALL HUNDRED-DOLLAR | CASH FINE"
+    },
+    {
+      "text": "Two years later, another patron refused to believe the story.",
+      "caps": "TWO YEARS LATER | ANOTHER PATRON | REFUSED TO BELIEVE"
+    },
+    {
+      "text": "So Tommy stole another plane and landed on the exact same street.",
+      "caps": "SO HE STOLE ANOTHER | AND LANDED ON | THE EXACT SAME STREET"
+    },
+    {
+      "text": "Proving to every skeptic in New York why...",
+      "caps": "PROVING TO EVERY | SKEPTIC IN NEW YORK | EXACTLY WHY"
+    }
+  ]
+}

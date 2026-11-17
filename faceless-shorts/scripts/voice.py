@@ -134,6 +134,9 @@ def main():
     lang = 'en-gb' if voice.startswith('b') else 'en-us'
     say = lambda text: trim(np.asarray(k.create(text, voice=voice, speed=speed, lang=lang)[0], dtype=np.float64))
     
+    # Normalize S['lines'] so either list of strings or list of dicts work
+    S['lines'] = [{'text': ln} if isinstance(ln, str) else ln for ln in S['lines']]
+
     # Group the lines into whole sentences (a line ending in . ? ! closes one; "break": true forces a close)
     groups, cur = [], []
     for i, ln in enumerate(S['lines']):

@@ -1,0 +1,53 @@
+{
+ "duration": 44.919,
+ "cues": [
+  {
+   "t": 0.1,
+   "type": "whoosh"
+  },
+  {
+   "t": 4.13,
+   "type": "pop"
+  },
+  {
+   "t": 6.11,
+   "type": "ding"
+  },
+  {
+   "t": 10.89,
+   "type": "boing"
+  },
+  {
+   "t": 14.37,
+   "type": "whoosh"
+  },
+  {
+   "t": 18.07,
+   "type": "stamp"
+  },
+  {
+   "t": 22.15,
+   "type": "cash"
+  },
+  {
+   "t": 25.89,
+   "type": "chime"
+  },
+  {
+   "t": 30.41,
+   "type": "whistle"
+  },
+  {
+   "t": 33.97,
+   "type": "siren"
+  },
+  {
+   "t": 38.07,
+   "type": "gavel"
+  },
+  {
+   "t": 41.63,
+   "type": "pop"
+  }
+ ]
+}

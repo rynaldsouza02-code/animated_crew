@@ -1,0 +1,79 @@
+{
+ "duration": 44.919,
+ "voice": "am_michael",
+ "speed": 1.1,
+ "lines": [
+  {
+   "i": 0,
+   "text": "Tech giants handed a random stranger over a hundred million dollars.",
+   "start": 0.01,
+   "end": 4.134
+  },
+  {
+   "i": 1,
+   "text": "And they did it simply because he asked.",
+   "start": 4.13,
+   "end": 6.03
+  },
+  {
+   "i": 2,
+   "text": "In twenty thirteen, Evaldas registered a fake electronics corporation in Latvia.",
+   "start": 6.11,
+   "end": 10.61
+  },
+  {
+   "i": 3,
+   "text": "He picked the exact name of a real Asian hardware supplier.",
+   "start": 10.89,
+   "end": 14.17
+  },
+  {
+   "i": 4,
+   "text": "Then he started mailing stacks of fake invoices to Google and Meta.",
+   "start": 14.37,
+   "end": 17.93
+  },
+  {
+   "i": 5,
+   "text": "Inside corporate accounting, nobody even checked the bank account numbers.",
+   "start": 18.07,
+   "end": 21.91
+  },
+  {
+   "i": 6,
+   "text": "Clerks casually stamped every multi-million dollar invoice as approved.",
+   "start": 22.15,
+   "end": 25.91
+  },
+  {
+   "i": 7,
+   "text": "Wire transfers flooded his bank accounts across Cyprus, Latvia, and Hungary.",
+   "start": 25.89,
+   "end": 30.27
+  },
+  {
+   "i": 8,
+   "text": "For two whole years, he bought luxury penthouses and sports cars.",
+   "start": 30.41,
+   "end": 33.83
+  },
+  {
+   "i": 9,
+   "text": "Until a routine international wire transfer audit flagged the payments.",
+   "start": 33.97,
+   "end": 37.87
+  },
+  {
+   "i": 10,
+   "text": "The feds seized seventy-five million, but were completely humiliated.",
+   "start": 38.07,
+   "end": 41.65
+  },
+  {
+   "i": 11,
+   "text": "Because for two solid years, these multi-trillion dollar...",
+   "start": 41.63,
+   "end": 44.81
+  }
+ ]
+}
