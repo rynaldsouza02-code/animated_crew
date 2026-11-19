@@ -634,9 +634,9 @@
       </a>
 
       <div class="nav-right">
-        <div class="status-pill" id="headerSchedulePill" title="Daily 7:00 PM IST FIFO auto-upload schedule">
+        <div class="status-pill" id="headerSchedulePill" title="Daily 6:30 PM IST FIFO auto-upload schedule">
           <span class="dot dot-emerald" id="headerScheduleDot"></span>
-          <span id="headerScheduleLabel">Auto-Drop 7:00 PM IST</span>
+          <span id="headerScheduleLabel">Auto-Drop 6:30 PM IST</span>
           <span class="mono" style="color:#fff;font-weight:700;" id="headerCountdown">--:--:--</span>
         </div>
 
@@ -715,7 +715,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
         </div>
         <div class="kpi-val" id="kpiQueue">0</div>
-        <div class="kpi-sub" id="kpiQueueSub">Ready: 0  |  1/Day @ 7:00 PM IST</div>
+        <div class="kpi-sub" id="kpiQueueSub">Ready: 0  |  1/Day @ 6:30 PM IST</div>
       </div>
     </section>
 
@@ -773,7 +773,7 @@
         <div class="panel-head">
           <div>
             <div class="panel-title">Daily Scheduled Upload Queue</div>
-            <div class="panel-sub">Only Queue #1 uploads automatically at 7:00 PM IST each day. Remaining ready videos stay queued in order.</div>
+            <div class="panel-sub">Only Queue #1 uploads automatically at 6:30 PM IST each day. Remaining ready videos stay queued in order.</div>
           </div>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <span class="badge badge-emerald" id="queueRuleBadge">1 Video / Day · FIFO</span>
@@ -1217,7 +1217,7 @@
         <div class="panel" style="margin-bottom:0;">
           <div class="panel-head">
             <div>
-              <div class="panel-title" id="autoHeadline">Daily 7:00 PM IST Scheduler</div>
+              <div class="panel-title" id="autoHeadline">Daily 6:30 PM IST Scheduler</div>
               <div class="panel-sub" id="autoDesc">Inspecting automation schedule...</div>
             </div>
             <div id="autoBadges"></div>
@@ -1241,7 +1241,7 @@
         <div class="panel-head">
           <div>
             <div class="panel-title">Autonomous 6-Stage Production Pipeline</div>
-            <div class="panel-sub">Pre-renders & stores completed videos in queue so daily 7:00 PM IST drops post in seconds</div>
+            <div class="panel-sub">Pre-renders & stores completed videos in queue so daily 6:30 PM IST drops post in seconds</div>
           </div>
         </div>
         <div class="flow-grid">
@@ -1273,7 +1273,7 @@
           <div class="flow-step">
             <div class="flow-step-num">Stage 06</div>
             <div class="flow-step-name">7 PM IST / Manual</div>
-            <div class="flow-step-desc">Publishes #1 daily at 7:00 PM IST, or trigger any file via Manual Upload.</div>
+            <div class="flow-step-desc">Publishes #1 daily at 6:30 PM IST, or trigger any file via Manual Upload.</div>
           </div>
         </div>
       </div>
@@ -1959,7 +1959,7 @@
         return;
       }
       const displayTitle = p.youtube_title || p.title || slug;
-      if (!confirm(`Publish "${displayTitle}" live to Animated_Crew now?\n\nOther queued videos will stay in queue for upcoming 7:00 PM IST runs.`)) return;
+      if (!confirm(`Publish "${displayTitle}" live to Animated_Crew now?\n\nOther queued videos will stay in queue for upcoming 6:30 PM IST runs.`)) return;
 
       switchTab("upload");
       setManualMode("queued");
@@ -2225,7 +2225,7 @@
       document.getElementById("kpiQueue").textContent = fmtNum(qs.queued_count || 0);
       document.getElementById("kpiQueueSub").textContent = nextUp
         ? `Ready: ${qs.ready_count || 0}  |  Next: #1 (${fmtSecLabel(nextUp.duration_sec)})`
-        : "Ready: 0  |  Auto-refills at 7:00 PM IST";
+        : "Ready: 0  |  Auto-refills at 6:30 PM IST";
 
       document.getElementById("tabQueueBadge").textContent = String((data.projects || []).length);
     }
@@ -2239,7 +2239,7 @@
       if (!queued.length) {
         container.innerHTML = `
           <div style="padding:26px 12px;text-align:center;color:var(--text-muted);font-size:0.86rem;">
-            No Shorts currently waiting in queue. At 7:00 PM IST, automation will generate a fresh Short automatically, or you can upload one manually.
+            No Shorts currently waiting in queue. At 6:30 PM IST, automation will generate a fresh Short automatically, or you can upload one manually.
           </div>`;
         return;
       }
@@ -2247,7 +2247,7 @@
       container.innerHTML = queued.map((p, idx) => {
         const isFirst = idx === 0;
         const isLast = idx === queued.length - 1;
-        const dayHint = isFirst ? "NEXT TONIGHT · 7:00 PM IST" : `QUEUED · DAY +${idx}`;
+        const dayHint = isFirst ? "NEXT TONIGHT · 6:30 PM IST" : `QUEUED · DAY +${idx}`;
         const thumbSrc = p.cover_url || p.sheet_url || "";
         const readyPill = p.ready_to_upload
           ? `<span class="badge badge-emerald">Ready · ${p.mp4_size_mb} MB</span>`
@@ -2325,7 +2325,7 @@
             <div style="font-size:0.73rem;color:var(--text-muted);">${fmtNum(p.youtube.likes)} likes · Live on YouTube</div>`;
         } else if (p.queue_status === "queued") {
           statusCell = `
-            <div style="font-weight:600;color:#6ee7b7;">Queue #${p.queue_order || '?'} · 7:00 PM IST</div>
+            <div style="font-weight:600;color:#6ee7b7;">Queue #${p.queue_order || '?'} · 6:30 PM IST</div>
             <div style="font-size:0.73rem;color:var(--text-muted);">${p.ready_to_upload ? `${p.mp4_size_mb} MB MP4 ready` : 'Preparing render'}</div>`;
         } else {
           statusCell = `<div style="font-size:0.78rem;color:var(--text-secondary);">Updated ${fmtDate(p.updated_at)}</div>`;
@@ -2979,7 +2979,7 @@
         headerLabel.textContent = "Rendering Video...";
       } else if (auto.enabled) {
         headerDot.className = tabDot.className = "dot dot-emerald";
-        headerLabel.textContent = "Auto-Drop 7:00 PM IST";
+        headerLabel.textContent = "Auto-Drop 6:30 PM IST";
       } else {
         headerDot.className = tabDot.className = "dot dot-red";
         headerLabel.textContent = "Automation Paused";
@@ -2987,7 +2987,7 @@
 
       const nextUp = qSummary?.next_up;
       document.getElementById("autoHeadline").textContent = auto.enabled
-        ? "Daily 7:00 PM IST Automation Armed"
+        ? "Daily 6:30 PM IST Automation Armed"
         : "Daily Automation Paused";
       document.getElementById("autoDesc").textContent = nextUp
         ? `Next scheduled drop uploads ONLY Queue #1 ("${nextUp.title}"). ${(qSummary?.queued_count || 1) - 1} more queued Short(s) stay ready — auto-generates 4 extra videos whenever 2 or fewer remain.`
@@ -2999,7 +2999,7 @@
       ].filter(Boolean).join(" ");
 
       document.getElementById("autoMetaGrid").innerHTML = [
-        { k: "Schedule", v: "Daily · 7:00 PM IST (Asia/Kolkata)" },
+        { k: "Schedule", v: "Daily · 6:30 PM IST (Asia/Kolkata)" },
         { k: "Queue Rule", v: "Publish #1/day · +4 videos if ≤2 left" },
         { k: "Channel Target", v: "Animated_Crew (Public Shorts)" },
         { k: "Next Scheduled File", v: nextUp ? `${nextUp.slug} (${nextUp.mp4_size_mb || '--'} MB)` : "Auto-generate on run" },

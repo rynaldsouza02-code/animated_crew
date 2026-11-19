@@ -562,7 +562,7 @@ def _detect_active_processes() -> Dict[str, Any]:
 
 def _compute_next_run(cron_str: str) -> Dict[str, Any]:
     tz_name = "Asia/Kolkata"
-    hour, minute = 19, 0
+    hour, minute = 18, 30
     m = re.match(r"CRON_TZ=([^\s]+)\s+(\d+)\s+(\d+)\s+", cron_str or "")
     if m:
         tz_name = m.group(1)
@@ -593,7 +593,7 @@ def get_automation_status() -> Dict[str, Any]:
     if CLOUD_MODE:
         snap = _read_json(CLOUD_DATA_DIR / "automation_snapshot.json", {})
         enabled = bool(snap.get("enabled", True))
-        cron_str = snap.get("cron_str") or "CRON_TZ=Asia/Kolkata 0 19 * * *"
+        cron_str = snap.get("cron_str") or "CRON_TZ=Asia/Kolkata 30 18 * * *"
         schedule_info = _compute_next_run(cron_str)
         return {
             "sidecar_id": SIDECAR_ID,
@@ -612,7 +612,7 @@ def get_automation_status() -> Dict[str, Any]:
             "latest_conversation_updated": snap.get("synced_at"),
             "latest_conversation_note": snap.get(
                 "latest_conversation_note",
-                "Workstation daemon armed · FIFO queue uploads 1 Short/day at 7:00 PM IST.",
+                "Workstation daemon armed · FIFO queue uploads 1 Short/day at 6:30 PM IST.",
             ),
             "auto_prompt_ready": True,
             "active_processes": {"is_rendering": False, "active_tools": [], "active_project": None},
@@ -626,7 +626,7 @@ def get_automation_status() -> Dict[str, Any]:
     enabled = bool(sidecar_state.get("enabled", False))
 
     args = sidecar_cfg.get("args", [])
-    cron_str = args[0] if args else "CRON_TZ=Asia/Kolkata 0 19 * * *"
+    cron_str = args[0] if args else "CRON_TZ=Asia/Kolkata 30 18 * * *"
     schedule_info = _compute_next_run(cron_str)
 
     log_lines: List[str] = []
@@ -650,7 +650,7 @@ def get_automation_status() -> Dict[str, Any]:
     latest_conv_id = None
     latest_conv_status = "idle"
     latest_conv_updated = None
-    latest_conv_note = "Ready for next 7:00 PM IST drop (uploads 1 queued video/day)."
+    latest_conv_note = "Ready for next 6:30 PM IST drop (uploads 1 queued video/day)."
 
     if SIDECAR_EVENTS_DIR.exists():
         event_files = sorted(SIDECAR_EVENTS_DIR.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
@@ -698,9 +698,9 @@ def get_automation_status() -> Dict[str, Any]:
                         content = last_step.get("content", "")
                         if "requested" in content.lower() or "ended with a colon" in content.lower():
                             latest_conv_status = "needs_attention"
-                            latest_conv_note = "Previous trigger note detected; FIFO queue ready for 7:00 PM IST."
+                            latest_conv_note = "Previous trigger note detected; FIFO queue ready for 6:30 PM IST."
                         else:
-                            latest_conv_note = "Scheduler armed (FIFO queue: 1 video/day at 7:00 PM IST)."
+                            latest_conv_note = "Scheduler armed (FIFO queue: 1 video/day at 6:30 PM IST)."
             except Exception:
                 pass
 
@@ -2821,7 +2821,7 @@ def _finalize_published_run(job: Dict[str, Any], vid: str) -> Dict[str, Any]:
                     if r.get("status") == "queued" and r.get("queue_order"):
                         qo = r["queue_order"]
                         r["notes"] = (
-                            "Queued #1: Next scheduled automatic upload at 7:00 PM IST (only 1 queued video uploads per day)."
+                            "Queued #1: Next scheduled automatic upload at 6:30 PM IST (only 1 queued video uploads per day)."
                             if qo == 1
                             else f"Queued #{qo}: Held in queue for future daily auto-upload."
                         )
