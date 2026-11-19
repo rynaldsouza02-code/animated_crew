@@ -40,14 +40,15 @@ def align(script_words, heard, t0, t1):
 def inline_fallback(P, S):
     L = json.loads((P / 'data/lines.json').read_text(encoding='utf-8'))['lines']; words = []
     for i, ln in enumerate(S['lines']):
-        toks = [w for w in ln['text'].split() if norm(w)]
+        ln_text = ln['text'] if isinstance(ln, dict) else ln
+        toks = [w for w in ln_text.split() if norm(w)]
         wts = [len(norm(w)) + 2.5 + (2.5 if w.endswith(',') else 4.5 if re.search(r'[.?!]$', w) and k < len(toks) - 1 else 0) for k, w in enumerate(toks)]
         lo, hi = L[i]['start'], L[i]['end']; c = lo; tot = sum(wts)
         for w, wt in zip(toks, wts):
             d = (hi - lo) * wt / tot; speak = d - (hi - lo) * (wt - len(norm(w)) - 2.5) / tot
             words.append({'w': w, 'line': i, 's': round(c, 3), 'e': round(c + speak * 0.92, 3)}); c += d
-    (P / 'data/words.json').write_text(json.dumps(words, indent=1))
-    (P / 'data/words.txt').write_text('\n'.join(f"{w['s']:7.2f} {w['e']:7.2f}  L{w['line']:<2d} {w['w']}" for w in words))
+    (P / 'data/words.json').write_text(json.dumps(words, indent=1), encoding='utf-8')
+    (P / 'data/words.txt').write_text('\n'.join(f"{w['s']:7.2f} {w['e']:7.2f}  L{w['line']:<2d} {w['w']}" for w in words), encoding='utf-8')
     print(f'data/words.json: {len(words)} words (spread inside the voice line times)')
 
 

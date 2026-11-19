@@ -1,0 +1,73 @@
+{
+ "duration": 39.299,
+ "voice": "am_michael",
+ "speed": 1.1,
+ "lines": [
+  {
+   "i": 0,
+   "text": "The most famous brain in history vanished right off the autopsy table.",
+   "start": 0.05,
+   "end": 3.834
+  },
+  {
+   "i": 1,
+   "text": "In 1955, pathologist Thomas Harvey conducted Albert Einstein's routine autopsy.",
+   "start": 3.914,
+   "end": 9.74
+  },
+  {
+   "i": 2,
+   "text": "Einstein specifically demanded his body be cremated without any study.",
+   "start": 9.82,
+   "end": 13.896
+  },
+  {
+   "i": 3,
+   "text": "Instead, Harvey quietly removed the entire brain and walked outside.",
+   "start": 13.976,
+   "end": 17.808
+  },
+  {
+   "i": 4,
+   "text": "He lost his medical license, his wife, and his job.",
+   "start": 17.888,
+   "end": 20.894
+  },
+  {
+   "i": 5,
+   "text": "Yet he refused to surrender it to any university.",
+   "start": 20.974,
+   "end": 23.794
+  },
+  {
+   "i": 6,
+   "text": "He chopped it into two hundred and forty glass slides.",
+   "start": 23.874,
+   "end": 26.724
+  },
+  {
+   "i": 7,
+   "text": "Then stored the remaining chunks inside two ordinary mason jars.",
+   "start": 26.804,
+   "end": 30.652
+  },
+  {
+   "i": 8,
+   "text": "For forty years, he kept the jars in a beer cooler.",
+   "start": 30.732,
+   "end": 33.572
+  },
+  {
+   "i": 9,
+   "text": "He even drove it across America in the trunk of his Buick.",
+   "start": 33.652,
+   "end": 36.915
+  },
+  {
+   "i": 10,
+   "text": "And it took four decades before anyone realized...",
+   "start": 36.995,
+   "end": 39.704
+  }
+ ]
+}

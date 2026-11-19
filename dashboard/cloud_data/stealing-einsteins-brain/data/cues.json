@@ -1,0 +1,41 @@
+{
+ "duration": 39.299,
+ "cues": [
+  {
+   "t": 0.1,
+   "type": "whoosh"
+  },
+  {
+   "t": 3.914,
+   "type": "ding"
+  },
+  {
+   "t": 9.82,
+   "type": "pop"
+  },
+  {
+   "t": 13.976,
+   "type": "whoosh"
+  },
+  {
+   "t": 17.888,
+   "type": "boom"
+  },
+  {
+   "t": 23.874,
+   "type": "pop"
+  },
+  {
+   "t": 30.732,
+   "type": "ding"
+  },
+  {
+   "t": 33.652,
+   "type": "whoosh"
+  },
+  {
+   "t": 36.995,
+   "type": "sparkle"
+  }
+ ]
+}

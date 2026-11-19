@@ -1,0 +1,26 @@
+{
+  "title": "The Doctor Who Stole Albert Einstein's Brain in a Jar",
+  "style": "tall-tale",
+  "voice": "am_michael",
+  "speed": 1.1,
+  "lead": 0.05,
+  "outro": 0.05,
+  "gap": 0.08,
+  "lines": [
+    "The most famous brain in history vanished right off the autopsy table.",
+    "In 1955, pathologist Thomas Harvey conducted Albert Einstein's routine autopsy.",
+    "Einstein specifically demanded his body be cremated without any study.",
+    "Instead, Harvey quietly removed the entire brain and walked outside.",
+    "He lost his medical license, his wife, and his job.",
+    "Yet he refused to surrender it to any university.",
+    "He chopped it into two hundred and forty glass slides.",
+    "Then stored the remaining chunks inside two ordinary mason jars.",
+    "For forty years, he kept the jars in a beer cooler.",
+    "He even drove it across America in the trunk of his Buick.",
+    "And it took four decades before anyone realized..."
+  ],
+  "sources": [
+    "https://www.nationalgeographic.com/science/article/the-bizarre-afterlife-of-einsteins-brain",
+    "https://www.bbc.com/news/magazine-32354300"
+  ]
+}

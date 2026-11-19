@@ -395,7 +395,9 @@ def _build_default_metadata(slug: str, script: Dict[str, Any], run_meta: Dict[st
     if len(yt_title) > 100:
         yt_title = yt_title[:97].rstrip() + "..."
     lines = script.get("lines") or []
-    summary_text = " ".join(str(l.get("text", "")).strip() for l in lines[:3]).strip()
+    summary_text = " ".join(
+        str(l if isinstance(l, str) else l.get("text", "")).strip() for l in lines[:3]
+    ).strip()
     default_desc = (
         f"{summary_text}\n\n#Shorts #History #TrueStory #CrazyHistory #Animation #DidYouKnow"
         if summary_text
@@ -2500,21 +2502,28 @@ def get_projects_pipeline(yt_data: Dict[str, Any], active_project: Optional[str]
         script_lines = []
         for idx, sl in enumerate(raw_lines):
             timing_line = lines_list[idx] if idx < len(lines_list) and isinstance(lines_list[idx], dict) else {}
+            line_txt = sl if isinstance(sl, str) else (sl.get("text", "") if isinstance(sl, dict) else str(sl))
+            line_caps = sl.get("caps") if isinstance(sl, dict) else None
             script_lines.append(
                 {
                     "index": idx + 1,
-                    "text": sl.get("text", ""),
-                    "caps": sl.get("caps"),
+                    "text": line_txt,
+                    "caps": line_caps,
                     "start": timing_line.get("start"),
                     "end": timing_line.get("end"),
                 }
             )
-        full_script_text = "\n".join(sl.get("text", "") for sl in raw_lines if sl.get("text"))
+        full_script_text = "\n".join(
+            (sl if isinstance(sl, str) else sl.get("text", "")) for sl in raw_lines
+        )
         sources = script.get("sources", [])
         yt_meta = _build_default_metadata(slug, script, run_meta)
 
-        word_count = len(words) if isinstance(words, list) and words else sum(len(l.get("text", "").split()) for l in raw_lines)
-        hook_text = raw_lines[0].get("text", "") if raw_lines else ""
+        def _line_str(l):
+            return l if isinstance(l, str) else (l.get("text", "") if isinstance(l, dict) else "")
+
+        word_count = len(words) if isinstance(words, list) and words else sum(len(_line_str(l).split()) for l in raw_lines)
+        hook_text = _line_str(raw_lines[0]) if raw_lines else ""
 
         projects.append(
             {
@@ -4314,11 +4323,13 @@ def api_project_script(slug: str):
     script_lines = []
     for idx, sl in enumerate(raw_lines):
         tl = lines_list[idx] if idx < len(lines_list) and isinstance(lines_list[idx], dict) else {}
+        line_txt = sl if isinstance(sl, str) else (sl.get("text", "") if isinstance(sl, dict) else str(sl))
+        line_caps = sl.get("caps") if isinstance(sl, dict) else None
         script_lines.append(
             {
                 "index": idx + 1,
-                "text": sl.get("text", ""),
-                "caps": sl.get("caps"),
+                "text": line_txt,
+                "caps": line_caps,
                 "start": tl.get("start"),
                 "end": tl.get("end"),
             }
@@ -4341,7 +4352,7 @@ def api_project_script(slug: str):
             "music": script.get("music", "bounce"),
             "queue_status": run_meta.get("status", "draft"),
             "queue_order": run_meta.get("queue_order"),
-            "full_script_text": "\n".join(sl.get("text", "") for sl in raw_lines if sl.get("text")),
+            "full_script_text": "\n".join((sl if isinstance(sl, str) else sl.get("text", "")) for sl in raw_lines),
             "script_lines": script_lines,
             "sources": script.get("sources", []),
             "mp4_url": f"/media/{slug}/renders/{mp4_path.name}" if (mp4_path and mp4_path.exists()) else None,
