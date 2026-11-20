@@ -1,0 +1,25 @@
+{
+  "title": "The Fake Shed That Became London's #1 Luxury Restaurant",
+  "style": "tall-tale",
+  "voice": "am_michael",
+  "speed": 1.1,
+  "lead": 0.05,
+  "outro": 0.05,
+  "gap": 0.08,
+  "lines": [
+    "London's highest rated restaurant didn't serve food and didn't even exist.",
+    "In 2017, writer Oobah Butler registered his backyard shed on TripAdvisor.",
+    "He called it The Shed at Dulwich with appointment-only reservations.",
+    "He photographed fake gourmet dishes made of bleach tablets and shaving foam.",
+    "Then he had friends post dozens of glowing five-star reviews.",
+    "Within six months, food critics were desperately begging for a table.",
+    "Wealthy executives offered thousands of dollars to jump the waiting list.",
+    "It officially hit number one out of eighteen thousand London restaurants.",
+    "For the grand opening, he served guests one-dollar microwave frozen dinners.",
+    "And customers gave it standing ovations... all because..."
+  ],
+  "sources": [
+    "https://www.vice.com/en/article/434gqw/i-made-my-shed-the-top-rated-restaurant-on-tripadvisor",
+    "https://www.theguardian.com/lifeandstyle/2017/dec/07/shed-at-dulwich-tripadvisor-fake-restaurant"
+  ]
+}

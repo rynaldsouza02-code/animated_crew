@@ -1,0 +1,67 @@
+{
+ "duration": 40.006,
+ "voice": "am_michael",
+ "speed": 1.1,
+ "lines": [
+  {
+   "i": 0,
+   "text": "London's highest rated restaurant didn't serve food and didn't even exist.",
+   "start": 0.05,
+   "end": 4.148
+  },
+  {
+   "i": 1,
+   "text": "In 2017, writer Oobah Butler registered his backyard shed on TripAdvisor.",
+   "start": 4.228,
+   "end": 9.624
+  },
+  {
+   "i": 2,
+   "text": "He called it The Shed at Dulwich with appointment-only reservations.",
+   "start": 9.704,
+   "end": 13.277
+  },
+  {
+   "i": 3,
+   "text": "He photographed fake gourmet dishes made of bleach tablets and shaving foam.",
+   "start": 13.357,
+   "end": 17.346
+  },
+  {
+   "i": 4,
+   "text": "Then he had friends post dozens of glowing five-star reviews.",
+   "start": 17.426,
+   "end": 20.978
+  },
+  {
+   "i": 5,
+   "text": "Within six months, food critics were desperately begging for a table.",
+   "start": 21.058,
+   "end": 24.602
+  },
+  {
+   "i": 6,
+   "text": "Wealthy executives offered thousands of dollars to jump the waiting list.",
+   "start": 24.682,
+   "end": 28.697
+  },
+  {
+   "i": 7,
+   "text": "It officially hit number one out of eighteen thousand London restaurants.",
+   "start": 28.777,
+   "end": 32.577
+  },
+  {
+   "i": 8,
+   "text": "For the grand opening, he served guests one-dollar microwave frozen dinners.",
+   "start": 32.657,
+   "end": 37.03
+  },
+  {
+   "i": 9,
+   "text": "And customers gave it standing ovations... all because...",
+   "start": 37.11,
+   "end": 40.136
+  }
+ ]
+}

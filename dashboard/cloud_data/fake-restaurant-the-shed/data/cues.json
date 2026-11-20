@@ -1,0 +1,41 @@
+{
+ "duration": 40.006,
+ "cues": [
+  {
+   "t": 0.1,
+   "type": "whoosh"
+  },
+  {
+   "t": 4.228,
+   "type": "ding"
+  },
+  {
+   "t": 9.704,
+   "type": "pop"
+  },
+  {
+   "t": 13.357,
+   "type": "whoosh"
+  },
+  {
+   "t": 17.426,
+   "type": "ding"
+  },
+  {
+   "t": 21.058,
+   "type": "pop"
+  },
+  {
+   "t": 28.777,
+   "type": "fanfare"
+  },
+  {
+   "t": 32.657,
+   "type": "whoosh"
+  },
+  {
+   "t": 37.11,
+   "type": "cheer"
+  }
+ ]
+}

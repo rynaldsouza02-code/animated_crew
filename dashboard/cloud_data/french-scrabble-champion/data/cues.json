@@ -1,0 +1,53 @@
+{
+ "duration": 37.392,
+ "cues": [
+  {
+   "t": 0.1,
+   "type": "whoosh"
+  },
+  {
+   "t": 3.47,
+   "type": "pop"
+  },
+  {
+   "t": 5.89,
+   "type": "ding"
+  },
+  {
+   "t": 8.99,
+   "type": "boing"
+  },
+  {
+   "t": 12.05,
+   "type": "whoosh"
+  },
+  {
+   "t": 15.73,
+   "type": "plop"
+  },
+  {
+   "t": 18.15,
+   "type": "tock"
+  },
+  {
+   "t": 21.53,
+   "type": "chime"
+  },
+  {
+   "t": 24.73,
+   "type": "shock"
+  },
+  {
+   "t": 28.53,
+   "type": "fanfare"
+  },
+  {
+   "t": 32.41,
+   "type": "cheer"
+  },
+  {
+   "t": 35.05,
+   "type": "pop"
+  }
+ ]
+}

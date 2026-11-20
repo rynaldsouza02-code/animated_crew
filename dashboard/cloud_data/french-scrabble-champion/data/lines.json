@@ -1,0 +1,79 @@
+{
+ "duration": 37.392,
+ "voice": "am_michael",
+ "speed": 1.1,
+ "lines": [
+  {
+   "i": 0,
+   "text": "A man won the French Scrabble championship without knowing French.",
+   "start": 0.01,
+   "end": 3.21
+  },
+  {
+   "i": 1,
+   "text": "In fact, he could not speak a single word.",
+   "start": 3.47,
+   "end": 5.45
+  },
+  {
+   "i": 2,
+   "text": "Nigel Richards from New Zealand only spoke fluent English.",
+   "start": 5.89,
+   "end": 8.77
+  },
+  {
+   "i": 3,
+   "text": "To challenge himself, he bought the entire French dictionary.",
+   "start": 8.99,
+   "end": 11.89
+  },
+  {
+   "i": 4,
+   "text": "For nine weeks, he memorized three hundred eighty-six thousand words.",
+   "start": 12.05,
+   "end": 15.47
+  },
+  {
+   "i": 5,
+   "text": "He never learned what any of the definitions meant.",
+   "start": 15.73,
+   "end": 18.07
+  },
+  {
+   "i": 6,
+   "text": "He only memorized letter combinations and point values.",
+   "start": 18.15,
+   "end": 21.35
+  },
+  {
+   "i": 7,
+   "text": "Then he flew to Belgium for the World Francophone Championship.",
+   "start": 21.53,
+   "end": 24.53
+  },
+  {
+   "i": 8,
+   "text": "Native French grandmasters stared in disbelief at his impossible moves.",
+   "start": 24.73,
+   "end": 28.55
+  },
+  {
+   "i": 9,
+   "text": "Nigel crushed the tournament and claimed the world championship trophy.",
+   "start": 28.53,
+   "end": 32.15
+  },
+  {
+   "i": 10,
+   "text": "When the French crowd cheered, he needed an interpreter.",
+   "start": 32.41,
+   "end": 34.81
+  },
+  {
+   "i": 11,
+   "text": "Because without even knowing how to say hello...",
+   "start": 35.05,
+   "end": 37.15
+  }
+ ]
+}
