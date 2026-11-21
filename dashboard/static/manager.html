@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Video Queue & Upload Manager — Animated_Crew</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Crect width='36' height='36' rx='9' fill='%230E1422'/%3E%3Crect x='4' y='7' width='28' height='22' rx='6' fill='%23E11D48'/%3E%3Cpolygon points='15,13 24,18 15,23' fill='%23FFFFFF'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -83,7 +86,7 @@
 
       <!-- Live Schedule Badge & Actions -->
       <div class="flex items-center gap-3">
-        <div id="countdown-badge" class="hidden sm:flex items-center gap-2 bg-rose-950/30 border border-rose-500/20 px-3 py-1.5 rounded-xl text-xs">
+        <div id="countdown-badge" class="flex items-center gap-2 bg-rose-950/30 border border-rose-500/20 px-3 py-1.5 rounded-xl text-xs">
           <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
           <span class="text-slate-300">Next 7:30 PM Drop:</span>
           <span id="countdown-text" class="font-mono font-bold text-rose-400">--:--:--</span>
@@ -121,21 +124,21 @@
       <div class="bg-[#0e1422] p-4 rounded-2xl border border-white/10">
         <p class="text-xs text-slate-400 font-medium">In Queue</p>
         <div class="flex items-baseline justify-between mt-1">
-          <h3 id="stat-queued" class="text-2xl font-bold text-emerald-400">--</h3>
+          <h3 id="stat-queued" class="text-2xl font-bold text-emerald-400">0</h3>
           <span class="text-xs text-emerald-400/80 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">Daily Drops</span>
         </div>
       </div>
       <div class="bg-[#0e1422] p-4 rounded-2xl border border-white/10">
         <p class="text-xs text-slate-400 font-medium">Published Live</p>
         <div class="flex items-baseline justify-between mt-1">
-          <h3 id="stat-published" class="text-2xl font-bold text-white">--</h3>
+          <h3 id="stat-published" class="text-2xl font-bold text-white">0</h3>
           <span class="text-xs text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">Shorts</span>
         </div>
       </div>
       <div class="bg-[#0e1422] p-4 rounded-2xl border border-white/10">
         <p class="text-xs text-slate-400 font-medium">Unqueued Drafts</p>
         <div class="flex items-baseline justify-between mt-1">
-          <h3 id="stat-drafts" class="text-2xl font-bold text-amber-400">--</h3>
+          <h3 id="stat-drafts" class="text-2xl font-bold text-amber-400">0</h3>
           <span class="text-xs text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">Rendered</span>
         </div>
       </div>
@@ -243,7 +246,7 @@
   </div>
 
   <!-- Toast Notification -->
-  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900/90 border border-white/15 px-4 py-3 rounded-2xl shadow-xl text-xs text-white flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300">
+  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900/95 border border-white/15 px-4 py-3 rounded-2xl shadow-xl text-xs text-white flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300">
     <span id="toast-icon">✅</span>
     <span id="toast-msg">Action completed</span>
   </div>
@@ -253,6 +256,7 @@
     let currentTab = 'queue';
     let countdownInterval = null;
     let uploadPollInterval = null;
+    let remainingSeconds = 0;
 
     async function loadData() {
       try {
@@ -267,10 +271,18 @@
 
     function updateUI() {
       if (!appData) return;
-      const runs = appData.runs || [];
-      const queued = runs.filter(r => r.status === 'queued').sort((a,b) => (a.queue_order || 999) - (b.queue_order || 999));
-      const published = runs.filter(r => r.status === 'published');
-      const drafts = runs.filter(r => r.status !== 'queued' && r.status !== 'published');
+      const projs = appData.projects || [];
+      
+      // Queued: items with queue_status === 'queued' or numeric queue_order and not posted
+      const queued = projs
+        .filter(p => (p.queue_status === 'queued' || (p.queue_order && !p.is_posted)))
+        .sort((a,b) => (Number(a.queue_order) || 999) - (Number(b.queue_order) || 999));
+
+      // Published: posted or status === 'published'
+      const published = projs.filter(p => p.is_posted || p.queue_status === 'published');
+
+      // Drafts: remaining
+      const drafts = projs.filter(p => !p.is_posted && p.queue_status !== 'queued' && !p.queue_order);
 
       document.getElementById('stat-queued').innerText = queued.length;
       document.getElementById('stat-published').innerText = published.length;
@@ -281,7 +293,7 @@
       document.getElementById('tab-count-published').innerText = published.length;
 
       renderTabContent();
-      startCountdown();
+      initCountdown();
       checkUploadStatus();
     }
 
@@ -303,15 +315,17 @@
       if (!appData) return;
       const container = document.getElementById('content-container');
       const filter = (document.getElementById('search-input').value || '').toLowerCase().trim();
-      const runs = appData.runs || [];
+      const projs = appData.projects || [];
 
       let items = [];
       if (currentTab === 'queue') {
-        items = runs.filter(r => r.status === 'queued').sort((a,b) => (a.queue_order || 999) - (b.queue_order || 999));
+        items = projs
+          .filter(p => (p.queue_status === 'queued' || (p.queue_order && !p.is_posted)))
+          .sort((a,b) => (Number(a.queue_order) || 999) - (Number(b.queue_order) || 999));
       } else if (currentTab === 'drafts') {
-        items = runs.filter(r => r.status !== 'queued' && r.status !== 'published');
+        items = projs.filter(p => !p.is_posted && p.queue_status !== 'queued' && !p.queue_order);
       } else {
-        items = runs.filter(r => r.status === 'published');
+        items = projs.filter(p => p.is_posted || p.queue_status === 'published');
       }
 
       if (filter) {
@@ -329,13 +343,15 @@
 
       let html = '';
       items.forEach((item, index) => {
-        const isQueued = item.status === 'queued';
-        const isFirst = isQueued && item.queue_order === 1;
-        const dur = item.rendered_duration_sec ? `${item.rendered_duration_sec.toFixed(1)}s` : '--';
-        const size = item.rendered_size_mb ? `${item.rendered_size_mb.toFixed(1)} MB` : '--';
+        const isQueued = (item.queue_status === 'queued' || (item.queue_order && !item.is_posted));
+        const orderNum = item.queue_order || index + 1;
+        const isFirst = isQueued && orderNum === 1;
+        const dur = item.duration_sec ? `${item.duration_sec.toFixed(1)}s` : '--';
+        const size = item.mp4_size_mb ? `${item.mp4_size_mb.toFixed(1)} MB` : '--';
         const title = item.youtube_title || item.title || item.slug;
         const thumbUrl = item.cover_url || `/media/${item.slug}/review/cover/t1.80.jpg`;
-        const mp4Url = item.mp4_url || `/media/${item.slug}/renders/${item.rendered_mp4_name || item.slug + '.mp4'}`;
+        const mp4Url = item.mp4_url || `/media/${item.slug}/renders/${item.mp4_name || item.slug + '.mp4'}`;
+        const ytWatch = item.youtube ? item.youtube.url : (item.youtube_url || null);
 
         html += `
           <div class="bg-[#0e1422] hover:bg-[#12192b] transition-all p-4 rounded-2xl border ${isFirst ? 'border-rose-500/50 glow-crimson' : 'border-white/10'} flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -345,9 +361,9 @@
               <div class="flex-shrink-0">
                 ${isQueued ? `
                   <div class="w-10 h-10 rounded-xl ${isFirst ? 'bg-gradient-to-tr from-rose-600 to-red-500 text-white font-extrabold shadow-lg shadow-rose-900/50' : 'bg-white/5 text-slate-300 font-bold border border-white/10'} flex flex-col items-center justify-center text-sm">
-                    <span>#${item.queue_order || index + 1}</span>
+                    <span>#${orderNum}</span>
                   </div>
-                ` : item.status === 'published' ? `
+                ` : item.is_posted ? `
                   <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
                     ✓
                   </div>
@@ -371,10 +387,10 @@
                 <div class="flex items-center gap-2 flex-wrap">
                   <h3 class="text-sm font-semibold text-white truncate max-w-md">${title}</h3>
                   ${isFirst ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500 text-white animate-pulse">UP NEXT AT 7:30 PM</span>' : ''}
-                  ${item.status === 'published' ? `<a href="${item.youtube_url}" target="_blank" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:underline">Watch on YouTube ↗</a>` : ''}
+                  ${ytWatch ? `<a href="${ytWatch}" target="_blank" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:underline">Watch on YouTube ↗</a>` : ''}
                 </div>
                 <p class="text-xs text-slate-400 font-mono">${item.slug} • <span class="text-slate-300">${dur}</span> • <span class="text-slate-300">${size}</span></p>
-                <p class="text-xs text-slate-500 truncate max-w-lg">${item.youtube_description || 'No description provided.'}</p>
+                <p class="text-xs text-slate-500 truncate max-w-lg">${item.youtube_description || item.hook_text || 'No description provided.'}</p>
               </div>
             </div>
 
@@ -396,7 +412,7 @@
                 <button onclick="removeFromQueue('${item.slug}')" class="p-2 hover:bg-red-500/10 text-slate-400 hover:text-red-400 rounded-xl text-xs" title="Remove from Queue">
                   ✕
                 </button>
-              ` : item.status !== 'published' ? `
+              ` : !item.is_posted ? `
                 <button onclick="enqueueItem('${item.slug}')" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-sm transition">
                   + Add to Queue
                 </button>
@@ -483,7 +499,11 @@
 
     function triggerUploadNext() {
       if (!appData) return;
-      const queued = (appData.runs || []).filter(r => r.status === 'queued').sort((a,b) => (a.queue_order || 999) - (b.queue_order || 999));
+      const projs = appData.projects || [];
+      const queued = projs
+        .filter(p => (p.queue_status === 'queued' || (p.queue_order && !p.is_posted)))
+        .sort((a,b) => (Number(a.queue_order) || 999) - (Number(b.queue_order) || 999));
+
       if (queued.length === 0) {
         alert('The queue is empty! Add a video to the queue first.');
         return;
@@ -579,20 +599,21 @@
       }
     }
 
-    function startCountdown() {
+    function initCountdown() {
+      if (!appData || !appData.automation || !appData.automation.schedule) return;
+      remainingSeconds = appData.automation.schedule.seconds_until_next || 0;
       if (countdownInterval) clearInterval(countdownInterval);
+
       function tick() {
-        const now = new Date();
-        const drop = new Date();
-        drop.setHours(19, 30, 0, 0); // 7:30 PM IST
-        if (now > drop) {
-          drop.setDate(drop.getDate() + 1);
+        if (remainingSeconds <= 0) {
+          document.getElementById('countdown-text').innerText = 'Starting drop...';
+          return;
         }
-        const diff = Math.max(0, Math.floor((drop - now) / 1000));
-        const h = String(Math.floor(diff / 3600)).padStart(2, '0');
-        const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
-        const s = String(diff % 60).padStart(2, '0');
+        const h = String(Math.floor(remainingSeconds / 3600)).padStart(2, '0');
+        const m = String(Math.floor((remainingSeconds % 3600) / 60)).padStart(2, '0');
+        const s = String(remainingSeconds % 60).padStart(2, '0');
         document.getElementById('countdown-text').innerText = `${h}h ${m}m ${s}s`;
+        remainingSeconds--;
       }
       tick();
       countdownInterval = setInterval(tick, 1000);

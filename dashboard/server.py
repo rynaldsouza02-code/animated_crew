@@ -575,7 +575,7 @@ def _detect_active_processes() -> Dict[str, Any]:
 
 def _compute_next_run(cron_str: str) -> Dict[str, Any]:
     tz_name = "Asia/Kolkata"
-    hour, minute = 18, 30
+    hour, minute = 19, 30
     m = re.match(r"CRON_TZ=([^\s]+)\s+(\d+)\s+(\d+)\s+", cron_str or "")
     if m:
         tz_name = m.group(1)
@@ -2834,7 +2834,7 @@ def _finalize_published_run(job: Dict[str, Any], vid: str) -> Dict[str, Any]:
                     if r.get("status") == "queued" and r.get("queue_order"):
                         qo = r["queue_order"]
                         r["notes"] = (
-                            "Queued #1: Next scheduled automatic upload at 6:30 PM IST (only 1 queued video uploads per day)."
+                            "Queued #1: Next scheduled automatic upload at 7:30 PM IST (only 1 queued video uploads per day)."
                             if qo == 1
                             else f"Queued #{qo}: Held in queue for future daily auto-upload."
                         )
