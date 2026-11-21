@@ -35,6 +35,19 @@ from fastapi.staticfiles import StaticFiles
 # Prefer IPv4 on Windows/local networks where IPv6 SSL handshakes to YouTube stall or EOF
 if os.name == "nt":
     _urllib3_conn.allowed_gai_family = lambda: socket.AF_INET
+    try:
+        import asyncio.proactor_events
+        _orig_call_connection_lost = asyncio.proactor_events._ProactorBasePipeTransport._call_connection_lost
+
+        def _safe_call_connection_lost(self, exc=None):
+            try:
+                _orig_call_connection_lost(self, exc)
+            except (ConnectionResetError, OSError):
+                pass
+
+        asyncio.proactor_events._ProactorBasePipeTransport._call_connection_lost = _safe_call_connection_lost
+    except Exception:
+        pass
 
 # Paths & Runtime Mode (Local Windows Workstation vs Vercel Serverless Cloud Monitor)
 BASE_DIR = Path(__file__).resolve().parent
@@ -612,7 +625,7 @@ def get_automation_status() -> Dict[str, Any]:
             "latest_conversation_updated": snap.get("synced_at"),
             "latest_conversation_note": snap.get(
                 "latest_conversation_note",
-                "Workstation daemon armed · FIFO queue uploads 1 Short/day at 6:30 PM IST.",
+                "Workstation daemon armed · FIFO queue uploads 1 Short/day at 7:30 PM IST.",
             ),
             "auto_prompt_ready": True,
             "active_processes": {"is_rendering": False, "active_tools": [], "active_project": None},
@@ -626,7 +639,7 @@ def get_automation_status() -> Dict[str, Any]:
     enabled = bool(sidecar_state.get("enabled", False))
 
     args = sidecar_cfg.get("args", [])
-    cron_str = args[0] if args else "CRON_TZ=Asia/Kolkata 30 18 * * *"
+    cron_str = args[0] if args else "CRON_TZ=Asia/Kolkata 30 19 * * *"
     schedule_info = _compute_next_run(cron_str)
 
     log_lines: List[str] = []
@@ -650,7 +663,7 @@ def get_automation_status() -> Dict[str, Any]:
     latest_conv_id = None
     latest_conv_status = "idle"
     latest_conv_updated = None
-    latest_conv_note = "Ready for next 6:30 PM IST drop (uploads 1 queued video/day)."
+    latest_conv_note = "Ready for next 7:30 PM IST drop (uploads 1 queued video/day)."
 
     if SIDECAR_EVENTS_DIR.exists():
         event_files = sorted(SIDECAR_EVENTS_DIR.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
@@ -698,9 +711,9 @@ def get_automation_status() -> Dict[str, Any]:
                         content = last_step.get("content", "")
                         if "requested" in content.lower() or "ended with a colon" in content.lower():
                             latest_conv_status = "needs_attention"
-                            latest_conv_note = "Previous trigger note detected; FIFO queue ready for 6:30 PM IST."
+                            latest_conv_note = "Previous trigger note detected; FIFO queue ready for 7:30 PM IST."
                         else:
-                            latest_conv_note = "Scheduler armed (FIFO queue: 1 video/day at 6:30 PM IST)."
+                            latest_conv_note = "Scheduler armed (FIFO queue: 1 video/day at 7:30 PM IST)."
             except Exception:
                 pass
 
@@ -3688,6 +3701,19 @@ def serve_home():
     )
 
 
+@app.get("/manager", response_class=HTMLResponse)
+@app.get("/queue", response_class=HTMLResponse)
+@app.get("/videos", response_class=HTMLResponse)
+def serve_manager():
+    mgr_file = STATIC_DIR / "manager.html"
+    if not mgr_file.exists():
+        raise HTTPException(status_code=404, detail="Manager UI not found")
+    return FileResponse(
+        mgr_file,
+        headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"},
+    )
+
+
 @app.get("/favicon.ico", include_in_schema=False)
 def serve_favicon():
     svg = (
@@ -4787,5 +4813,13 @@ def _warmup_local_yt_pool() -> None:
 
 if __name__ == "__main__":
     import uvicorn
+    import time
 
-    uvicorn.run(app, host="0.0.0.0", port=8765, log_level="info")
+    while True:
+        try:
+            uvicorn.run(app, host="0.0.0.0", port=8765, log_level="info")
+        except (KeyboardInterrupt, SystemExit):
+            break
+        except Exception as exc:
+            print(f"[Dashboard Server Crash] Auto-restarting in 2s: {exc}")
+            time.sleep(2)
