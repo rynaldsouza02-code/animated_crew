@@ -1,0 +1,28 @@
+{
+  "title": "What Happens To Your Body After 24 Hours With No Sleep?",
+  "voice": "am_michael",
+  "speed": 1.0,
+  "lead": 0.35,
+  "outro": 1.0,
+  "gap": 0.26,
+  "music": "tension",
+  "sources": [
+    "NIH Sleep Foundation: after 24 hours awake, cognitive impairment equals 0.10% blood alcohol — legally drunk",
+    "Neuron journal: sleep clears adenosine and metabolic waste via the glymphatic system; skipping this causes toxic buildup",
+    "PNAS: amygdala becomes 60% more reactive after one sleepless night — emotional responses become uncontrolled",
+    "Lancet case reports: fatal familial insomnia — hereditary condition that prevents sleep and kills within 18 months"
+  ],
+  "lines": [
+    { "text": "After sixteen hours without sleep, you are legally impaired.", "caps": "After *sixteen hours | without *sleep | you are *legally | *impaired" },
+    { "text": "Your brain is performing like someone who is drunk.", "caps": "Your *brain | performing like | someone *drunk" },
+    { "text": "Adenosine, a chemical waste product, is now flooding your neurons.", "caps": "*Adenosine | chemical *waste | *flooding | your *neurons" },
+    { "text": "Your prefrontal cortex — the part that makes decisions — goes quiet.", "caps": "Prefrontal *cortex | makes *decisions | goes *quiet" },
+    { "text": "Your amygdala, the panic center, becomes sixty percent more reactive.", "caps": "Your *amygdala | panic *center | *sixty percent | more *reactive" },
+    { "text": "You start seeing things that aren't there.", "caps": "You start *seeing | things that | aren't there" },
+    { "text": "Micro-sleeps hit without warning — your eyes open but your brain is offline.", "caps": "*Micro-sleeps | hit *without warning | brain *offline" },
+    { "text": "Immune cells drop by seventy percent.", "caps": "Immune *cells | drop by *seventy | *percent" },
+    { "text": "Your body enters the same stress state as surviving an attack.", "caps": "Your body | enters *stress | like *surviving | an *attack" },
+    { "text": "There is a disease called fatal familial insomnia.", "caps": "There is | a *disease | fatal *familial | *insomnia" },
+    { "text": "It stops you from ever sleeping again, and kills you in eighteen months.", "caps": "It *stops you | ever *sleeping | kills you | in *eighteen months" }
+  ]
+}

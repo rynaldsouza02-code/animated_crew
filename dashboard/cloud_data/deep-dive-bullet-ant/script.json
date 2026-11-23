@@ -1,0 +1,28 @@
+{
+  "title": "What Happens If You Get Stung By A Bullet Ant?",
+  "voice": "am_michael",
+  "speed": 1.0,
+  "lead": 0.35,
+  "outro": 1.0,
+  "gap": 0.26,
+  "music": "tension",
+  "sources": [
+    "Schmidt Sting Pain Index: bullet ant rated 4+ (highest possible), described as 'waves of burning, throbbing, all-consuming pain' lasting 24 hours",
+    "PLOS ONE, 'The sting of the bullet ant Paraponera clavata' — venom contains poneratoxin, a neuroactive peptide causing uncontrolled nerve firing",
+    "Wikipedia, Bullet ant: Satere-Mawe tribe initiation ritual — boys wear gloves of woven bullet ants for 10 minutes, 20 times over months",
+    "Healthline: venom blocks pain-inhibiting neurotransmitters, causing involuntary muscle contractions and temporary paralysis of the sting site"
+  ],
+  "lines": [
+    { "text": "The bullet ant has the most painful sting on Earth.", "caps": "The *bullet ant | has the *most | *painful sting | on *Earth" },
+    { "text": "Scientists rate it a perfect four on the pain scale.", "caps": "Scientists | rate it *perfect 4 | on the *pain scale" },
+    { "text": "The moment it stings you, its venom hijacks your nervous system.", "caps": "The *moment | it *stings you | venom *hijacks | your *nervous system" },
+    { "text": "It fires every pain nerve in your body simultaneously.", "caps": "It *fires | every *pain nerve | *simultaneously" },
+    { "text": "The burning is so intense your muscles start convulsing.", "caps": "The *burning | so *intense | muscles start *convulsing" },
+    { "text": "Your heart rate spikes, and you lose control of your limb.", "caps": "Heart rate *spikes | you *lose control | of your *limb" },
+    { "text": "The pain lasts for twenty-four straight hours.", "caps": "The *pain lasts | *twenty-four | straight *hours" },
+    { "text": "There is no antidote.", "caps": "There is | *no antidote" },
+    { "text": "An Amazonian tribe makes boys wear gloves full of bullet ants as an initiation.", "caps": "An *Amazonian tribe | makes boys *wear | gloves full of | *bullet ants" },
+    { "text": "Ten minutes of pure agony.", "caps": "*Ten minutes | of *pure agony" },
+    { "text": "Twenty times before you become a man.", "caps": "*Twenty times | before you become | a *man" }
+  ]
+}

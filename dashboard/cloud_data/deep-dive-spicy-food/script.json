@@ -1,0 +1,28 @@
+{
+  "title": "What REALLY Happens When You Eat The World's Spiciest Food?",
+  "voice": "am_michael",
+  "speed": 1.0,
+  "lead": 0.35,
+  "outro": 1.0,
+  "gap": 0.26,
+  "music": "tension",
+  "sources": [
+    "Capsaicin binds to TRPV1 receptors (heat and pain sensors) in the mouth, throat, and stomach — the brain literally processes it as fire",
+    "Journal of Pharmacology: capsaicin triggers the same nerve pathway as actual burning at 43C+",
+    "Carolina Reaper SHU: 2.2 million Scoville units vs. pepper spray at 2 million — essentially the same compound",
+    "New England Journal of Medicine case report: eating a Carolina Reaper caused thunderclap headache from cerebral artery spasms"
+  ],
+  "lines": [
+    { "text": "When you eat the world's spiciest pepper, nothing burns.", "caps": "When you *eat | world's *spiciest | nothing *burns" },
+    { "text": "Because capsaicin doesn't cause heat — it tricks your brain into feeling heat.", "caps": "Capsaicin | doesn't cause *heat | it *tricks | your *brain" },
+    { "text": "It binds to the exact same nerve receptor as actual fire.", "caps": "It *binds | to the *exact | same receptor | as actual *fire" },
+    { "text": "Your tongue signals two million units of pain.", "caps": "Your *tongue | signals *two million | units of *pain" },
+    { "text": "That is the same concentration as pepper spray.", "caps": "That is *the same | as *pepper spray" },
+    { "text": "Your brain triggers a full emergency response.", "caps": "Your *brain | triggers *full | emergency *response" },
+    { "text": "Adrenaline floods your blood, your eyes water, and your nose runs.", "caps": "*Adrenaline floods | *eyes water | *nose runs" },
+    { "text": "Your stomach tries to eject the threat.", "caps": "Your *stomach | tries to *eject | the *threat" },
+    { "text": "Blood vessels in your skull can actually spasm.", "caps": "Blood *vessels | in your *skull | can actually *spasm" },
+    { "text": "Doctors have seen this cause thunderclap headaches.", "caps": "Doctors have *seen | *thunderclap | headaches" },
+    { "text": "Your body treats hot sauce like a biological weapon.", "caps": "Your *body | treats hot *sauce | like a *weapon" }
+  ]
+}

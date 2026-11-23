@@ -1,0 +1,73 @@
+{
+ "duration": 34.671,
+ "voice": "am_michael",
+ "speed": 1.0,
+ "lines": [
+  {
+   "i": 0,
+   "text": "When electricity enters your body, it looks for the fastest path to ground.",
+   "start": 0.01,
+   "end": 3.97
+  },
+  {
+   "i": 1,
+   "text": "That path runs straight through your heart.",
+   "start": 4.11,
+   "end": 5.81
+  },
+  {
+   "i": 2,
+   "text": "Just sixty milliamps \u2014 the power of a small light bulb \u2014 is enough to kill you.",
+   "start": 5.93,
+   "end": 10.11
+  },
+  {
+   "i": 3,
+   "text": "The current hijacks your nervous system and locks every muscle in your body.",
+   "start": 10.17,
+   "end": 14.13
+  },
+  {
+   "i": 4,
+   "text": "You cannot let go of the wire.",
+   "start": 14.27,
+   "end": 15.81
+  },
+  {
+   "i": 5,
+   "text": "Your heart begins fibrillating \u2014 quivering instead of pumping.",
+   "start": 15.95,
+   "end": 19.03
+  },
+  {
+   "i": 6,
+   "text": "Externally, the burn looks tiny.",
+   "start": 19.29,
+   "end": 20.91
+  },
+  {
+   "i": 7,
+   "text": "Internally, the current has scorched a path through your organs.",
+   "start": 21.11,
+   "end": 23.95
+  },
+  {
+   "i": 8,
+   "text": "Lightning does the opposite \u2014 the bolt is so brief your heart stops then restarts.",
+   "start": 24.37,
+   "end": 28.55
+  },
+  {
+   "i": 9,
+   "text": "That is why lightning strike survivors can walk away.",
+   "start": 28.53,
+   "end": 31.61
+  },
+  {
+   "i": 10,
+   "text": "But a household socket holds on long enough to end you.",
+   "start": 31.69,
+   "end": 34.61
+  }
+ ]
+}

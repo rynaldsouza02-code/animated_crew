@@ -1,0 +1,73 @@
+{
+ "duration": 31.088,
+ "voice": "am_michael",
+ "speed": 1.0,
+ "lines": [
+  {
+   "i": 0,
+   "text": "The bullet ant has the most painful sting on Earth.",
+   "start": 0.01,
+   "end": 2.63
+  },
+  {
+   "i": 1,
+   "text": "Scientists rate it a perfect four on the pain scale.",
+   "start": 3.21,
+   "end": 5.45
+  },
+  {
+   "i": 2,
+   "text": "The moment it stings you, its venom hijacks your nervous system.",
+   "start": 5.61,
+   "end": 8.91
+  },
+  {
+   "i": 3,
+   "text": "It fires every pain nerve in your body simultaneously.",
+   "start": 9.01,
+   "end": 11.95
+  },
+  {
+   "i": 4,
+   "text": "The burning is so intense your muscles start convulsing.",
+   "start": 12.49,
+   "end": 15.51
+  },
+  {
+   "i": 5,
+   "text": "Your heart rate spikes, and you lose control of your limb.",
+   "start": 15.57,
+   "end": 18.43
+  },
+  {
+   "i": 6,
+   "text": "The pain lasts for twenty-four straight hours.",
+   "start": 18.59,
+   "end": 20.75
+  },
+  {
+   "i": 7,
+   "text": "There is no antidote.",
+   "start": 21.07,
+   "end": 22.19
+  },
+  {
+   "i": 8,
+   "text": "An Amazonian tribe makes boys wear gloves full of bullet ants as an initiation.",
+   "start": 22.33,
+   "end": 27.19
+  },
+  {
+   "i": 9,
+   "text": "Ten minutes of pure agony.",
+   "start": 27.13,
+   "end": 28.85
+  },
+  {
+   "i": 10,
+   "text": "Twenty times before you become a man.",
+   "start": 28.79,
+   "end": 31.01
+  }
+ ]
+}

@@ -1,0 +1,73 @@
+{
+ "duration": 36.564,
+ "voice": "am_michael",
+ "speed": 1.0,
+ "lines": [
+  {
+   "i": 0,
+   "text": "After sixteen hours without sleep, you are legally impaired.",
+   "start": 0.01,
+   "end": 3.23
+  },
+  {
+   "i": 1,
+   "text": "Your brain is performing like someone who is drunk.",
+   "start": 3.43,
+   "end": 5.99
+  },
+  {
+   "i": 2,
+   "text": "Adenosine, a chemical waste product, is now flooding your neurons.",
+   "start": 6.39,
+   "end": 9.83
+  },
+  {
+   "i": 3,
+   "text": "Your prefrontal cortex \u2014 the part that makes decisions \u2014 goes quiet.",
+   "start": 10.15,
+   "end": 13.81
+  },
+  {
+   "i": 4,
+   "text": "Your amygdala, the panic center, becomes sixty percent more reactive.",
+   "start": 13.97,
+   "end": 17.71
+  },
+  {
+   "i": 5,
+   "text": "You start seeing things that aren't there.",
+   "start": 17.95,
+   "end": 19.77
+  },
+  {
+   "i": 6,
+   "text": "Micro-sleeps hit without warning \u2014 your eyes open but your brain is offline.",
+   "start": 20.21,
+   "end": 24.17
+  },
+  {
+   "i": 7,
+   "text": "Immune cells drop by seventy percent.",
+   "start": 24.51,
+   "end": 26.448
+  },
+  {
+   "i": 8,
+   "text": "Your body enters the same stress state as surviving an attack.",
+   "start": 26.43,
+   "end": 29.61
+  },
+  {
+   "i": 9,
+   "text": "There is a disease called fatal familial insomnia.",
+   "start": 29.59,
+   "end": 32.47
+  },
+  {
+   "i": 10,
+   "text": "It stops you from ever sleeping again, and kills you in eighteen months.",
+   "start": 32.79,
+   "end": 36.27
+  }
+ ]
+}

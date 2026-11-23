@@ -1,0 +1,73 @@
+{
+ "duration": 32.858,
+ "voice": "am_michael",
+ "speed": 1.0,
+ "lines": [
+  {
+   "i": 0,
+   "text": "When you eat the world's spiciest pepper, nothing burns.",
+   "start": 0.01,
+   "end": 2.85
+  },
+  {
+   "i": 1,
+   "text": "Because capsaicin doesn't cause heat \u2014 it tricks your brain into feeling heat.",
+   "start": 3.17,
+   "end": 7.03
+  },
+  {
+   "i": 2,
+   "text": "It binds to the exact same nerve receptor as actual fire.",
+   "start": 7.15,
+   "end": 10.69
+  },
+  {
+   "i": 3,
+   "text": "Your tongue signals two million units of pain.",
+   "start": 10.77,
+   "end": 13.17
+  },
+  {
+   "i": 4,
+   "text": "That is the same concentration as pepper spray.",
+   "start": 13.27,
+   "end": 15.85
+  },
+  {
+   "i": 5,
+   "text": "Your brain triggers a full emergency response.",
+   "start": 15.95,
+   "end": 18.53
+  },
+  {
+   "i": 6,
+   "text": "Adrenaline floods your blood, your eyes water, and your nose runs.",
+   "start": 18.93,
+   "end": 22.05
+  },
+  {
+   "i": 7,
+   "text": "Your stomach tries to eject the threat.",
+   "start": 22.33,
+   "end": 24.23
+  },
+  {
+   "i": 8,
+   "text": "Blood vessels in your skull can actually spasm.",
+   "start": 24.41,
+   "end": 26.77
+  },
+  {
+   "i": 9,
+   "text": "Doctors have seen this cause thunderclap headaches.",
+   "start": 27.05,
+   "end": 29.39
+  },
+  {
+   "i": 10,
+   "text": "Your body treats hot sauce like a biological weapon.",
+   "start": 29.37,
+   "end": 32.67
+  }
+ ]
+}

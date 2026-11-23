@@ -1,0 +1,28 @@
+{
+  "title": "What REALLY Happens When Electricity Goes Through Your Body?",
+  "voice": "am_michael",
+  "speed": 1.0,
+  "lead": 0.35,
+  "outro": 1.0,
+  "gap": 0.26,
+  "music": "tension",
+  "sources": [
+    "OSHA: 100 mA through the heart causes ventricular fibrillation — the heart quivers instead of pumping",
+    "Electrical burns appear small externally but destroy tissue along the entire current path internally",
+    "Electrocution physics: human body resistance 1000-2000 ohms; 120V household current can push 60-120 mA through the chest — lethal range",
+    "NEJM: lightning strike survivors often survive because the current is so brief it causes cardiac arrest then restarts the heart"
+  ],
+  "lines": [
+    { "text": "When electricity enters your body, it looks for the fastest path to ground.", "caps": "When *electricity | enters your body | fastest *path | to *ground" },
+    { "text": "That path runs straight through your heart.", "caps": "That path | runs *straight | through your *heart" },
+    { "text": "Just sixty milliamps — the power of a small light bulb — is enough to kill you.", "caps": "Just *sixty | *milliamps | enough to *kill you" },
+    { "text": "The current hijacks your nervous system and locks every muscle in your body.", "caps": "Current *hijacks | your nervous *system | locks every *muscle" },
+    { "text": "You cannot let go of the wire.", "caps": "You *cannot | let go | of the *wire" },
+    { "text": "Your heart begins fibrillating — quivering instead of pumping.", "caps": "Your *heart | begins *fibrillating | *quivering | not *pumping" },
+    { "text": "Externally, the burn looks tiny.", "caps": "*Externally | the burn | looks *tiny" },
+    { "text": "Internally, the current has scorched a path through your organs.", "caps": "*Internally | current has *scorched | a *path | through your *organs" },
+    { "text": "Lightning does the opposite — the bolt is so brief your heart stops then restarts.", "caps": "*Lightning | so *brief | heart *stops | then *restarts" },
+    { "text": "That is why lightning strike survivors can walk away.", "caps": "That is *why | lightning *survivors | can walk *away" },
+    { "text": "But a household socket holds on long enough to end you.", "caps": "A household *socket | holds on *long | enough to *end you" }
+  ]
+}
