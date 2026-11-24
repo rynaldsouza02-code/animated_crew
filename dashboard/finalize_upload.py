@@ -94,7 +94,7 @@ def finalize(youtube_id: str | None = None) -> int:
             for idx, re in enumerate(queued, start=1):
                 re["queue_order"] = idx
                 re["notes"] = (
-                    "Queued #1: Next scheduled automatic upload at 7:30 PM IST (only 1 queued video uploads per day)."
+                    "Queued #1: Next scheduled automatic upload at 6:30 PM IST (only 1 queued video uploads per day)."
                     if idx == 1
                     else f"Queued #{idx}: Held in queue for future daily auto-upload."
                 )

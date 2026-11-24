@@ -634,9 +634,9 @@
       </a>
 
       <div class="nav-right">
-        <div class="status-pill" id="headerSchedulePill" title="Daily 7:30 PM IST FIFO auto-upload schedule">
+        <div class="status-pill" id="headerSchedulePill" title="Daily 6:30 PM IST FIFO auto-upload schedule">
           <span class="dot dot-emerald" id="headerScheduleDot"></span>
-          <span id="headerScheduleLabel">Auto-Drop 7:30 PM IST</span>
+          <span id="headerScheduleLabel">Auto-Drop 6:30 PM IST</span>
           <span class="mono" style="color:#fff;font-weight:700;" id="headerCountdown">--:--:--</span>
         </div>
 
@@ -1277,7 +1277,7 @@
           </div>
           <div class="flow-step">
             <div class="flow-step-num">Stage 06</div>
-            <div class="flow-step-name">7 PM IST / Manual</div>
+            <div class="flow-step-name">6:30 PM IST / Manual</div>
             <div class="flow-step-desc">Publishes #1 daily at 6:30 PM IST, or trigger any file via Manual Upload.</div>
           </div>
         </div>
@@ -2239,7 +2239,7 @@
     function renderQueueList(projects) {
       const container = document.getElementById("queueList");
       const queued = projects.filter(p => p.queue_status === "queued");
-      document.getElementById("queueRuleBadge").textContent = `${queued.length} Queued · 1/Day @ 7 PM IST`;
+      document.getElementById("queueRuleBadge").textContent = `${queued.length} Queued · 1/Day @ 6:30 PM IST`;
 
       if (!queued.length) {
         container.innerHTML = `
