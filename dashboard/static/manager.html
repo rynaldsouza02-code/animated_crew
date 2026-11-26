@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Video Queue & Upload Manager — Animated_Crew</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Crect width='36' height='36' rx='9' fill='%230E1422'/%3E%3Crect x='4' y='7' width='28' height='22' rx='6' fill='%23E11D48'/%3E%3Cpolygon points='15,13 24,18 15,23' fill='%23FFFFFF'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            bgDark: '#070a12',
+            cardDark: '#0e1422',
+            cardElevated: '#141c2e',
+            borderDark: 'rgba(255, 255, 255, 0.08)',
+            borderStrong: 'rgba(255, 255, 255, 0.16)',
+            crimson: '#e11d48',
+            emerald: '#10b981',
+            amber: '#f59e0b',
+            cyan: '#06b6d4',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background: radial-gradient(1000px 500px at 10% -5%, rgba(225, 29, 72, 0.08), transparent 60%),
+                  radial-gradient(900px 500px at 90% -5%, rgba(6, 182, 212, 0.08), transparent 60%),
+                  #070a12;
+      color: #f3f6fb;
+      min-height: 100vh;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+    .glow-crimson {
+      box-shadow: 0 0 25px -5px rgba(225, 29, 72, 0.4);
+    }
+    .glow-emerald {
+      box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.35);
+    }
+  </style>
+</head>
+<body class="font-sans antialiased text-slate-100 flex flex-col min-h-screen">
+
+  <!-- Top Navigation -->
+  <header class="sticky top-0 z-40 bg-[#070a12]/90 backdrop-blur-md border-b border-white/10 px-6 py-3">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-rose-600 to-red-500 flex items-center justify-center shadow-lg shadow-rose-900/40">
+            <svg class="w-5 h-5 text-white fill-current" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+          </div>
+          <div>
+            <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
+              Video Queue Manager
+              <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">Auto-Upload Ready</span>
+            </h1>
+            <p class="text-xs text-slate-400">Target Channel: <span class="text-rose-400 font-semibold">@Animated_Crew</span></p>
+          </div>
+        </div>
+
+        <div class="hidden md:flex items-center gap-2 ml-6 bg-white/[0.04] p-1 rounded-xl border border-white/5">
+          <a href="/" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition">Studio Hub</a>
+          <a href="/manager" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600/90 text-white shadow-sm shadow-rose-600/30">Queue Manager</a>
+        </div>
+      </div>
+
+      <!-- Live Schedule Badge & Actions -->
+      <div class="flex items-center gap-3">
+        <div id="countdown-badge" class="flex items-center gap-2 bg-rose-950/30 border border-rose-500/20 px-3 py-1.5 rounded-xl text-xs">
+          <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+          <span class="text-slate-300">Next 6:00 PM Drop:</span>
+          <span id="countdown-text" class="font-mono font-bold text-rose-400">--:--:--</span>
+        </div>
+
+        <button onclick="refreshData()" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 transition" title="Refresh Data">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Upload Live Progress Banner (Hidden by default) -->
+  <div id="upload-banner" class="hidden bg-gradient-to-r from-rose-900/60 to-purple-900/60 border-b border-rose-500/30 px-6 py-2.5">
+    <div class="max-w-7xl mx-auto flex items-center justify-between text-xs sm:text-sm">
+      <div class="flex items-center gap-3">
+        <div class="animate-spin rounded-full h-4 w-4 border-2 border-rose-400 border-t-transparent"></div>
+        <div>
+          <span class="font-semibold text-white">Active Upload in Progress:</span>
+          <span id="upload-step-text" class="text-rose-200 ml-1.5">Staging video...</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="upload-timer-text" class="font-mono text-slate-300 text-xs">0s</span>
+        <button onclick="clearUploadJob()" class="text-xs text-rose-300 hover:text-white underline">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+    <!-- KPI / Overview Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-[#0e1422] p-4 rounded-2xl border border-white/10">
+        <p class="text-xs text-slate-400 font-medium">In Queue</p>
+        <div class="flex items-baseline justify-between mt-1">
+          <h3 id="stat-queued" class="text-2xl font-bold text-emerald-400">0</h3>
+          <span class="text-xs text-emerald-400/80 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">Daily Drops</span>
+        </div>
+      </div>
+      <div class="bg-[#0e1422] p-4 rounded-2xl border border-white/10">
+        <p class="text-xs text-slate-400 font-medium">Published Live</p>
+        <div class="flex items-baseline justify-between mt-1">
+          <h3 id="stat-published" class="text-2xl font-bold text-white">0</h3>
+          <span class="text-xs text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">Shorts</span>
+        </div>
+      </div>
+      <div class="bg-[#0e1422] p-4 rounded-2xl border border-white/10">
+        <p class="text-xs text-slate-400 font-medium">Unqueued Drafts</p>
+        <div class="flex items-baseline justify-between mt-1">
+          <h3 id="stat-drafts" class="text-2xl font-bold text-amber-400">0</h3>
+          <span class="text-xs text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">Rendered</span>
+        </div>
+      </div>
+      <div class="bg-[#0e1422] p-4 rounded-2xl border border-white/10">
+        <p class="text-xs text-slate-400 font-medium">Automated Cadence</p>
+        <div class="flex items-baseline justify-between mt-1">
+          <h3 class="text-xl font-bold text-cyan-400">6:00 PM</h3>
+          <span class="text-xs text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">IST Daily</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls & Tab Switcher -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#0e1422] p-3.5 rounded-2xl border border-white/10">
+      <!-- Tabs -->
+      <div class="flex items-center gap-1.5 bg-black/30 p-1 rounded-xl border border-white/5">
+        <button onclick="setTab('queue')" id="tab-btn-queue" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 text-white shadow transition">
+          Active Queue (<span id="tab-count-queue">0</span>)
+        </button>
+        <button onclick="setTab('drafts')" id="tab-btn-drafts" class="px-4 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition">
+          Drafts & Rendered (<span id="tab-count-drafts">0</span>)
+        </button>
+        <button onclick="setTab('published')" id="tab-btn-published" class="px-4 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition">
+          Published Shorts (<span id="tab-count-published">0</span>)
+        </button>
+      </div>
+
+      <!-- Search & Fast Actions -->
+      <div class="flex items-center gap-2.5">
+        <div class="relative w-full sm:w-64">
+          <input type="text" id="search-input" oninput="renderTabContent()" placeholder="Search title or slug..." class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500/60 pl-8" />
+          <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+
+        <button onclick="triggerUploadNext()" id="btn-upload-next" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-semibold shadow-md shadow-emerald-950/30 flex items-center gap-1.5 transition whitespace-nowrap">
+          <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
+          Publish #1 Now
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Section Container -->
+    <div id="content-container" class="space-y-4">
+      <!-- Dynamic list injected here -->
+    </div>
+
+  </main>
+
+  <!-- Video Preview Modal -->
+  <div id="preview-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-[#0e1422] border border-white/15 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl flex flex-col">
+      <div class="px-5 py-3.5 border-b border-white/10 flex items-center justify-between">
+        <h4 id="modal-video-title" class="text-sm font-bold text-white truncate max-w-[280px]">Video Preview</h4>
+        <button onclick="closePreviewModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">✕</button>
+      </div>
+      <div class="p-4 flex items-center justify-center bg-black/60 aspect-[9/16] max-h-[560px]">
+        <video id="modal-video-player" controls autoplay loop class="w-full h-full object-contain rounded-xl"></video>
+      </div>
+      <div class="p-4 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+        <span id="modal-video-meta">--</span>
+        <button onclick="closePreviewModal()" class="px-3 py-1 bg-white/10 hover:bg-white/15 rounded-lg text-white">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Metadata Edit Modal -->
+  <div id="edit-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-[#0e1422] border border-white/15 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <h4 class="text-sm font-bold text-white">Edit YouTube Video Metadata</h4>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+      <input type="hidden" id="edit-slug" />
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">YouTube Video Title</label>
+        <input type="text" id="edit-title" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500/60" />
+      </div>
+      <div>
+        <label class="block text-xs text-slate-400 mb-1">Description (Include hashtags)</label>
+        <textarea id="edit-desc" rows="3" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500/60"></textarea>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Privacy Status</label>
+          <select id="edit-privacy" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500/60">
+            <option value="public">Public (Immediate)</option>
+            <option value="unlisted">Unlisted</option>
+            <option value="private">Private</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Category</label>
+          <select id="edit-category" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500/60">
+            <option value="23">Comedy (23)</option>
+            <option value="27">Education (27)</option>
+            <option value="24">Entertainment (24)</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
+        <button onclick="closeEditModal()" class="px-4 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-slate-300">Cancel</button>
+        <button onclick="saveEditMetadata()" class="px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-semibold text-white shadow-md shadow-rose-900/40">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900/95 border border-white/15 px-4 py-3 rounded-2xl shadow-xl text-xs text-white flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300">
+    <span id="toast-icon">✅</span>
+    <span id="toast-msg">Action completed</span>
+  </div>
+
+  <script>
+    let appData = null;
+    let currentTab = 'queue';
+    let countdownInterval = null;
+    let uploadPollInterval = null;
+    let remainingSeconds = 0;
+
+    async function loadData() {
+      try {
+        const res = await fetch('/api/overview?_t=' + Date.now());
+        if (!res.ok) throw new Error('API request failed');
+        appData = await res.json();
+        updateUI();
+      } catch (err) {
+        console.error('Failed to load overview data:', err);
+      }
+    }
+
+    function updateUI() {
+      if (!appData) return;
+      const projs = appData.projects || [];
+      
+      // Queued: items with queue_status === 'queued' or numeric queue_order and not posted
+      const queued = projs
+        .filter(p => (p.queue_status === 'queued' || (p.queue_order && !p.is_posted)))
+        .sort((a,b) => (Number(a.queue_order) || 999) - (Number(b.queue_order) || 999));
+
+      // Published: posted or status === 'published'
+      const published = projs.filter(p => p.is_posted || p.queue_status === 'published');
+
+      // Drafts: remaining
+      const drafts = projs.filter(p => !p.is_posted && p.queue_status !== 'queued' && !p.queue_order);
+
+      document.getElementById('stat-queued').innerText = queued.length;
+      document.getElementById('stat-published').innerText = published.length;
+      document.getElementById('stat-drafts').innerText = drafts.length;
+
+      document.getElementById('tab-count-queue').innerText = queued.length;
+      document.getElementById('tab-count-drafts').innerText = drafts.length;
+      document.getElementById('tab-count-published').innerText = published.length;
+
+      renderTabContent();
+      initCountdown();
+      checkUploadStatus();
+    }
+
+    function setTab(tab) {
+      currentTab = tab;
+      const tabs = ['queue', 'drafts', 'published'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (t === tab) {
+          btn.className = 'px-4 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 text-white shadow transition';
+        } else {
+          btn.className = 'px-4 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition';
+        }
+      });
+      renderTabContent();
+    }
+
+    function renderTabContent() {
+      if (!appData) return;
+      const container = document.getElementById('content-container');
+      const filter = (document.getElementById('search-input').value || '').toLowerCase().trim();
+      const projs = appData.projects || [];
+
+      let items = [];
+      if (currentTab === 'queue') {
+        items = projs
+          .filter(p => (p.queue_status === 'queued' || (p.queue_order && !p.is_posted)))
+          .sort((a,b) => (Number(a.queue_order) || 999) - (Number(b.queue_order) || 999));
+      } else if (currentTab === 'drafts') {
+        items = projs.filter(p => !p.is_posted && p.queue_status !== 'queued' && !p.queue_order);
+      } else {
+        items = projs.filter(p => p.is_posted || p.queue_status === 'published');
+      }
+
+      if (filter) {
+        items = items.filter(r => (r.title || '').toLowerCase().includes(filter) || (r.slug || '').toLowerCase().includes(filter));
+      }
+
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="bg-[#0e1422] p-12 rounded-2xl border border-white/10 text-center">
+            <p class="text-slate-400 text-sm">No videos found in this category.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      items.forEach((item, index) => {
+        const isQueued = (item.queue_status === 'queued' || (item.queue_order && !item.is_posted));
+        const orderNum = item.queue_order || index + 1;
+        const isFirst = isQueued && orderNum === 1;
+        const dur = item.duration_sec ? `${item.duration_sec.toFixed(1)}s` : '--';
+        const size = item.mp4_size_mb ? `${item.mp4_size_mb.toFixed(1)} MB` : '--';
+        const title = item.youtube_title || item.title || item.slug;
+        const thumbUrl = item.cover_url || `/media/${item.slug}/review/cover/t1.80.jpg`;
+        const mp4Url = item.mp4_url || `/media/${item.slug}/renders/${item.mp4_name || item.slug + '.mp4'}`;
+        const ytWatch = item.youtube ? item.youtube.url : (item.youtube_url || null);
+
+        html += `
+          <div class="bg-[#0e1422] hover:bg-[#12192b] transition-all p-4 rounded-2xl border ${isFirst ? 'border-rose-500/50 glow-crimson' : 'border-white/10'} flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            
+            <div class="flex items-center gap-4 w-full md:w-auto">
+              <!-- Queue Rank or Status Icon -->
+              <div class="flex-shrink-0">
+                ${isQueued ? `
+                  <div class="w-10 h-10 rounded-xl ${isFirst ? 'bg-gradient-to-tr from-rose-600 to-red-500 text-white font-extrabold shadow-lg shadow-rose-900/50' : 'bg-white/5 text-slate-300 font-bold border border-white/10'} flex flex-col items-center justify-center text-sm">
+                    <span>#${orderNum}</span>
+                  </div>
+                ` : item.is_posted ? `
+                  <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                    ✓
+                  </div>
+                ` : `
+                  <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
+                    ✎
+                  </div>
+                `}
+              </div>
+
+              <!-- Thumbnail & Play Overlay -->
+              <div class="relative w-16 h-24 sm:w-20 sm:h-28 rounded-xl overflow-hidden bg-black/60 border border-white/10 flex-shrink-0 cursor-pointer group" onclick="openPreviewModal('${item.slug}', '${title.replace(/'/g, "\\'")}', '${mp4Url}')">
+                <img src="${thumbUrl}" onerror="this.src='/static/favicon.ico'; this.className='p-4 opacity-30';" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                  <div class="w-7 h-7 rounded-full bg-white/90 text-black flex items-center justify-center shadow">▶</div>
+                </div>
+              </div>
+
+              <!-- Metadata -->
+              <div class="space-y-1 min-w-0 flex-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h3 class="text-sm font-semibold text-white truncate max-w-md">${title}</h3>
+                  ${isFirst ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500 text-white animate-pulse">UP NEXT AT 7:30 PM</span>' : ''}
+                  ${ytWatch ? `<a href="${ytWatch}" target="_blank" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:underline">Watch on YouTube ↗</a>` : ''}
+                </div>
+                <p class="text-xs text-slate-400 font-mono">${item.slug} • <span class="text-slate-300">${dur}</span> • <span class="text-slate-300">${size}</span></p>
+                <p class="text-xs text-slate-500 truncate max-w-lg">${item.youtube_description || item.hook_text || 'No description provided.'}</p>
+              </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="flex items-center gap-2 w-full md:w-auto justify-end border-t md:border-t-0 pt-3 md:pt-0 border-white/5">
+              ${isQueued ? `
+                <div class="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/10">
+                  <button onclick="reorderQueue('${item.slug}', 'top')" title="Move to Top" class="p-1.5 hover:bg-white/10 rounded text-slate-300 hover:text-white text-xs">⤒</button>
+                  <button onclick="reorderQueue('${item.slug}', 'up')" title="Move Up" class="p-1.5 hover:bg-white/10 rounded text-slate-300 hover:text-white text-xs">▲</button>
+                  <button onclick="reorderQueue('${item.slug}', 'down')" title="Move Down" class="p-1.5 hover:bg-white/10 rounded text-slate-300 hover:text-white text-xs">▼</button>
+                  <button onclick="reorderQueue('${item.slug}', 'bottom')" title="Move to Bottom" class="p-1.5 hover:bg-white/10 rounded text-slate-300 hover:text-white text-xs">⤓</button>
+                </div>
+                <button onclick="openEditModal('${item.slug}', '${title.replace(/'/g, "\\'")}', '${(item.youtube_description || '').replace(/'/g, "\\'")}', '${item.privacy_status || 'public'}', '${item.category_id || '23'}')" class="p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-300 hover:text-white text-xs" title="Edit Metadata">
+                  ✎
+                </button>
+                <button onclick="triggerUpload('${item.slug}')" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold shadow-sm transition" title="Upload this video immediately">
+                  Upload Now
+                </button>
+                <button onclick="removeFromQueue('${item.slug}')" class="p-2 hover:bg-red-500/10 text-slate-400 hover:text-red-400 rounded-xl text-xs" title="Remove from Queue">
+                  ✕
+                </button>
+              ` : !item.is_posted ? `
+                <button onclick="enqueueItem('${item.slug}')" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-sm transition">
+                  + Add to Queue
+                </button>
+                <button onclick="triggerUpload('${item.slug}')" class="px-3 py-1.5 bg-white/10 hover:bg-white/15 text-white rounded-xl text-xs font-medium">
+                  Direct Upload
+                </button>
+              ` : `
+                <span class="text-xs text-slate-400 font-mono">Published ${item.published_at ? item.published_at.slice(0, 10) : ''}</span>
+              `}
+            </div>
+
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    async function reorderQueue(slug, action) {
+      try {
+        showToast('Updating queue order...', '⏳');
+        const res = await fetch('/api/queue/reorder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug, action })
+        });
+        if (!res.ok) throw new Error('Reorder failed');
+        await loadData();
+        showToast('Queue reordered successfully!', '✅');
+      } catch (err) {
+        showToast(err.message, '❌');
+      }
+    }
+
+    async function enqueueItem(slug) {
+      try {
+        showToast('Adding video to queue...', '⏳');
+        const res = await fetch('/api/queue/metadata', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug, queue_status: 'queued' })
+        });
+        if (!res.ok) throw new Error('Failed to enqueue video');
+        await loadData();
+        showToast(`Enqueued '${slug}'!`, '✅');
+      } catch (err) {
+        showToast(err.message, '❌');
+      }
+    }
+
+    async function removeFromQueue(slug) {
+      try {
+        showToast('Removing video from queue...', '⏳');
+        const res = await fetch('/api/queue/metadata', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug, queue_status: 'draft' })
+        });
+        if (!res.ok) throw new Error('Failed to remove video');
+        await loadData();
+        showToast(`Removed '${slug}' from queue`, '✅');
+      } catch (err) {
+        showToast(err.message, '❌');
+      }
+    }
+
+    async function triggerUpload(slug) {
+      if (!confirm(`Are you sure you want to upload '${slug}' to @Animated_Crew right now?`)) return;
+      try {
+        showToast(`Initiating upload for ${slug}...`, '🚀');
+        const res = await fetch('/api/upload/manual', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug, force: true })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Upload failed to start');
+        showToast('Upload job started!', '✅');
+        checkUploadStatus();
+      } catch (err) {
+        showToast(err.message, '❌');
+      }
+    }
+
+    function triggerUploadNext() {
+      if (!appData) return;
+      const projs = appData.projects || [];
+      const queued = projs
+        .filter(p => (p.queue_status === 'queued' || (p.queue_order && !p.is_posted)))
+        .sort((a,b) => (Number(a.queue_order) || 999) - (Number(b.queue_order) || 999));
+
+      if (queued.length === 0) {
+        alert('The queue is empty! Add a video to the queue first.');
+        return;
+      }
+      triggerUpload(queued[0].slug);
+    }
+
+    async function checkUploadStatus() {
+      try {
+        const res = await fetch('/api/upload/status?_t=' + Date.now());
+        const job = await res.json();
+        const banner = document.getElementById('upload-banner');
+        if (job && job.active) {
+          banner.classList.remove('hidden');
+          document.getElementById('upload-step-text').innerText = job.step || 'Processing...';
+          document.getElementById('upload-timer-text').innerText = `${job.elapsed_sec || 0}s`;
+          if (!uploadPollInterval) {
+            uploadPollInterval = setInterval(checkUploadStatus, 2000);
+          }
+        } else {
+          banner.classList.add('hidden');
+          if (uploadPollInterval) {
+            clearInterval(uploadPollInterval);
+            uploadPollInterval = null;
+          }
+        }
+      } catch (e) {}
+    }
+
+    async function clearUploadJob() {
+      try {
+        await fetch('/api/upload/clear', { method: 'POST' });
+        showToast('Upload cancelled', 'ℹ️');
+        checkUploadStatus();
+      } catch (e) {}
+    }
+
+    function openPreviewModal(slug, title, mp4Url) {
+      document.getElementById('modal-video-title').innerText = title;
+      document.getElementById('modal-video-meta').innerText = `Project: ${slug}`;
+      const player = document.getElementById('modal-video-player');
+      player.src = mp4Url;
+      player.play();
+      document.getElementById('preview-modal').classList.remove('hidden');
+    }
+
+    function closePreviewModal() {
+      const player = document.getElementById('modal-video-player');
+      player.pause();
+      player.src = '';
+      document.getElementById('preview-modal').classList.add('hidden');
+    }
+
+    function openEditModal(slug, title, desc, privacy, category) {
+      document.getElementById('edit-slug').value = slug;
+      document.getElementById('edit-title').value = title;
+      document.getElementById('edit-desc').value = desc;
+      document.getElementById('edit-privacy').value = privacy;
+      document.getElementById('edit-category').value = category;
+      document.getElementById('edit-modal').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').classList.add('hidden');
+    }
+
+    async function saveEditMetadata() {
+      const slug = document.getElementById('edit-slug').value;
+      const title = document.getElementById('edit-title').value;
+      const desc = document.getElementById('edit-desc').value;
+      const privacy = document.getElementById('edit-privacy').value;
+      const category = document.getElementById('edit-category').value;
+
+      try {
+        showToast('Saving metadata...', '⏳');
+        const res = await fetch('/api/queue/metadata', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            slug,
+            youtube_title: title,
+            youtube_description: desc,
+            privacy_status: privacy,
+            category_id: category
+          })
+        });
+        if (!res.ok) throw new Error('Failed to update metadata');
+        closeEditModal();
+        await loadData();
+        showToast('Metadata saved successfully!', '✅');
+      } catch (err) {
+        showToast(err.message, '❌');
+      }
+    }
+
+    function initCountdown() {
+      if (!appData || !appData.automation || !appData.automation.schedule) return;
+      remainingSeconds = appData.automation.schedule.seconds_until_next || 0;
+      if (countdownInterval) clearInterval(countdownInterval);
+
+      function tick() {
+        if (remainingSeconds <= 0) {
+          document.getElementById('countdown-text').innerText = 'Starting drop...';
+          return;
+        }
+        const h = String(Math.floor(remainingSeconds / 3600)).padStart(2, '0');
+        const m = String(Math.floor((remainingSeconds % 3600) / 60)).padStart(2, '0');
+        const s = String(remainingSeconds % 60).padStart(2, '0');
+        document.getElementById('countdown-text').innerText = `${h}h ${m}m ${s}s`;
+        remainingSeconds--;
+      }
+      tick();
+      countdownInterval = setInterval(tick, 1000);
+    }
+
+    function showToast(msg, icon = '✅') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-msg').innerText = msg;
+      document.getElementById('toast-icon').innerText = icon;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+
+    function refreshData() {
+      showToast('Refreshing queue data...', '🔄');
+      loadData();
+    }
+
+    // Auto-refresh data on load
+    loadData();
+    setInterval(loadData, 10000);
+  </script>
+</body>
+</html>
