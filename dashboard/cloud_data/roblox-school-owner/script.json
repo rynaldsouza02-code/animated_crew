@@ -1,0 +1,27 @@
+{
+  "title": "The Poor Noob Who Secretly Owned the School",
+  "voice": "am_michael",
+  "speed": 1.15,
+  "lead": 0.3,
+  "outro": 1.1,
+  "gap": 0.16,
+  "music": "tension",
+  "lines": [
+    { "text": "Get out of our way, broke noob!", "caps": "*Get out | of our *way, | *broke noob!" },
+    { "text": "Look at his cheap bacon hair and dusty jacket. He doesn't even belong here.", "caps": "Cheap *bacon hair | and *dusty jacket. | Doesn't *belong here." },
+    { "text": "At lunch, Leo tried to sit at the empty table, but the three rich kids blocked his tray.", "caps": "Leo tried | to *sit down, | rich kids *blocked him." },
+    { "text": "Sit on the floor where you belong, they laughed, as everyone stared.", "caps": "Sit on the *floor! | they *laughed, | as *everyone stared." },
+    { "text": "Leo didn't say a word. He just picked up his tray and walked away.", "caps": "Leo didn't | say a *word. | Just *walked away." },
+    { "text": "They had no idea what his family was about to do that very night.", "caps": "They had *no idea | what his *family | did *that night." },
+    { "text": "The next morning, the principal called an emergency assembly for the whole school.", "caps": "The *next morning, | *emergency assembly | for the *whole school." },
+    { "text": "Attention students! Our school has officially been bought by a billionaire new owner.", "caps": "Our school | has been *bought | by a *billionaire!" },
+    { "text": "The three bullies smirked, bragging that it had to be one of their rich dads.", "caps": "The bullies *smirked, | bragging it was | their *rich dads." },
+    { "text": "Whoever owns this place is kicking that noob out today, they whispered.", "caps": "Kicking that *noob | *out today! | they *whispered." },
+    { "text": "Minutes later, the principal's office door swung open, and everyone froze in shock.", "caps": "The office *door | swung *open, | everyone *froze!" },
+    { "text": "Leo walked straight past the bullies, wearing the same blue shirt and bacon hair.", "caps": "*Leo walked past, | same *blue shirt | and *bacon hair." },
+    { "text": "Welcome, sir, the principal bowed, handing Leo the golden deed to the school.", "caps": "*Welcome, sir! | principal *bowed, | handing the *deed." },
+    { "text": "Leo turned to the pale bullies and smiled: Guess I'm not sitting on the floor today.", "caps": "Leo *smiled: | Not sitting on | the *floor today." },
+    { "text": "The same three kids who mocked him dropped to their knees, begging for forgiveness.", "caps": "The *same bullies | dropped to *knees, | *begging forgiveness." },
+    { "text": "Because in life, you never know who the quiet kid really is.", "caps": "You *never know | who the *quiet kid | *really is.", "gap": 0.3 }
+  ]
+}

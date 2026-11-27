@@ -1117,6 +1117,42 @@
       "youtube_id": null,
       "youtube_url": null,
       "rendered_duration_sec": 34.77
+    },
+    {
+      "slug": "roblox-school-owner",
+      "title": "The Poor Noob Who Secretly Owned the School",
+      "style": "roblox-3d",
+      "voice": "am_michael",
+      "music": "tension",
+      "created_at": "2026-11-27T09:07:00+05:30",
+      "status": "queued",
+      "stage": "ready_in_queue",
+      "queue_order": 11,
+      "video_file": "renders/roblox-school-owner.mp4",
+      "rendered_mp4_name": "roblox-school-owner.mp4",
+      "youtube_title": "The Poor Noob Who Secretly Owned the School! 😱🏫 #Shorts",
+      "youtube_description": "Three rich students bullied Leo for his cheap bacon hair and dusty jacket—until the principal announced the school had a billionaire new owner! 🏫👑\n\nSubscribe to @Animated_Crew for more Roblox cinematic stories!\n\n#Shorts #Roblox #RobloxStory #RobloxAnimation #SchoolDrama #PlotTwist #RichVsPoor #AnimatedCrew #BaconHair #Viral",
+      "youtube_tags": [
+        "Shorts",
+        "Roblox",
+        "RobloxStory",
+        "RobloxAnimation",
+        "SchoolDrama",
+        "PlotTwist",
+        "RichVsPoor",
+        "AnimatedCrew",
+        "BaconHair",
+        "Viral"
+      ],
+      "privacy_status": "public",
+      "category_id": "23",
+      "rendered_size_mb": 27.71,
+      "rendered_duration_sec": 57.86,
+      "mp4_ready_snapshot": true,
+      "notes": "Queued #11: Held in queue for future daily auto-upload.",
+      "published_at": null,
+      "youtube_id": null,
+      "youtube_url": null
     }
   ]
 }
